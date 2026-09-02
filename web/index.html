@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#17324d">
+  <title>سامانه پیگیری تولید نبراس</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div id="login" class="center">
+    <form id="loginForm" class="panel">
+      <div class="brand">نبراس کالا</div>
+      <h1>پیگیری تولید</h1>
+      <p id="loginHint">نام کاربری و رمز واحد خود را وارد کنید.</p>
+      <input id="username" placeholder="نام کاربری" autocomplete="username" required>
+      <input id="password" type="password" placeholder="رمز عبور" autocomplete="current-password" required minlength="4">
+      <button type="submit">ورود به سامانه</button>
+      <small id="loginError"></small>
+    </form>
+  </div>
+  <main id="app" hidden>
+    <header><div><small>سامانه زنده تولید</small><h1>پیگیری سفارش‌ها</h1></div><button id="logout" class="ghost">خروج</button></header>
+    <section class="toolbar">
+      <input id="search" placeholder="جست‌وجوی کد، مشتری یا مناسبت">
+      <button id="refresh" class="ghost">تازه‌سازی</button>
+      <button id="newJob" hidden>سفارش جدید</button>
+    </section>
+    <section id="stats" class="stats"></section>
+    <section class="sectionHead"><div><h2 id="heading">کارهای واحد</h2><small>اطلاعات خودکار تازه می‌شود</small></div><b id="count">۰ مورد</b></section>
+    <section id="jobs" class="jobs"></section>
+  </main>
+  <dialog id="jobDialog"><form id="jobForm" method="dialog"><h2>سفارش جدید</h2><input id="code" placeholder="کد محصول" required><input id="quantity" type="number" min="1" value="1" placeholder="تعداد" required><input id="customer" placeholder="مشتری"><input id="occasion" placeholder="مناسبت"><div><button value="cancel" class="ghost">انصراف</button><button id="saveJob" value="default">ثبت و ارسال به پلاتر</button></div></form></dialog>
+  <script src="./config.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
