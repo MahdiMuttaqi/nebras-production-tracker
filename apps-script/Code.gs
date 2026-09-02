@@ -1,4 +1,5 @@
 const SHEET_ID="13MRxSoqVZjRAii4qs4dwgAkd6WBN7qBzAblw4rVFjA0";
+const INITIAL_ADMIN_PASSWORD="رمز-دلخواه-خودتان";
 const STAGES=["plotter","calendar","laser","sewing","warehouse","completed"];
 function out(x){return ContentService.createTextOutput(JSON.stringify(x)).setMimeType(ContentService.MimeType.JSON)}
 function doGet(){return out({ok:true,name:"سامانه پیگیری تولید نبراس"})}
@@ -6,7 +7,7 @@ function doPost(e){try{const q=JSON.parse(e.postData.contents||"{}");if(q.action
 function sh(n){return SpreadsheetApp.openById(SHEET_ID).getSheetByName(n)}
 function hash(x){const b=Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256,x,Utilities.Charset.UTF_8);return b.map(v=>(v+256)%256).map(v=>v.toString(16).padStart(2,"0")).join("")}
 function secret(){const p=PropertiesService.getScriptProperties();let s=p.getProperty("SECRET");if(!s){s=Utilities.getUuid()+Utilities.getUuid();p.setProperty("SECRET",s)}return s}
-function setupAdmin(){const ui=SpreadsheetApp.getUi(),r=ui.prompt("تنظیم رمز مدیر","یک رمز حداقل ۴ کاراکتری وارد کنید",ui.ButtonSet.OK_CANCEL);if(r.getSelectedButton()!==ui.Button.OK)return;const password=r.getResponseText().trim();if(password.length<4)throw new Error("رمز باید حداقل ۴ کاراکتر باشد");sh("کاربران").getRange(2,5).setValue(hash(password));ui.alert("رمز مدیر با موفقیت تنظیم شد")}
+function setupAdmin(){const password=INITIAL_ADMIN_PASSWORD.trim();if(password==="رمز-دلخواه-خودتان"||password.length<4)throw new Error("ابتدا مقدار INITIAL_ADMIN_PASSWORD را به رمز دلخواه خود تغییر دهید");sh("کاربران").getRange(2,5).setValue(hash(password));Logger.log("رمز مدیر با موفقیت تنظیم شد")}
 function rows(n){const s=sh(n),v=s.getDataRange().getValues();return v.slice(1)}
 function login(q){const u=rows("کاربران").find(r=>String(r[0]).trim()===String(q.username).trim()&&r[3]!==false);if(!u)return {ok:false,error:"نام کاربری پیدا نشد"};if(!u[4])return {ok:false,error:"ابتدا تابع setupAdmin را اجرا و رمز مدیر را تنظیم کنید"};if(u[4]!==hash(q.password))return {ok:false,error:"رمز عبور اشتباه است"};const until=Date.now()+86400000*7,payload=[u[0],u[1],roleKey(u[2]),until].join("|"),sig=hash(payload+"|"+secret());return {ok:true,session:Utilities.base64EncodeWebSafe(payload+"|"+sig)}}
 function sessionUser(t){try{const raw=Utilities.newBlob(Utilities.base64DecodeWebSafe(t)).getDataAsString(),p=raw.split("|"),sig=p.pop();if(hash(p.join("|")+"|"+secret())!==sig||Date.now()>+p[3])return null;return {username:p[0],name:p[1],role:p[2]}}catch(e){return null}}
