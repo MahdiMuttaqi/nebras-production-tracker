@@ -24,6 +24,7 @@
     <section class="toolbar">
       <input id="search" placeholder="جست‌وجوی کد، مشتری یا مناسبت">
       <button id="refresh" class="ghost">تازه‌سازی</button>
+      <button id="manageUsers" class="ghost" hidden>کاربر جدید</button>
       <button id="newJob" hidden>سفارش جدید</button>
     </section>
     <section id="stats" class="stats"></section>
@@ -31,7 +32,8 @@
     <section id="jobs" class="jobs"></section>
   </main>
   <dialog id="jobDialog"><form id="jobForm" method="dialog"><h2>سفارش جدید</h2><input id="code" placeholder="کد محصول" required><input id="quantity" type="number" min="1" value="1" placeholder="تعداد" required><input id="customer" placeholder="مشتری"><input id="occasion" placeholder="مناسبت"><div><button type="button" id="cancelJob" class="ghost">انصراف</button><button id="saveJob" value="default">ثبت و ارسال به پلاتر</button></div></form></dialog>
+  <dialog id="userDialog"><form id="userForm"><h2>کاربر جدید</h2><input id="userName" placeholder="نام شخص" required><input id="userUsername" dir="ltr" placeholder="نام کاربری انگلیسی" required><input id="userPassword" dir="ltr" type="password" minlength="4" placeholder="رمز عبور" required><select id="userRole" required><option value="">انتخاب واحد</option><option value="plotter">پلاتر</option><option value="calendar">کلندر</option><option value="laser">لیزر</option><option value="sewing">خیاط</option><option value="warehouse">انبار</option></select><div><button type="button" id="cancelUser" class="ghost">انصراف</button><button type="submit">ساخت حساب</button></div></form></dialog>
   <script src="./config.js?v=4"></script>
-  <script src="./app.js?v=5"></script>
+  <script src="./app.js?v=6"></script>
 </body>
 </html>

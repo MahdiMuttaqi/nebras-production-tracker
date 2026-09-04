@@ -3,3 +3,5 @@
 dialog[open]{position:fixed!important;top:50%!important;left:50%!important;right:auto!important;bottom:auto!important;transform:translate(-50%,-50%)!important;margin:0!important;max-height:min(620px,90vh);overflow:auto;z-index:20}
 
 [hidden]{display:none!important}
+
+#userForm{display:grid;gap:12px}#userForm h2{margin:0 0 8px}#userForm input,#userForm select{padding:13px;border:1px solid #bdcbd0;border-radius:10px;background:#fff;font:inherit}#userForm>div{display:flex;gap:8px}#userForm>div button{flex:1}
