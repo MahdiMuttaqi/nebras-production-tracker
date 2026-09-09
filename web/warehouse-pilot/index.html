@@ -15,7 +15,7 @@
 <div class="app">
   <header class="top"><div class="brand"><b>انبار هوشمند نبراس</b><small>نسخه آزمایشی مستقل</small></div><div class="online"><i class="dot"></i><span>آماده ثبت</span></div></header>
   <main class="main">
-    <div class="notice">این نسخه آزمایشی است و هیچ تغییری در سامانه پیگیری تولید یا فایل اصلی انبار ایجاد نمی‌کند.</div>
+    <div class="notice">این نسخه آزمایشی است و هیچ تغییری در سامانه پیگیری تولید یا فایل اصلی انبار ایجاد نمی‌کند. <a href="labels.html" style="color:#0b7168;font-weight:800">ساخت و چاپ QR محصول و مکان</a></div>
     <section class="hero">
       <div class="scan-card"><div><h1>اسکن هوشمند انبار</h1><p>بارکد محصول یا QR مکان را مقابل دوربین بگیرید.</p></div><button class="scan-btn" data-scan-target="global">اسکن هوشمند</button></div>
       <div class="summary"><div class="stat"><strong id="totalStock">۰</strong><span>کل موجودی</span></div><div class="stat"><strong id="activeLocs">۰</strong><span>مکان فعال</span></div><div class="stat"><strong id="productCount">۰</strong><span>کد موجود</span></div><div class="stat"><strong id="todayOps">۰</strong><span>عملیات امروز</span></div></div>
@@ -57,7 +57,7 @@ function norm(s){return String(s||'').trim().toUpperCase()}
 function item(p,l){return db.stock.find(x=>x.p===norm(p)&&x.l===norm(l))}
 function product(code){return db.products.find(x=>x.code===norm(code))}
 function ensureProduct(code){code=norm(code);let p=product(code);if(!p){p={code,name:'محصول جدید',occasion:'تعیین‌نشده'};db.products.push(p)}return p}
-function locationValid(l){return /^NBR-A\d{2}-R\d{2}-B\d{2}$/i.test(norm(l))}
+function locationValid(l){return /^NBR-(?:A\d{2}-R\d{2}-B\d{2}|S\d{2}-R\d{2}-B\d{2}-\d{2})$/i.test(norm(l))}
 function changeStock(p,l,delta,setValue=false){p=norm(p);l=norm(l);ensureProduct(p);if(!db.locations.includes(l))db.locations.push(l);let x=item(p,l);const before=x?x.q:0;const after=setValue?delta:before+delta;if(after<0)throw Error('تعداد خروج بیشتر از موجودی این مکان است.');if(x)x.q=after;else if(after>0)db.stock.push({p,l,q:after});db.stock=db.stock.filter(y=>y.q>0);return{before,after}}
 function log(type,p,qty,from,to,note,before,after){db.history.unshift({id:crypto.randomUUID?crypto.randomUUID():Date.now()+Math.random(),at:now(),type,p:norm(p),qty,from:from||'',to:to||'',note:note||'',before,after})}
 function render(){const active=db.stock.filter(x=>x.q>0);document.querySelector('#totalStock').textContent=fa(active.reduce((a,x)=>a+x.q,0));document.querySelector('#activeLocs').textContent=fa(new Set(active.map(x=>x.l)).size);document.querySelector('#productCount').textContent=fa(new Set(active.map(x=>x.p)).size);document.querySelector('#todayOps').textContent=fa(db.history.length);document.querySelector('#products').innerHTML=db.products.map(p=>`<option value="${p.code}">${p.name}</option>`).join('');renderHistory()}
