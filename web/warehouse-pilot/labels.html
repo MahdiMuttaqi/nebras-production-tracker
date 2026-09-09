@@ -8,7 +8,34 @@
   <style>
     :root{--navy:#173852;--teal:#0b7168;--ink:#132a3b;--line:#d6e3e7;--muted:#637783;--bg:#f3f7f8;--red:#a93649}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Tahoma,"Segoe UI",sans-serif;font-size:16px}.top{background:var(--navy);color:#fff;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}.top a{color:#fff;text-decoration:none;background:#ffffff18;padding:9px 12px;border-radius:10px}.wrap{max-width:1000px;margin:auto;padding:16px}.notice{background:#fff7dc;border:1px solid #efd989;color:#665116;border-radius:13px;padding:11px 13px;margin-bottom:14px;font-size:.88rem}.tabs,.queue-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}.tab,.queue-tab{border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff;color:var(--navy);font-weight:800}.tab.on,.queue-tab.on{background:var(--teal);color:#fff;border-color:var(--teal)}.panel{display:none}.panel.on{display:block}.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:0 6px 20px #1738520c}.card h2{font-size:1.05rem;margin:0 0 13px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.field{display:flex;flex-direction:column;gap:6px}.full{grid-column:1/-1}label{font-size:.84rem;color:#536773;font-weight:700}input,textarea{width:100%;border:1px solid #bdcdd3;border-radius:11px;padding:11px 12px;font:inherit;outline:none}input[type=file]{background:#f8fbfc}textarea{min-height:104px;resize:vertical}input:focus,textarea:focus{border-color:var(--teal);box-shadow:0 0 0 3px #0b716819}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}button{font:inherit;cursor:pointer}.primary,.secondary,.danger{border:0;border-radius:11px;padding:11px 15px;font-weight:800}.primary{background:var(--teal);color:#fff}.secondary{background:#e8f0f3;color:var(--navy)}.danger{background:#f8e4e7;color:var(--red)}.status{display:none;margin-top:12px;padding:11px 13px;border-radius:11px;background:#eaf5f7;color:#173852;font-weight:700;line-height:1.8}.status.show{display:block}.queue-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.count{background:#dff3f0;color:var(--teal);border-radius:999px;padding:5px 10px;font-weight:800;font-size:.82rem}.labels{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}.label-card{background:#fff;border:1px solid #92a5ad;border-radius:10px;padding:9px;text-align:center;min-width:0;position:relative}.label-card .qr{width:128px;height:128px;margin:0 auto 6px;display:flex;align-items:center;justify-content:center}.label-card .qr img,.label-card .qr canvas{max-width:100%;height:auto}.label-card strong{display:block;font-size:1rem;direction:ltr;unicode-bidi:isolate;white-space:nowrap}.label-card .fa{font-weight:800;margin-top:3px}.label-card small{display:block;color:var(--muted);margin-top:3px;min-height:18px}.remove{position:absolute;left:5px;top:5px;border:0;background:#f8e4e7;color:var(--red);width:28px;height:28px;border-radius:50%;font-weight:900}.empty{text-align:center;color:var(--muted);padding:24px}.help{font-size:.82rem;color:var(--muted);margin:6px 0 0}.ltr{direction:ltr;text-align:left}.toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,15px);background:var(--navy);color:#fff;border-radius:11px;padding:11px 15px;opacity:0;transition:.2s;pointer-events:none;z-index:30}.toast.show{opacity:1;transform:translate(-50%,0)}
     @media(max-width:700px){.wrap{padding:12px}.grid{grid-template-columns:1fr}.full{grid-column:auto}.labels{grid-template-columns:repeat(2,minmax(0,1fr))}.label-card{padding:7px}.label-card .qr{width:112px;height:112px}.label-card strong{font-size:.82rem}.queue-head{align-items:flex-start;flex-direction:column}}
-    @media print{body{background:#fff}.top,.notice,.tabs,.panel,.queue-tabs,.queue-head .actions,.remove,.help{display:none!important}.wrap{max-width:none;padding:0}.card{border:0;box-shadow:none;padding:0;margin:0}.queue-head{display:block}.queue-head h2{display:none}.labels{display:grid;grid-template-columns:repeat(3,70mm);gap:4mm;justify-content:center;margin:0}.label-card{width:70mm;min-height:50mm;border:1px solid #000;border-radius:2mm;padding:3mm;break-inside:avoid;page-break-inside:avoid}.label-card .qr{width:29mm;height:29mm;margin-bottom:1mm}.label-card strong{font-size:11pt}.label-card .fa{font-size:10pt}.label-card small{font-size:8pt;min-height:0}@page{size:A4;margin:8mm}}
+    #printPages{display:none}
+    @media print{
+      @page{size:A4 portrait;margin:8mm}
+      html,body{width:210mm;margin:0!important;padding:0!important;background:#fff}
+      .top,.notice,.tabs,.panel,.queue-tabs,.queue-head,.labels,.remove,.help{display:none!important}
+      .wrap,.card{display:block!important;max-width:none!important;border:0!important;box-shadow:none!important;padding:0!important;margin:0!important}
+      #printPages{display:block!important;width:194mm;margin:0 auto}
+      .print-page{width:194mm;height:281mm;display:grid;justify-content:center;align-content:start;break-after:page;page-break-after:always;overflow:hidden}
+      .print-page:last-child{break-after:auto;page-break-after:auto}
+      .print-page.location-page{grid-template-columns:repeat(2,95mm);grid-template-rows:repeat(2,138.5mm);gap:4mm}
+      .print-page.location-page .label-card{width:95mm;height:138.5mm;padding:7mm 4mm}
+      .print-page.location-page .qr{width:58mm;height:58mm;margin:8mm auto 5mm}
+      .print-page.location-page strong{font-size:14pt}
+      .print-page.location-page .fa{font-size:13pt;margin-top:4mm}
+      .print-page.location-page small{font-size:10pt;margin-top:3mm}
+      .print-page.product-page{grid-template-columns:repeat(2,70mm);grid-auto-rows:50mm;gap:4mm;justify-content:center}
+      .print-page.product-page .label-card{width:70mm;height:50mm;padding:3mm}
+      .print-page.product-page .qr{width:29mm;height:29mm;margin:0 auto 1mm}
+      .print-page.product-page strong{font-size:11pt}
+      .print-page.product-page .fa{font-size:10pt}
+      .print-page.product-page small{font-size:8pt;min-height:0}
+      .print-page .label-card{border:1px solid #000;border-radius:2mm;text-align:center;position:relative;overflow:hidden;break-inside:avoid;page-break-inside:avoid}
+      .print-page .qr{display:flex;align-items:center;justify-content:center}
+      .print-page .qr img,.print-page .qr canvas{max-width:100%;height:auto}
+      .print-page strong{display:block;direction:ltr;unicode-bidi:isolate;white-space:nowrap}
+      .print-page .fa{font-weight:800}
+      .print-page small{display:block;color:#333}
+    }
   </style>
 </head>
 <body>
@@ -45,7 +72,7 @@
       <p class="help">مثلاً جعبهٔ 1,2 به شکل NBR-S01-R02-B01-02 داخل QR ذخیره می‌شود، اما روی برچسب به صورت جعبه 1,2 نوشته می‌شود.</p></div>
     </section>
 
-    <section class="card"><div class="queue-head"><div><h2>صف چاپ برچسب‌ها</h2><span class="count" id="count">۰ برچسب</span></div><div class="actions"><button class="primary" id="print">چاپ همین فهرست</button><button class="secondary" id="saveSet">ذخیره فهرست</button><button class="danger" id="clear">پاک‌کردن همین فهرست</button></div></div><div class="queue-tabs"><button class="queue-tab on" data-type="location">QR مکان‌ها</button><button class="queue-tab" data-type="product">QR محصولات</button></div><div class="labels" id="labels"></div></section>
+    <section class="card"><div class="queue-head"><div><h2>صف چاپ برچسب‌ها</h2><span class="count" id="count">۰ برچسب</span></div><div class="actions"><button class="primary" id="print">چاپ همین فهرست</button><button class="secondary" id="saveSet">ذخیره فهرست</button><button class="danger" id="clear">پاک‌کردن همین فهرست</button></div></div><div class="queue-tabs"><button class="queue-tab on" data-type="location">QR مکان‌ها</button><button class="queue-tab" data-type="product">QR محصولات</button></div><div class="labels" id="labels"></div><div id="printPages" aria-hidden="true"></div></section>
   </main>
   <div class="toast" id="toast"></div>
   <script src="jszip.min.js"></script>
@@ -80,7 +107,28 @@
     document.querySelector('#addLocations').onclick=()=>{const s=pad(document.querySelector('#shelf').value),r=pad(document.querySelector('#row').value),boxes=document.querySelector('#boxes').value.split(/\n+/).map(x=>x.trim()).filter(Boolean);if(!s||!r||!boxes.length){toast('قفسه، ردیف و جعبه‌ها را کامل کنید.');return}let n=0;boxes.forEach(v=>{const b=parseBox(v);if(!b)return;const value=`NBR-S${s}-R${r}-B${pad(b.a)}-${pad(b.b)}`;if(add({type:'location',value,title:`قفسه ${Number(s)} | ردیف ${Number(r)} | جعبه ${b.a},${b.b}`,sub:'مکان انبار نبراس'}))n++});toast(`${fa(n)} مکان به صف اضافه شد.`)};
     document.querySelector('#clear').onclick=()=>{if(confirm(`همهٔ QRهای ${viewType==='location'?'مکان':'محصول'} پاک شوند؟`)){queue=queue.filter(x=>x.type!==viewType);persist();render()}};
     document.querySelector('#saveSet').onclick=()=>{persist();toast('فهرست روی همین دستگاه ذخیره شد.')};
-    document.querySelector('#print').onclick=()=>queue.some(x=>x.type===viewType)?window.print():toast('این فهرست چاپ خالی است.');
+    function buildPrintPages(){
+      const items=queue.filter(x=>x.type===viewType),perPage=viewType==='location'?4:10,host=document.querySelector('#printPages');
+      host.innerHTML='';
+      for(let start=0;start<items.length;start+=perPage){
+        const page=document.createElement('section');
+        page.className='print-page '+(viewType==='location'?'location-page':'product-page');
+        items.slice(start,start+perPage).forEach((item,index)=>{
+          const card=document.createElement('article');
+          card.className='label-card';
+          const title=norm(item.title)!==norm(item.value)?`<div class="fa">${esc(item.title)}</div>`:'';
+          card.innerHTML=`<div class="qr"></div><strong>${esc(item.value)}</strong>${title}<small>${esc(item.sub||'')}</small>`;
+          page.appendChild(card);
+          new QRCode(card.querySelector('.qr'),{text:item.value,width:viewType==='location'?300:180,height:viewType==='location'?300:180,correctLevel:QRCode.CorrectLevel.M});
+        });
+        host.appendChild(page);
+      }
+    }
+    document.querySelector('#print').onclick=()=>{
+      if(!queue.some(x=>x.type===viewType)){toast('این فهرست چاپ خالی است.');return}
+      buildPrintPages();
+      window.print();
+    };
     render();
   </script>
 </body>
