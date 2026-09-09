@@ -13,7 +13,10 @@
       @page{size:A4 portrait;margin:8mm}
       html,body{width:210mm;margin:0!important;padding:0!important;background:#fff}
       .top,.notice,.tabs,.panel,.queue-tabs,.queue-head,.labels,.remove,.help{display:none!important}
-      .wrap,.card{display:block!important;max-width:none!important;border:0!important;box-shadow:none!important;padding:0!important;margin:0!important}
+      .wrap{display:block!important;max-width:none!important;padding:0!important;margin:0!important}
+      .wrap>*{display:none!important}
+      .wrap>section.card:last-of-type{display:block!important;border:0!important;box-shadow:none!important;padding:0!important;margin:0!important}
+      .wrap>section.card:last-of-type>*:not(#printPages){display:none!important}
       #printPages{display:block!important;width:194mm;margin:0 auto}
       .print-page{width:194mm;height:281mm;display:grid;justify-content:center;align-content:start;break-after:page;page-break-after:always;overflow:hidden}
       .print-page:last-child{break-after:auto;page-break-after:auto}
