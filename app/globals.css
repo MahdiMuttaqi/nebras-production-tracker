@@ -138,3 +138,24 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Production tracker extensions: three sewing units and transfer history. */
+.stats{grid-template-columns:repeat(4,1fr)}
+.s-sewing,.s-sewing1,.s-sewing2,.s-sewing3{border-top-color:#f59e0b}
+.stage-sewing,.stage-sewing1,.stage-sewing2,.stage-sewing3{background:#fff1d6;color:#9a5b00}
+.meta{grid-template-columns:1fr 1fr 1.4fr}
+.meta b{line-height:1.6}
+.actions{align-items:stretch}
+.tailor-select{min-height:44px;border:1px solid #bdcbd0;border-radius:9px;padding:0 10px;background:#fff;color:var(--ink);font-weight:700}
+.transfer-history{border-top:1px solid #edf1f2;padding:9px 0}
+.transfer-history summary{cursor:pointer;color:#0b7c72;font-size:13px;font-weight:700}
+.transfer-history div{margin-top:8px;display:grid;gap:6px}
+.transfer-history p{margin:0;background:#f6f9fa;border-radius:8px;padding:7px 9px;display:flex;justify-content:space-between;gap:10px;font-size:12px}
+.transfer-history p span{color:#71808a}
+
+@media(max-width:760px){
+  .meta{grid-template-columns:1fr}
+  .meta span:last-child{grid-column:auto}
+  .tailor-select{width:100%}
+  .transfer-history p{align-items:flex-start;flex-direction:column}
+}
