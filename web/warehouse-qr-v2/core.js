@@ -1,0 +1,14 @@
+(function(root,factory){const api=factory();if(typeof module==='object'&&module.exports)module.exports=api;else root.NebrasQRCore=api})(typeof self!=='undefined'?self:this,function(){
+  const faDigits='۰۱۲۳۴۵۶۷۸۹',arDigits='٠١٢٣٤٥٦٧٨٩';
+  function latin(v){return String(v??'').replace(/[۰-۹]/g,c=>faDigits.indexOf(c)).replace(/[٠-٩]/g,c=>arDigits.indexOf(c))}
+  function normCode(v){return latin(v).trim().toUpperCase().replace(/\u200c/g,'').replace(/[‐‑‒–—−]/g,'-').replace(/\s+/g,'')}
+  function normNum(v){const s=latin(v).trim();if(!s)return'';const n=Number(s);return Number.isFinite(n)?String(n):s.toUpperCase()}
+  function parseBoxes(v){const raw=latin(v).trim().replace(/،/g,',');if(!raw)return[];const pieces=raw.split(/\s*[-;|/]\s*/).filter(Boolean),out=[];for(const p of pieces){const m=p.match(/^(\d+)\s*[,\.]\s*(\d+)$/);if(m)out.push(`${Number(m[1])},${Number(m[2])}`);else if(/^\d+$/.test(p))out.push(String(Number(p)));else return[]}return[...new Set(out)]}
+  function pad(v){return normNum(v).padStart(2,'0')}
+  function location(shelf,row,box){const s=normNum(shelf),r=normNum(row),b=parseBoxes(box);if(!s||!r||b.length!==1)return null;const p=b[0].split(',');return{key:`L|S${pad(s)}|R${pad(r)}|B${pad(p[0])}${p[1]?'|'+pad(p[1]):''}`,value:`NBR-S${pad(s)}-R${pad(r)}-B${pad(p[0])}${p[1]?'-'+pad(p[1]):''}`,title:`قفسه ${s} | ردیف ${r} | جعبه ${b[0]}`}}
+  function catalog(rows){const products=new Map(),locations=new Map(),issues=[];for(const x of rows){const code=normCode(x.code);if(!code)continue;if(!products.has(code))products.set(code,{key:'P|'+code,value:code,title:code,occasion:String(x.occasion||'').trim()});if(x.productOnly)continue;const boxes=parseBoxes(x.box);if(!x.shelf||!x.row||!boxes.length){issues.push({row:x.excelRow||'',code,reason:'لوکیشن ناقص یا جعبه نامعتبر'});continue}for(const b of boxes){const loc=location(x.shelf,x.row,b);if(loc&&!locations.has(loc.key))locations.set(loc.key,loc)}}return{products:[...products.values()],locations:[...locations.values()],issues}}
+  function labelKey(type,item){return`${type}|${item.key}`}
+  function buildLabels(cat){return{location_qr:cat.locations.map(x=>({...x,id:labelKey('location_qr',x),type:'location_qr'})),product_qr:cat.products.map(x=>({...x,id:labelKey('product_qr',x),type:'product_qr'})),product_barcode:cat.products.map(x=>({...x,id:labelKey('product_barcode',x),type:'product_barcode'}))}}
+  function diff(labels,registry){const printed=new Set((registry||[]).filter(x=>x.status==='printed').map(x=>x.id)),queued=new Set((registry||[]).filter(x=>x.status==='queued').map(x=>x.id));const out={};for(const [type,items] of Object.entries(labels))out[type]={new:items.filter(x=>!printed.has(x.id)&&!queued.has(x.id)),known:items.filter(x=>printed.has(x.id)||queued.has(x.id)),all:items};return out}
+  return{latin,normCode,normNum,parseBoxes,location,catalog,buildLabels,diff};
+});
