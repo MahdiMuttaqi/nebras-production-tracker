@@ -1,4 +1,4 @@
-const CACHE='nebras-warehouse-qr-v2-4';
+const CACHE='nebras-warehouse-qr-v2-5';
 const ASSETS=['./','./index.html','./styles.css','./core.js','./code128.js','./app.js','./manifest.json','./icon.svg','../warehouse-pilot/jszip.min.js','../warehouse-pilot/qrcode.min.js'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()))});
