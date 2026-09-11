@@ -2,7 +2,7 @@ import { asc, count, eq } from "drizzle-orm";
 import { getDb } from "@/db";
 import { users } from "@/db/schema";
 import { getChatGPTUser } from "@/app/chatgpt-auth";
-export const roles = ["pending", "admin", "plotter", "calendar", "laser", "sewing", "warehouse"] as const;
+export const roles = ["pending", "admin", "plotter", "calendar", "laser", "sewing", "sewing1", "sewing2", "sewing3", "warehouse"] as const;
 export async function currentUser() {
   const identity = await getChatGPTUser(); if (!identity) return null; const db = getDb();
   const found = await db.select().from(users).where(eq(users.email, identity.email)).limit(1); if (found[0]) return found[0];
