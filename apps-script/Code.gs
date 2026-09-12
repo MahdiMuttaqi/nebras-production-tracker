@@ -4,7 +4,7 @@ const ROLE_FA={admin:"مدیر",plotter:"پلاتر",calendar:"کلندر",cutti
 const MAX_TAILORS=20;
 
 function out(x){return ContentService.createTextOutput(JSON.stringify(x)).setMimeType(ContentService.MimeType.JSON)}
-function doGet(){return out({ok:true,name:"سامانه پیگیری تولید نبراس"})}
+function doGet(e){try{const q=e&&e.parameter||{};if(!q.action)return out({ok:true,name:"سامانه پیگیری تولید نبراس"});const u=sessionUser(q.session);if(!u)return out({ok:false,error:"نشست شما منقضی شده است"});if(q.action==="list")return out(list(u));if(q.action==="listUsers")return out(listUsers(u));return out({ok:false,error:"درخواست خواندن نامعتبر"})}catch(x){return out({ok:false,error:String(x.message||x)})}}
 function doPost(e){try{const q=JSON.parse(e.postData.contents||"{}");if(q.action==="login")return out(login(q));const u=sessionUser(q.session);if(!u)return out({ok:false,error:"نشست شما منقضی شده است"});const a={list,listUsers,add,addUser,updateUser,advance,complete,editJob,clearArchive};return out(a[q.action]?a[q.action](u,q):{ok:false,error:"درخواست نامعتبر"})}catch(x){return out({ok:false,error:String(x.message||x)})}}
 function sh(n){return SpreadsheetApp.openById(SHEET_ID).getSheetByName(n)}
 function rows(n){return sh(n).getDataRange().getValues().slice(1)}
