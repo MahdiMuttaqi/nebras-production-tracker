@@ -25,7 +25,7 @@ call=async function(action,data={}){
   return result;
 };
 
-// Fast optimistic transfer. Known transient/typed-column errors do not block the UI.
+// Fast optimistic transfer. Move the card on screen immediately; network confirmation continues in background.
 advance=async function(id,route="",tailor=""){
   const key=String(id);
   if(busyIds.has(key))return;
@@ -40,6 +40,9 @@ advance=async function(id,route="",tailor=""){
   nebrasTransitionRevision++;
   busyIds.add(key);
   localMove(j,to,event);
+
+  // Critical: paint the optimistic move NOW instead of waiting for Apps Script.
+  render();
 
   try{
     await nebrasOriginalCall("advance",{id,route,tailor});
