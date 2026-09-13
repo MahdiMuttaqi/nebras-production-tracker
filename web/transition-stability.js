@@ -25,7 +25,7 @@ call=async function(action,data={}){
   return result;
 };
 
-// Fast optimistic transfer. Move the card on screen immediately; network confirmation continues in background.
+// Fast optimistic transfer. localMove already repaints immediately.
 advance=async function(id,route="",tailor=""){
   const key=String(id);
   if(busyIds.has(key))return;
@@ -41,12 +41,11 @@ advance=async function(id,route="",tailor=""){
   busyIds.add(key);
   localMove(j,to,event);
 
-  // Critical: paint the optimistic move NOW instead of waiting for Apps Script.
-  render();
-
   try{
     await nebrasOriginalCall("advance",{id,route,tailor});
-    syncSoon();
+    // Server already confirmed the transfer, so refresh immediately instead of
+    // waiting for the old 1.2s reconciliation timer.
+    load(true);
   }catch(e){
     if(e?.code==="NO_RESPONSE"||nebrasIsTypedColumnFormatError(e)){
       // Keep the already-applied optimistic move and reconcile in background.
