@@ -9,7 +9,7 @@ const cleanPassword=x=>String(x||"").trim().replace(/[۰-۹]/g,c=>"۰۱۲۳۴۵�
 const esc=x=>String(x??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const stageKey=x=>({"تکمیل‌شده":"completed","تکمیل شده":"completed","خیاط ۱":"sewing1","خیاط ۲":"sewing2","خیاط ۳":"sewing3","خیاط":"sewing","ثبت سفارش":"new"}[String(x||"").trim()]||x);
 const isKnownStage=x=>["admin","plotter","calendar","cutting","laser","warehouse","completed","new"].includes(String(x||""))||isTailorRole(x);
-const normalizeJob=j=>({...j,stage:stageKey(j.stage),events:(j.events||[]).map(e=>({...e,fromStage:stageKey(e.fromStage),toStage:stageKey(e.toStage)})).filter(e=>isKnownStage(e.fromStage)&&isKnownStage(e.toStage)&&!/^XLS[-_]/i.test(String(e.note||"").trim()))});
+const normalizeJob=j=>({...j,stage:stageKey(j.stage),events:(j.events||[]).map(e=>{const note=String(e.note||"").trim();return{...e,fromStage:stageKey(e.fromStage),toStage:stageKey(e.toStage),note:/^ارسال گروهی از اکسل(?:\s|$)/.test(note)?"":e.note}}).filter(e=>isKnownStage(e.fromStage)&&isKnownStage(e.toStage)&&!/^XLS[-_]/i.test(String(e.note||"").trim()))});
 const when=x=>String(x||"—").replace(",","");
 const faNow=()=>new Intl.DateTimeFormat("fa-IR-u-ca-persian-nu-latn",{timeZone:"Asia/Tehran",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false}).format(new Date()).replace(/،|,/g,"");
 function syncSoon(){setTimeout(()=>load(true),1000);setTimeout(()=>load(true),3500)}
