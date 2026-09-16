@@ -39,3 +39,5 @@ jobs:
           fi
           git commit -m "Persist warehouse login and clean only confirmed local history"
           git push origin HEAD:main
+
+# retry after patch-script correction
