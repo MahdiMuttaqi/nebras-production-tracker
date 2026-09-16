@@ -5,13 +5,64 @@
 
   let sharedOutSource = null;
 
-  function sharedMemberLocations(x) {
-    const bits = String(x?.display || '').split('/').map(v => v.trim());
+  function asciiDigits(value) {
+    return String(value ?? '')
+      .replace(/[۰-۹]/g, d => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)))
+      .replace(/[٠-٩]/g, d => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)))
+      .replace(/\u200c/g, '')
+      .trim();
+  }
+
+  function physicalBoxLocation(shelf, row, box) {
+    const cleanShelf = asciiDigits(shelf);
+    const cleanRow = asciiDigits(row);
+    const cleanBox = asciiDigits(box).replace(/[،٫.]/g, ',').replace(/\s+/g, '');
+    if (!cleanShelf || !cleanRow || !cleanBox) return '';
+    return boxLocation(cleanShelf, cleanRow, cleanBox);
+  }
+
+  function locationsFromDisplay(x) {
+    const display = asciiDigits(x?.display || '');
+    const bits = display.split('/').map(v => v.trim()).filter(Boolean);
     if (bits.length < 3) return [];
     const shelf = bits[0];
     const row = bits[1];
-    const boxes = bits.slice(2).join('/').split('-').map(v => v.trim()).filter(Boolean);
-    return boxes.map(box => boxLocation(shelf, row, box)).filter(Boolean);
+    const boxSpec = bits.slice(2).join('/');
+    const boxes = boxSpec.split(/\s*-\s*/).map(v => v.trim()).filter(Boolean);
+    return boxes.map(box => physicalBoxLocation(shelf, row, box)).filter(Boolean);
+  }
+
+  function locationsFromMultiCode(x) {
+    const code = norm(x?.l || '');
+    const m = code.match(/^NBR-S(\d+)-R(\d+)-MULTI-(.+)$/i);
+    if (!m) return [];
+    const shelf = m[1];
+    const row = m[2];
+    const nums = m[3].split('-').map(v => asciiDigits(v)).filter(Boolean);
+    const out = [];
+
+    // V11 encodes comma-separated sub-boxes such as 7,1-7,2-7,3 as MULTI-7-1-7-2-7-3.
+    if (nums.length >= 2 && nums.length % 2 === 0) {
+      for (let i = 0; i < nums.length; i += 2) {
+        const loc = physicalBoxLocation(shelf, row, `${nums[i]},${nums[i + 1]}`);
+        if (loc) out.push(loc);
+      }
+    }
+
+    // Fallback for plain box lists when no display text is available.
+    if (!out.length) {
+      for (const n of nums) {
+        const loc = physicalBoxLocation(shelf, row, n);
+        if (loc) out.push(loc);
+      }
+    }
+    return out;
+  }
+
+  function sharedMemberLocations(x) {
+    const fromDisplay = locationsFromDisplay(x);
+    const fromCode = locationsFromMultiCode(x);
+    return [...new Set([...fromDisplay, ...fromCode].map(norm).filter(Boolean))];
   }
 
   function locationInventoryRows(location) {
@@ -37,7 +88,7 @@
         ? `<div style="display:flex;flex-direction:column;gap:6px"><button class="primary" onclick="quickOutShared('${x.p}','${x.l}','${l}')">برداشت از مشترک</button><button class="secondary" onclick="openSplit('${x.p}','${x.l}')">تفکیک</button></div>`
         : `<button class="secondary" onclick="quickOut('${x.p}','${l}')">برداشت</button>`;
       return `<div class="result-row"><span><b>${html(x.p)} — ${html(name)}</b>${detail}</span><span class="qty"><small>${shared ? 'کل مشترک' : 'موجودی'}</small>${fa(x.q)}</span>${buttons}</div>`;
-    }).join('') : '<div class="empty">برای این جعبه موجودی مستقیم یا مشترک ثبت نشده است.</div>'}</div>`;
+    }).join('') : `<div class="empty">برای این جعبه موجودی مستقیم یا مشترک ثبت نشده است.<br><small>${html(l)}</small></div>`}</div>`;
   }
 
   window.quickOut = (p, l) => {
