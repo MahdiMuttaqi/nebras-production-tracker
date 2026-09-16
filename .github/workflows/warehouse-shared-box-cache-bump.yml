@@ -1,0 +1,35 @@
+name: Bump warehouse shared-box cache
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/warehouse-shared-box-cache-bump.yml'
+permissions:
+  contents: write
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Bump shared-box script version only
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('web/warehouse-pilot/index.html')
+          s=p.read_text(encoding='utf-8')
+          old='<script src="shared-box.js?v=20260916-1"></script>'
+          new='<script src="shared-box.js?v=20260916-2"></script>'
+          if s.count(old)!=1:
+              raise SystemExit(f'safety stop: expected one cache tag, found {s.count(old)}')
+          p.write_text(s.replace(old,new,1),encoding='utf-8')
+          PY
+          git diff --check
+          git rm .github/workflows/warehouse-shared-box-cache-bump.yml
+          git config user.name "MahdiMuttaqi"
+          git config user.email "mehdi.muttaqi2014@gmail.com"
+          git add web/warehouse-pilot/index.html
+          git commit -m "Refresh shared-box mobile script"
+          git push origin main
