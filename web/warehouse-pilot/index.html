@@ -37,7 +37,6 @@
     <section class="panel" id="move"><div class="card"><h2>انتقال بین دو مکان</h2><div class="grid"><div class="field"><label>مکان مبدأ</label><div class="location-input"><input id="moveFrom" placeholder="اسکن مبدأ"><button class="mini-scan" data-scan-target="moveFrom">اسکن</button></div></div><div class="field"><label>مکان مقصد</label><div class="location-input"><input id="moveTo" placeholder="اسکن مقصد"><button class="mini-scan" data-scan-target="moveTo">اسکن</button></div></div><div class="field"><label>کد محصول</label><input id="moveProduct" list="products" placeholder="کد محصول"></div><div class="field"><label>تعداد انتقال</label><input id="moveQty" type="number" min="1" inputmode="numeric" placeholder="تعداد"></div></div><div class="actions"><button class="primary" id="moveSubmit">ثبت انتقال</button></div></div></section>
 
     <section class="panel" id="adjust"><div class="card"><h2>اصلاح موجودی شمارش‌شده</h2><div class="grid"><div class="field"><label>مکان</label><div class="location-input"><input id="adjustLoc" placeholder="کد QR مکان"><button class="mini-scan" data-scan-target="adjustLoc">اسکن</button></div></div><div class="field"><label>کد محصول</label><input id="adjustProduct" list="products" placeholder="کد محصول"></div><div class="field"><label>تعداد واقعی شمارش‌شده</label><input id="adjustQty" type="number" min="0" inputmode="numeric" placeholder="تعداد واقعی"></div><div class="field"><label>علت اصلاح</label><select id="adjustReason"><option>مغایرت شمارش</option><option>اشتباه ثبت قبلی</option><option>خرابی یا ضایعات</option><option>جابه‌جایی ثبت‌نشده</option></select></div></div><div class="actions"><button class="primary" id="adjustSubmit">ثبت اصلاح</button></div></div></section>
-
     <section class="panel" id="history"><div class="card"><h2>سوابق عملیات این دستگاه</h2><div class="actions" style="margin-top:0"><button class="secondary" id="exportHistory">خروجی سوابق</button><button class="danger" id="resetDemo">بازنشانی به اطلاعات فایل اکسل</button></div><div id="historyList"></div></div></section>
     <datalist id="products"></datalist>
   </main>
@@ -118,7 +117,7 @@ function cleanupConfirmedHistory(){
  return changed
 }
 function excelAppliedStatus(v){return String(v||'').trim()==='اعمال شد'}
-function excelRejectedStatus(v){const x=String(v||'');return x.includes('اعمال نشد')||x.includes('نیازمند بررسی')}
+function excelRejectedStatus(v){const x=String(v||'');return x.includes('اعمال نشد')||x.includes('نیازمند بررسی')||x.includes('خطا')}
 function operationNeedsReplay(h){if(h.sync!=='synced')return true;return !excelAppliedStatus(h.excelStatus)&&!excelRejectedStatus(h.excelStatus)}
 async function reconcileStatusesBeforeSnapshot(){
  if(!db||!Array.isArray(db.history)||!navigator.onLine)return;
