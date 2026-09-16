@@ -1,0 +1,27 @@
+name: Link shared-box warehouse enhancement
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/warehouse-shared-box-link.yml'
+permissions:
+  contents: write
+jobs:
+  link:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Link warehouse enhancement only
+        run: |
+          sed -i 's#</body>#<script src="shared-box.js?v=20260916-1"></script>\n</body>#' web/warehouse-pilot/index.html
+          grep -q 'shared-box.js?v=20260916-1' web/warehouse-pilot/index.html
+          git diff --check
+          git rm .github/workflows/warehouse-shared-box-link.yml
+          git rm .github/workflows/warehouse-shared-box-patch.yml
+          git config user.name "MahdiMuttaqi"
+          git config user.email "mehdi.muttaqi2014@gmail.com"
+          git add web/warehouse-pilot/index.html
+          git commit -m "Enable shared-box view and withdrawal"
+          git push origin main
