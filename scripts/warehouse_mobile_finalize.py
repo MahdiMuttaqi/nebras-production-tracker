@@ -10,15 +10,16 @@ def replace_once(old, new, label):
         raise SystemExit(f'{label}: expected exactly 1 match, found {count}')
     s = s.replace(old, new, 1)
 
+# Explicit logout first, so the successful-login patch below cannot create a second ambiguous match.
+replace_once(
+    " sessionStorage.removeItem(SESSION_PASSWORD_KEY);\n clearTimeout(syncTimer);",
+    " localStorage.removeItem(SESSION_PASSWORD_KEY);sessionStorage.removeItem(SESSION_PASSWORD_KEY);\n clearTimeout(syncTimer);",
+    'explicit logout clears trusted login'
+)
 replace_once(
     "sessionStorage.setItem(SESSION_PASSWORD_KEY,password);",
     "localStorage.setItem(SESSION_PASSWORD_KEY,password);sessionStorage.removeItem(SESSION_PASSWORD_KEY);",
     'persist successful login'
-)
-replace_once(
-    "sessionStorage.removeItem(SESSION_PASSWORD_KEY);",
-    "localStorage.removeItem(SESSION_PASSWORD_KEY);sessionStorage.removeItem(SESSION_PASSWORD_KEY);",
-    'explicit logout clears trusted login'
 )
 replace_once(
     "const rememberedPassword=sessionStorage.getItem(SESSION_PASSWORD_KEY);\nif(rememberedPassword){document.querySelector('#managerPassword').value=rememberedPassword;setTimeout(unlock,0)}",
