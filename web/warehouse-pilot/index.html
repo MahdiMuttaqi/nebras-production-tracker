@@ -121,6 +121,7 @@ function excelRejectedStatus(v){const x=String(v||'');return x.includes('اعم�
 function operationNeedsReplay(h){if(h.sync!=='synced')return true;return !excelAppliedStatus(h.excelStatus)&&!excelRejectedStatus(h.excelStatus)}
 async function reconcileStatusesBeforeSnapshot(){
  if(!db||!Array.isArray(db.history)||!navigator.onLine)return;
+ const missingRejectedIds=new Set();
  const candidates=db.history.filter(h=>h.sync==='synced'&&!excelAppliedStatus(h.excelStatus)).slice(0,60);
  for(let i=0;i<candidates.length;i+=6){
   const batch=candidates.slice(i,i+6);
@@ -129,9 +130,12 @@ async function reconcileStatusesBeforeSnapshot(){
    if(status?.found){
     h.excelStatus=status.excelStatus||h.excelStatus||'در انتظار';
     if(excelAppliedStatus(h.excelStatus)&&!h.confirmedAt)h.confirmedAt=new Date().toISOString();
+   }else if(excelRejectedStatus(h.excelStatus)){
+    missingRejectedIds.add(String(h.id));
    }
   }));
  }
+ if(missingRejectedIds.size)db.history=db.history.filter(h=>!missingRejectedIds.has(String(h.id)));
 }
 function syncSummary(){const unsent=db.history.filter(h=>h.sync!=='synced').length,waiting=db.history.filter(h=>h.sync==='synced'&&!excelAppliedStatus(h.excelStatus)&&!excelRejectedStatus(h.excelStatus)).length,review=db.history.filter(h=>h.sync==='synced'&&excelRejectedStatus(h.excelStatus)).length;return{unsent,waiting,review}}
 function showSyncSummary(prefix=''){const s=syncSummary();if(s.unsent)syncState(`${prefix}${fa(s.unsent)} عملیات در صف ارسال`,false);else if(s.waiting)syncState(`${prefix}${fa(s.waiting)} عملیات رسیده؛ منتظر اکسل`,true);else if(s.review)syncState(`${prefix}${fa(s.review)} عملیات نیازمند بررسی`,false);else syncState(prefix?'به‌روز از اکسل':'همگام',true)}
