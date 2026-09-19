@@ -29,6 +29,7 @@ Public Sub Nebras_Repair_Daily_Locations_V36()
     Dim oldScreen As Boolean
     Dim oldAlerts As Boolean
     Dim snapshotTaken As Boolean
+    Dim failDescription As String
 
     oldCalc = Application.Calculation
     oldEvents = Application.EnableEvents
@@ -144,6 +145,7 @@ Public Sub Nebras_Repair_Daily_Locations_V36()
     Exit Sub
 
 Failed:
+    failDescription = Err.Description
     On Error Resume Next
     If snapshotTaken Then
         helperWs.Range("H" & repairFirstRow & ":U" & helperLastRow).Formula = oldFormulas
@@ -154,7 +156,7 @@ Failed:
     Application.Calculation = oldCalc
     On Error GoTo 0
 
-    MsgBox "Daily location repair stopped and rolled back." & vbCrLf & Err.Description, _
+    MsgBox "Daily location repair stopped and rolled back." & vbCrLf & failDescription, _
            vbCritical, "Nebras Warehouse"
 End Sub
 
