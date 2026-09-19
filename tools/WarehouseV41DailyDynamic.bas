@@ -164,12 +164,14 @@ Public Sub Nebras_BulkDailyImport_V41()
     Dim oldEvents As Boolean
     Dim oldScreen As Boolean
     Dim oldAlerts As Boolean
+    Dim oldAutomationSecurity As Long
     Dim failDescription As String
 
     oldCalc = Application.Calculation
     oldEvents = Application.EnableEvents
     oldScreen = Application.ScreenUpdating
     oldAlerts = Application.DisplayAlerts
+    oldAutomationSecurity = Application.AutomationSecurity
 
     On Error GoTo Failed
 
