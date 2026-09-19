@@ -2,7 +2,8 @@ Attribute VB_Name = "WarehouseV36DailyLocationFix"
 Option Explicit
 
 ' Nebras warehouse - surgical repair for Daily Picking location helper only.
-' Scope: first worksheet helper range H:U only. No other sheet data or VBA module is changed.
+' Scope: only the broken/missing tail of the helper block H:U on worksheet 1.
+' No Daily Picking inputs, Inventory Bank data, sync code, buttons, or other VBA modules are changed.
 
 Public Sub Nebras_Repair_Daily_Locations_V36()
     Dim bankTbl As ListObject
@@ -14,6 +15,7 @@ Public Sub Nebras_Repair_Daily_Locations_V36()
     Dim lastDailyRow As Long
     Dim helperFirstRow As Long
     Dim helperLastRow As Long
+    Dim repairFirstRow As Long
     Dim lastBankRow As Long
     Dim r As Long, k As Long
     Dim posCols As Variant
@@ -26,6 +28,12 @@ Public Sub Nebras_Repair_Daily_Locations_V36()
     Dim oldEvents As Boolean
     Dim oldScreen As Boolean
     Dim oldAlerts As Boolean
+    Dim snapshotTaken As Boolean
+
+    oldCalc = Application.Calculation
+    oldEvents = Application.EnableEvents
+    oldScreen = Application.ScreenUpdating
+    oldAlerts = Application.DisplayAlerts
 
     On Error GoTo Failed
 
@@ -45,35 +53,47 @@ Public Sub Nebras_Repair_Daily_Locations_V36()
     firstDailyRow = dailyTbl.DataBodyRange.Row
     lastDailyRow = firstDailyRow + dailyTbl.DataBodyRange.Rows.Count - 1
 
-    ' Existing workbook design maps Daily row 4 -> helper row 2.
+    ' Existing Nebras design maps Daily row 4 -> helper row 2.
     helperFirstRow = firstDailyRow - 2
     helperLastRow = lastDailyRow - 2
 
     If helperFirstRow < 2 Then Err.Raise vbObjectError + 3605, , "Unexpected Daily Picking table position."
     If helperLastRow < helperFirstRow Then Err.Raise vbObjectError + 3606, , "Invalid helper row range."
 
-    ' Match the current Daily Picking formulas' forward-capacity range.
+    ' Find the FIRST genuinely broken helper row. Good rows before it are not touched.
+    repairFirstRow = 0
+    For r = helperFirstRow To helperLastRow
+        If HelperRowNeedsRepairV36(helperWs, r) Then
+            repairFirstRow = r
+            Exit For
+        End If
+    Next r
+
+    If repairFirstRow = 0 Then
+        MsgBox "Daily location helper is already complete. No cell was changed.", _
+               vbInformation, "Nebras Warehouse"
+        Exit Sub
+    End If
+
+    ' Current workbook Daily formulas are already sized to row 2957.
+    ' Keep that same forward-capacity boundary for repaired helper formulas.
     lastBankRow = Application.Max(2957, bankTbl.Range.Row + bankTbl.ListRows.Count + 500)
     If lastBankRow > bankWs.Rows.Count Then lastBankRow = bankWs.Rows.Count
-
-    oldCalc = Application.Calculation
-    oldEvents = Application.EnableEvents
-    oldScreen = Application.ScreenUpdating
-    oldAlerts = Application.DisplayAlerts
 
     Application.ScreenUpdating = False
     Application.EnableEvents = False
     Application.DisplayAlerts = False
     Application.Calculation = xlCalculationManual
 
-    ' Keep a rollback snapshot. Only this range is ever changed.
-    oldFormulas = helperWs.Range("H" & helperFirstRow & ":U" & helperLastRow).Formula
+    ' Rollback snapshot: ONLY the helper tail that will be repaired.
+    oldFormulas = helperWs.Range("H" & repairFirstRow & ":U" & helperLastRow).Formula
+    snapshotTaken = True
 
     posCols = Array("L", "M", "N", "O", "P", "Q", "R", "S", "T", "U")
     outCols = Array("I", "J", "K")
     bankCols = Array("H", "I", "J")
 
-    For r = helperFirstRow To helperLastRow
+    For r = repairFirstRow To helperLastRow
         helperWs.Range("H" & r).Formula = _
             "=IF('" & EscapeSheetV36(dailyWs.Name) & "'!D" & (r + 2) & "="""","""",'" & _
             EscapeSheetV36(dailyWs.Name) & "'!C" & (r + 2) & "&""|""&'" & _
@@ -93,18 +113,21 @@ Public Sub Nebras_Repair_Daily_Locations_V36()
         Next k
     Next r
 
-    ' Formula-structure validation before saving.
-    For Each c In helperWs.Range("H" & helperFirstRow & ":U" & helperLastRow).Cells
-        If Not c.HasFormula Then
-            Err.Raise vbObjectError + 3607, , "A helper formula is missing at " & c.Address(False, False) & "."
+    ' Structural validation before saving.
+    For r = repairFirstRow To helperLastRow
+        If HelperRowNeedsRepairV36(helperWs, r) Then
+            Err.Raise vbObjectError + 3607, , "Helper validation failed at row " & r & "."
         End If
+    Next r
+
+    For Each c In helperWs.Range("H" & repairFirstRow & ":U" & helperLastRow).Cells
         If InStr(1, c.Formula, "#REF!", vbTextCompare) > 0 Then
             Err.Raise vbObjectError + 3608, , "A broken reference remains at " & c.Address(False, False) & "."
         End If
     Next c
 
     Application.Calculation = oldCalc
-    helperWs.Range("H" & helperFirstRow & ":U" & helperLastRow).Calculate
+    helperWs.Range("H" & repairFirstRow & ":U" & helperLastRow).Calculate
     dailyTbl.Range.Calculate
 
     ThisWorkbook.Save
@@ -115,16 +138,15 @@ Public Sub Nebras_Repair_Daily_Locations_V36()
     Application.Calculation = oldCalc
 
     MsgBox "Daily location helper repaired safely." & vbCrLf & _
-           "Helper rows repaired: " & helperFirstRow & " to " & helperLastRow & vbCrLf & _
-           "No other worksheet data or VBA module was changed.", vbInformation, "Nebras Warehouse"
+           "Only helper rows " & repairFirstRow & " to " & helperLastRow & " in columns H:U were repaired." & vbCrLf & _
+           "No other worksheet data or VBA module was changed.", _
+           vbInformation, "Nebras Warehouse"
     Exit Sub
 
 Failed:
     On Error Resume Next
-    If Not helperWs Is Nothing Then
-        If helperLastRow >= helperFirstRow And helperFirstRow >= 2 Then
-            helperWs.Range("H" & helperFirstRow & ":U" & helperLastRow).Formula = oldFormulas
-        End If
+    If snapshotTaken Then
+        helperWs.Range("H" & repairFirstRow & ":U" & helperLastRow).Formula = oldFormulas
     End If
     Application.EnableEvents = oldEvents
     Application.ScreenUpdating = oldScreen
@@ -135,6 +157,46 @@ Failed:
     MsgBox "Daily location repair stopped and rolled back." & vbCrLf & Err.Description, _
            vbCritical, "Nebras Warehouse"
 End Sub
+
+Private Function HelperRowNeedsRepairV36(ByVal ws As Worksheet, ByVal helperRow As Long) As Boolean
+    Dim c As Range
+    Dim expectedDailyRow As Long
+    Dim hFormula As String
+
+    expectedDailyRow = helperRow + 2
+
+    Set c = ws.Range("H" & helperRow)
+    If Not c.HasFormula Then
+        HelperRowNeedsRepairV36 = True
+        Exit Function
+    End If
+
+    hFormula = CStr(c.Formula)
+
+    If InStr(1, hFormula, "#REF!", vbTextCompare) > 0 Then
+        HelperRowNeedsRepairV36 = True
+        Exit Function
+    End If
+
+    ' H row must point to its matching Daily row. This catches shifted/corrupt formulas.
+    If InStr(1, hFormula, "D" & expectedDailyRow, vbTextCompare) = 0 Or _
+       InStr(1, hFormula, "C" & expectedDailyRow, vbTextCompare) = 0 Then
+        HelperRowNeedsRepairV36 = True
+        Exit Function
+    End If
+
+    ' I:U must all contain formulas and no broken references.
+    For Each c In ws.Range("I" & helperRow & ":U" & helperRow).Cells
+        If Not c.HasFormula Then
+            HelperRowNeedsRepairV36 = True
+            Exit Function
+        End If
+        If InStr(1, CStr(c.Formula), "#REF!", vbTextCompare) > 0 Then
+            HelperRowNeedsRepairV36 = True
+            Exit Function
+        End If
+    Next c
+End Function
 
 Private Function FindTableV36(ByVal tableName As String) As ListObject
     Dim ws As Worksheet
@@ -156,14 +218,14 @@ End Function
 Private Function FindHelperSheetV36() As Worksheet
     Dim ws As Worksheet
 
-    ' The original Nebras warehouse design stores the helper block on worksheet 1.
+    ' The original Nebras warehouse design stores this helper block on worksheet 1.
     On Error Resume Next
     Set ws = ThisWorkbook.Worksheets(1)
     On Error GoTo 0
 
     If ws Is Nothing Then Exit Function
 
-    ' Safety check: H1:K1 must be the existing helper header block (four non-empty cells).
+    ' Safety gate: existing H1:K1 helper headers must all be present.
     If Len(Trim$(CStr(ws.Range("H1").Value))) = 0 Then Exit Function
     If Len(Trim$(CStr(ws.Range("I1").Value))) = 0 Then Exit Function
     If Len(Trim$(CStr(ws.Range("J1").Value))) = 0 Then Exit Function
