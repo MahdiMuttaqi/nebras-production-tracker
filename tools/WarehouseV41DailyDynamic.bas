@@ -61,12 +61,14 @@ Public Sub Nebras_Install_Daily_Dynamic_V41()
     Dim oldEvents As Boolean
     Dim oldScreen As Boolean
     Dim oldAlerts As Boolean
+    Dim oldAutomationSecurity As Long
     Dim failDescription As String
 
     oldCalc = Application.Calculation
     oldEvents = Application.EnableEvents
     oldScreen = Application.ScreenUpdating
     oldAlerts = Application.DisplayAlerts
+    oldAutomationSecurity = Application.AutomationSecurity
 
     On Error GoTo Failed
 
@@ -187,11 +189,16 @@ Public Sub Nebras_BulkDailyImport_V41()
     Application.DisplayAlerts = False
     Application.Calculation = xlCalculationManual
 
+    ' Never run macros from the selected import workbook.
+    Application.AutomationSecurity = 3
+
     Set srcWb = Workbooks.Open( _
         Filename:=pickedFile, _
         UpdateLinks:=False, _
         ReadOnly:=True, _
         AddToMru:=False)
+
+    Application.AutomationSecurity = oldAutomationSecurity
 
     Set srcWs = FindImportSheetV41(srcWb, headerRow, codeCol, qtyCol, customerCol)
 
@@ -276,6 +283,7 @@ Public Sub Nebras_BulkDailyImport_V41()
     Application.ScreenUpdating = oldScreen
     Application.DisplayAlerts = oldAlerts
     Application.Calculation = oldCalc
+    Application.AutomationSecurity = oldAutomationSecurity
 
     MsgBox CStr(imported) & " product code(s) imported successfully." & vbCrLf & _
            "Only the required Daily Picking rows were added.", _
@@ -293,6 +301,7 @@ Failed:
     Application.ScreenUpdating = oldScreen
     Application.DisplayAlerts = oldAlerts
     Application.Calculation = oldCalc
+    Application.AutomationSecurity = oldAutomationSecurity
 
     MsgBox "Bulk import stopped safely." & vbCrLf & failDescription, _
            vbCritical, "Nebras Warehouse V41"
@@ -885,12 +894,25 @@ Private Function FindImportSheetV41(ByVal wb As Workbook, _
     Dim maxCol As Long
     Dim txt As String
 
-    For Each ws In wb.Worksheets
-        maxRow = Application.Min(20, Application.Max(1, ws.UsedRange.Row + ws.UsedRange.Rows.Count - 1))
-        maxCol = Application.Min(100, Application.Max(1, ws.UsedRange.Column + ws.UsedRange.Columns.Count - 1))
+    Dim scanFirstRow As Long
+    Dim scanLastRow As Long
+    Dim scanFirstCol As Long
+    Dim scanLastCol As Long
 
-        For r = 1 To maxRow
-            For c = 1 To maxCol
+    For Each ws In wb.Worksheets
+        scanFirstRow = Application.Max(1, ws.UsedRange.Row)
+        scanLastRow = Application.Min(ws.Rows.Count, scanFirstRow + 19, _
+                                      ws.UsedRange.Row + ws.UsedRange.Rows.Count - 1)
+
+        scanFirstCol = Application.Max(1, ws.UsedRange.Column)
+        scanLastCol = Application.Min(ws.Columns.Count, scanFirstCol + 99, _
+                                      ws.UsedRange.Column + ws.UsedRange.Columns.Count - 1)
+
+        maxRow = scanLastRow
+        maxCol = scanLastCol
+
+        For r = scanFirstRow To maxRow
+            For c = scanFirstCol To maxCol
                 txt = NormalizeHeaderV41(ws.Cells(r, c).Value)
 
                 If codeCol = 0 And IsCodeHeaderV41(txt) Then
