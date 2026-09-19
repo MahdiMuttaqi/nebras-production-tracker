@@ -225,5 +225,6 @@ function applyScan(v){v=norm(v);if(!v){toast('کدی وارد نشده است.')
 document.querySelector('#closeScanner').onclick=closeScanner;document.querySelector('#useManual').onclick=()=>applyScan(document.querySelector('#manualScan').value);document.querySelector('#scanner').onclick=e=>{if(e.target.id==='scanner')closeScanner()};ensureInRow();renderInRows();
 </script>
 <script src="shared-box.js?v=20260916-2"></script>
+<script src="scanner-robust.js?v=20260919-1"></script>
 </body>
 </html>
