@@ -70,6 +70,12 @@ Public Sub Nebras_Install_Daily_Dynamic_Fix_V37()
     Dim f As String
     Dim failDescription As String
     Dim autoCol As ListColumn
+    Dim dailyOccLC As ListColumn
+    Dim dailyCodeLC As ListColumn
+    Dim bankKeyLC As ListColumn
+    Dim bankShelfLC As ListColumn
+    Dim bankRowLC As ListColumn
+    Dim bankBoxLC As ListColumn
     Dim changedIndicatorCount As Long
 
     oldCalc = Application.Calculation
@@ -111,21 +117,29 @@ Public Sub Nebras_Install_Daily_Dynamic_Fix_V37()
     helperLastRow = targetDailyLastRow - dailyOffset
     If helperLastRow < HELPER_FIRST_ROW_V37 Then Err.Raise vbObjectError + 3705, , "Invalid helper range."
 
-    dailyOccCol = FindListColumnV37(dailyTbl, "مناسبت").Range.Column
-    dailyCodeCol = FindListColumnV37(dailyTbl, "کد محصول").Range.Column
+    Set dailyOccLC = FindListColumnV37(dailyTbl, "مناسبت")
+    Set dailyCodeLC = FindListColumnV37(dailyTbl, "کد محصول")
 
-    If dailyOccCol = 0 Then Err.Raise vbObjectError + 3706, , "Daily column 'مناسبت' was not found."
-    If dailyCodeCol = 0 Then Err.Raise vbObjectError + 3707, , "Daily column 'کد محصول' was not found."
+    If dailyOccLC Is Nothing Then Err.Raise vbObjectError + 3706, , "Daily column 'مناسبت' was not found."
+    If dailyCodeLC Is Nothing Then Err.Raise vbObjectError + 3707, , "Daily column 'کد محصول' was not found."
 
-    bankKeyName = FindListColumnV37(bankTbl, "کلید لوکیشن").Name
-    bankShelfName = FindListColumnV37(bankTbl, "قفسه").Name
-    bankRowName = FindListColumnV37(bankTbl, "ردیف").Name
-    bankBoxName = FindListColumnV37(bankTbl, "جعبه").Name
+    dailyOccCol = dailyOccLC.Range.Column
+    dailyCodeCol = dailyCodeLC.Range.Column
 
-    If Len(bankKeyName) = 0 Then Err.Raise vbObjectError + 3708, , "Bank column 'کلید لوکیشن' was not found."
-    If Len(bankShelfName) = 0 Then Err.Raise vbObjectError + 3709, , "Bank column 'قفسه' was not found."
-    If Len(bankRowName) = 0 Then Err.Raise vbObjectError + 3710, , "Bank column 'ردیف' was not found."
-    If Len(bankBoxName) = 0 Then Err.Raise vbObjectError + 3711, , "Bank column 'جعبه' was not found."
+    Set bankKeyLC = FindListColumnV37(bankTbl, "کلید لوکیشن")
+    Set bankShelfLC = FindListColumnV37(bankTbl, "قفسه")
+    Set bankRowLC = FindListColumnV37(bankTbl, "ردیف")
+    Set bankBoxLC = FindListColumnV37(bankTbl, "جعبه")
+
+    If bankKeyLC Is Nothing Then Err.Raise vbObjectError + 3708, , "Bank column 'کلید لوکیشن' was not found."
+    If bankShelfLC Is Nothing Then Err.Raise vbObjectError + 3709, , "Bank column 'قفسه' was not found."
+    If bankRowLC Is Nothing Then Err.Raise vbObjectError + 3710, , "Bank column 'ردیف' was not found."
+    If bankBoxLC Is Nothing Then Err.Raise vbObjectError + 3711, , "Bank column 'جعبه' was not found."
+
+    bankKeyName = bankKeyLC.Name
+    bankShelfName = bankShelfLC.Name
+    bankRowName = bankRowLC.Name
+    bankBoxName = bankBoxLC.Name
 
     Application.ScreenUpdating = False
     Application.EnableEvents = False
