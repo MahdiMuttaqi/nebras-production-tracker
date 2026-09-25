@@ -239,6 +239,25 @@ function pickJsonp(params,timeoutMs=15000){
  });
 }
 function pickStatusClass(s){return s==='برداشت شد'?'in':(s==='ناقص'||s==='مغایرت'?'out':'move')}
+function faText(v){return String(v??'').replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[Number(d)])}
+function pickDisplayCode(v){
+ const s=String(v??'').trim();
+ const m=s.match(/^[A-Za-z]{3}\s+([A-Za-z]{3})\s+\d{2}\s+(\d{4,})\b/);
+ if(!m)return s;
+ const mon={Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'}[m[1]];
+ return mon?mon+'-'+m[2]:s;
+}
+function pickBatchFa(v){
+ const s=String(v??'').trim(),m=s.match(/^(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})(\d{2})$/);
+ if(!m)return faText(s);
+ const d=new Date(Number(m[1]),Number(m[2])-1,Number(m[3]),Number(m[4]),Number(m[5]),Number(m[6]));
+ const date=new Intl.DateTimeFormat('fa-IR-u-ca-persian-nu-latn',{year:'numeric',month:'2-digit',day:'2-digit'}).format(d);
+ return faText(date+' ساعت '+m[4]+':'+m[5]+':'+m[6]);
+}
+function pickOrderNo(v){
+ const s=String(v??''),m=s.match(/-(\d{3})$/);
+ return m?faText(String(Number(m[1]))):faText(s);
+}
 function renderPickOrders(){
  const host=document.querySelector('#pickOrders');
  if(!host)return;
@@ -246,10 +265,10 @@ function renderPickOrders(){
  host.innerHTML=pickOrders.map(o=>{
   const done=o.items?.filter(x=>x.status==='برداشت شد').length||0,total=o.items?.length||0;
   return `<div class="card" style="margin-top:12px">
-   <div class="result-head"><div><b>${html(o.customer||'بدون نام')}</b><br><small>${html(o.orderId)} · ثبت ${html(o.batch||'')}</small></div><span class="badge">${fa(done)} از ${fa(total)}</span></div>
+   <div class="result-head"><div><b>${html(o.customer||'بدون نام')}</b><br><small>شماره سفارش: ${pickOrderNo(o.orderId)} · زمان ثبت: ${html(pickBatchFa(o.batch||''))}</small></div><span class="badge">${fa(done)} از ${fa(total)}</span></div>
    <div class="grid" style="margin-top:12px"><div class="field"><label>انباردار مسئول</label><input value="${html(o.worker||'')}" onchange="setPickOrder('${html(o.orderId)}',{worker:this.value,orderStatus:'در حال برداشت'})" placeholder="نام انباردار"></div><div class="field"><label>وضعیت سفارش</label><div class="badge">${html(o.orderStatus||'در انتظار برداشت')}</div></div></div>
    <div class="result" style="margin-top:12px">${(o.items||[]).map(it=>`<div class="result-row" style="grid-template-columns:minmax(0,1.4fr) .55fr minmax(220px,auto)">
-    <span><b>${html(it.code)}</b><br><small class="location-code">${html(it.location||'بدون لوکیشن')}</small></span>
+    <span><b>کد محصول: ${html(pickDisplayCode(it.code))}</b><br><small class="location-code">مکان: ${html(it.location||'بدون مکان ثبت‌شده')}</small></span>
     <span class="qty"><small>تعداد</small>${fa(it.qty)}</span>
     <span><b class="op ${pickStatusClass(it.status)}">${html(it.status||'در انتظار')}</b><br>
       <button class="secondary" style="margin-top:6px;padding:7px 9px" onclick="setPickItem('${html(o.orderId)}','${html(it.lineId)}','برداشت شد')">برداشت شد</button>
