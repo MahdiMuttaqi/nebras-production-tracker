@@ -19,6 +19,13 @@ function pickAuthorized_(key) {
   return String(key || "") === PICK_QUEUE_KEY;
 }
 
+function pickCodeText_(value) {
+  if (value instanceof Date) {
+    return String(value.getMonth() + 1).padStart(2, "0") + "-" + String(value.getFullYear());
+  }
+  return String(value == null ? "" : value);
+}
+
 function pickSheet_() {
   const props = PropertiesService.getScriptProperties();
   let id = props.getProperty(PICK_QUEUE_FILE_PROP);
@@ -89,7 +96,13 @@ function pickQueuePut_(p) {
     "در انتظار", "", "در انتظار برداشت", "", now, now
   ]));
   sh.clearContents();
+  // Keep identifiers, product codes and locations as plain text so values such as 10-5058
+  // are never converted by Google Sheets into dates.
+  sh.getRange(1,1,keep.length,5).setNumberFormat("@");
+  sh.getRange(1,7,keep.length,5).setNumberFormat("@");
+  for (let i=1;i<keep.length;i++) keep[i][4]=pickCodeText_(keep[i][4]);
   sh.getRange(1,1,keep.length,PICK_QUEUE_HEADERS.length).setValues(keep);
+  sh.getRange(2,12,Math.max(keep.length-1,1),2).setNumberFormat("yyyy-mm-dd hh:mm:ss");
   sh.setFrozenRows(1);
   return {ok:true,orderId:String(payload.orderId),items:payload.items.length};
 }
@@ -107,7 +120,7 @@ function pickQueueList_(p) {
       items:[]
     };
     map[id].items.push({
-      lineId:String(r[3]||""),code:String(r[4]||""),qty:Number(r[5]||0),
+      lineId:String(r[3]||""),code:pickCodeText_(r[4]),qty:Number(r[5]||0),
       location:String(r[6]||""),status:String(r[7]||"در انتظار")
     });
   }
