@@ -135,35 +135,59 @@ function pickQueueSet_(p) {
   if (!orderId) throw new Error("orderId required");
   const allowedItem=new Set(["در انتظار","برداشت شد","ناقص","مغایرت"]);
   const allowedOrder=new Set(["در انتظار برداشت","در حال برداشت","آماده بسته‌بندی","تحویل بسته‌بندی"]);
-  const {sh,values}=pickRows_();
-  let changed=0;
-  for (let i=1;i<values.length;i++) {
-    if (String(values[i][0])!==orderId) continue;
-    if (p.worker !== undefined) values[i][8]=String(p.worker||"");
-    if (p.orderStatus !== undefined) {
-      const s=String(p.orderStatus||"");
-      if (!allowedOrder.has(s)) throw new Error("invalid order status");
-      values[i][9]=s;
-    }
-    if (p.note !== undefined) values[i][10]=String(p.note||"");
-    if (lineId && String(values[i][3])===lineId && p.itemStatus !== undefined) {
-      const s=String(p.itemStatus||"");
-      if (!allowedItem.has(s)) throw new Error("invalid item status");
-      values[i][7]=s;
-    }
-    values[i][12]=new Date();
-    changed++;
-  }
-  if (!changed) throw new Error("order not found");
+  const sh=pickSheet_();
+  const lastRow=sh.getLastRow();
+  if (lastRow < 2) throw new Error("order not found");
 
-  // Preserve identifier/code/location columns as text. This prevents a code such as
-  // 10-5058 from being reinterpreted as a calendar date on any status update.
-  sh.getRange(1,1,values.length,5).setNumberFormat("@");
-  sh.getRange(1,7,values.length,5).setNumberFormat("@");
-  for (let i=1;i<values.length;i++) values[i][4]=pickCodeText_(values[i][4]);
-  sh.getRange(1,1,values.length,PICK_QUEUE_HEADERS.length).setValues(values);
-  if (values.length > 1) sh.getRange(2,12,values.length-1,2).setNumberFormat("yyyy-mm-dd hh:mm:ss");
-  return {ok:true,changed};
+  // Read once, but write only the cells that actually changed.
+  // This avoids rewriting the whole queue on every mobile tap.
+  const values=sh.getRange(2,1,lastRow-1,PICK_QUEUE_HEADERS.length).getValues();
+  const matches=[];
+  let lineFound=!lineId;
+
+  for (let i=0;i<values.length;i++) {
+    const r=values[i];
+    if (String(r[0]||"")!==orderId) continue;
+    const row=i+2;
+    matches.push(row);
+    if (lineId && String(r[3]||"")===lineId) lineFound=true;
+  }
+  if (!matches.length) throw new Error("order not found");
+  if (!lineFound) throw new Error("item not found");
+
+  if (p.worker !== undefined) {
+    const v=String(p.worker||"");
+    matches.forEach(row=>sh.getRange(row,9).setValue(v));
+  }
+  if (p.orderStatus !== undefined) {
+    const v=String(p.orderStatus||"");
+    if (!allowedOrder.has(v)) throw new Error("invalid order status");
+    matches.forEach(row=>sh.getRange(row,10).setValue(v));
+  }
+  if (p.note !== undefined) {
+    const v=String(p.note||"");
+    matches.forEach(row=>sh.getRange(row,11).setValue(v));
+  }
+  if (lineId && p.itemStatus !== undefined) {
+    const v=String(p.itemStatus||"");
+    if (!allowedItem.has(v)) throw new Error("invalid item status");
+    for (let i=0;i<values.length;i++) {
+      const r=values[i];
+      if (String(r[0]||"")===orderId && String(r[3]||"")===lineId) {
+        sh.getRange(i+2,8).setValue(v);
+        sh.getRange(i+2,13).setValue(new Date());
+        break;
+      }
+    }
+  }
+
+  // Update timestamps for order-wide changes only when needed.
+  if (p.worker !== undefined || p.orderStatus !== undefined || p.note !== undefined) {
+    const now=new Date();
+    matches.forEach(row=>sh.getRange(row,13).setValue(now));
+  }
+
+  return {ok:true,changed:matches.length};
 }
 
 // Standalone Web App entry points for the independent V13 pick queue.
