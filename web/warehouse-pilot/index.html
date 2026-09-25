@@ -44,7 +44,7 @@
           <div><h2 style="margin-bottom:4px">لیست برداشت سفارش‌ها</h2><p class="section-note" style="margin:0">این بخش فقط چک‌لیست جمع‌آوری سفارش‌های نهایی‌شدهٔ اکسل است و موجودی را تغییر نمی‌دهد.</p></div>
           <button class="secondary refresh-btn" id="refreshPickOrders">↻ دریافت سفارش‌ها</button>
         </div>
-        <div id="pickQueueState" class="notice" style="margin-top:12px">برای دریافت سفارش‌های ارسالی از اکسل، روی «دریافت سفارش‌ها» بزنید.</div>
+        <div id="pickQueueState" class="notice" style="margin-top:12px">برای دریافت سفارش‌های ارسالی از اکسل، روی «دریافت سفارش‌ها» بزنید.</div><p class="section-note" style="margin:8px 2px 0">برداشت شد: کامل پیدا و جمع شد · ناقص: تعداد کامل پیدا نشد · مغایرت: کد، تعداد یا مکان با واقعیت یکی نیست. سفارش ناقص یا دارای مغایرت تا رفع مشکل آماده بسته‌بندی نمی‌شود.</p>
         <div id="pickOrders"></div>
       </div>
     </section>
@@ -311,19 +311,61 @@ async function refreshPickOrders(){
   toast(e.message==='pick timeout'?'صف سفارش تا ۱۵ ثانیه پاسخ نداد.':(e.message||'خطا در دریافت سفارش‌ها'));
  }finally{if(btn){btn.disabled=false;btn.textContent='↻ دریافت سفارش‌ها'}}
 }
+const pickActionBusy=new Set();
+function pickFindOrder(orderId){return pickOrders.find(o=>String(o.orderId)===String(orderId))}
+function pickFindItem(order,lineId){return (order?.items||[]).find(x=>String(x.lineId)===String(lineId))}
+function pickBusyKey(orderId,lineId){return String(orderId)+'|'+String(lineId||'ORDER')}
+
 async function setPickItem(orderId,lineId,itemStatus){
+ const key=pickBusyKey(orderId,lineId);
+ if(pickActionBusy.has(key))return;
+ const order=pickFindOrder(orderId),item=pickFindItem(order,lineId);
+ if(!order||!item)return toast('این ردیف سفارش پیدا نشد.');
+ const oldStatus=item.status;
+ item.status=itemStatus;
+ pickActionBusy.add(key);
+ renderPickOrders();
  try{
-  const r=await pickJsonp({action:'pickQueueSet',orderId,lineId,itemStatus});
+  const r=await pickJsonp({action:'pickQueueSet',orderId,lineId,itemStatus},8000);
   if(!r?.ok)throw Error(r?.error||'ثبت وضعیت انجام نشد.');
-  await refreshPickOrders();toast('وضعیت آیتم ثبت شد؛ موجودی تغییر نکرد.');
- }catch(e){toast(e.message||'ثبت وضعیت انجام نشد.')}
+  toast(itemStatus==='برداشت شد'?'برداشت این ردیف ثبت شد.':itemStatus==='ناقص'?'این ردیف به‌عنوان ناقص ثبت شد.':'مغایرت این ردیف ثبت شد.');
+ }catch(e){
+  item.status=oldStatus;
+  renderPickOrders();
+  toast(e.message==='pick timeout'?'پاسخ سرور دیر رسید؛ دوباره تلاش کنید.':(e.message||'ثبت وضعیت انجام نشد.'));
+ }finally{pickActionBusy.delete(key)}
 }
 async function setPickOrder(orderId,changes){
+ const key=pickBusyKey(orderId,'ORDER');
+ if(pickActionBusy.has(key))return;
+ const order=pickFindOrder(orderId);
+ if(!order)return toast('این سفارش پیدا نشد.');
+
+ if(changes.orderStatus==='آماده بسته‌بندی'){
+  const unresolved=(order.items||[]).filter(x=>x.status!=='برداشت شد');
+  if(unresolved.length)return toast('برای آماده بسته‌بندی، همه ردیف‌ها باید «برداشت شد» باشند.');
+ }
+ if(changes.orderStatus==='تحویل بسته‌بندی' && order.orderStatus!=='آماده بسته‌بندی'){
+  return toast('ابتدا سفارش را «آماده بسته‌بندی» کنید.');
+ }
+
+ const old={worker:order.worker,orderStatus:order.orderStatus,note:order.note};
+ Object.assign(order,changes);
+ pickActionBusy.add(key);
+ renderPickOrders();
  try{
-  const r=await pickJsonp({action:'pickQueueSet',orderId,...changes});
+  const r=await pickJsonp({action:'pickQueueSet',orderId,...changes},8000);
   if(!r?.ok)throw Error(r?.error||'ثبت سفارش انجام نشد.');
-  await refreshPickOrders();toast('وضعیت سفارش ثبت شد؛ موجودی تغییر نکرد.');
- }catch(e){toast(e.message||'ثبت سفارش انجام نشد.')}
+  toast(changes.orderStatus==='آماده بسته‌بندی'?'سفارش آماده بسته‌بندی شد.':changes.orderStatus==='تحویل بسته‌بندی'?'سفارش تحویل بسته‌بندی شد.':'اطلاعات سفارش ثبت شد.');
+  if(changes.orderStatus==='تحویل بسته‌بندی'){
+   pickOrders=pickOrders.filter(o=>String(o.orderId)!==String(orderId));
+   renderPickOrders();
+  }
+ }catch(e){
+  Object.assign(order,old);
+  renderPickOrders();
+  toast(e.message==='pick timeout'?'پاسخ سرور دیر رسید؛ دوباره تلاش کنید.':(e.message||'ثبت سفارش انجام نشد.'));
+ }finally{pickActionBusy.delete(key)}
 }
 window.setPickItem=setPickItem;window.setPickOrder=setPickOrder;
 document.querySelector('#refreshPickOrders').onclick=refreshPickOrders;
