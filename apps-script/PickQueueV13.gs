@@ -59,7 +59,7 @@ function pickDoGet(e) {
     if (!pickAuthorized_(p.key)) return pickOut_({ok:false,error:"unauthorized"}, cb);
     if (p.action === "pickQueueList") return pickOut_(pickQueueList_(p), cb);
     if (p.action === "pickQueueSet") return pickOut_(pickQueueSet_(p), cb);
-    return pickOut_({ok:true,name:"سامانه پیگیری تولید نبراس",service:"pick-queue-v13"}, cb);
+    return pickOut_({ok:true,name:"صف برداشت سفارش‌های نبراس",service:"pick-queue-v13"}, cb);
   } catch (err) {
     return pickOut_({ok:false,error:String(err && err.message || err)}, e && e.parameter && e.parameter.callback);
   }
@@ -155,7 +155,14 @@ function pickQueueSet_(p) {
     changed++;
   }
   if (!changed) throw new Error("order not found");
+
+  // Preserve identifier/code/location columns as text. This prevents a code such as
+  // 10-5058 from being reinterpreted as a calendar date on any status update.
+  sh.getRange(1,1,values.length,5).setNumberFormat("@");
+  sh.getRange(1,7,values.length,5).setNumberFormat("@");
+  for (let i=1;i<values.length;i++) values[i][4]=pickCodeText_(values[i][4]);
   sh.getRange(1,1,values.length,PICK_QUEUE_HEADERS.length).setValues(values);
+  if (values.length > 1) sh.getRange(2,12,values.length-1,2).setNumberFormat("yyyy-mm-dd hh:mm:ss");
   return {ok:true,changed};
 }
 
