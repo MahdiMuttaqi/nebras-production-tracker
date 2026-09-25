@@ -146,12 +146,8 @@ function pickQueueSet_(p) {
   return {ok:true,changed};
 }
 
-/*
-  Integration:
-  In the standalone Apps Script project, route your existing doGet/doPost to these helpers:
+// Standalone Web App entry points for the independent V13 pick queue.
+function doGet(e) { return pickDoGet(e); }
+function doPost(e) { return pickDoPost(e); }
 
-  function doGet(e){ return pickDoGet(e); }
-  function doPost(e){ return pickDoPost(e); }
-
-  This queue is independent. It never reads or writes InventoryBankTable.
-*/
+// This queue is independent. It never reads or writes InventoryBankTable.
