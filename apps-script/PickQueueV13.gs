@@ -1,6 +1,6 @@
 const PICK_QUEUE_KEY = "565bcdf6f75dbfa57dc467be8fd02910ea1c2cdc90592903";
 const PICK_QUEUE_FILE_PROP = "NEBRAS_PICK_QUEUE_SHEET_ID";
-const PICK_QUEUE_SHEET = "PickQueue";
+const PICK_QUEUE_SHEET = "PickQueueV2";
 const PICK_QUEUE_HEADERS = [
   "OrderId","Batch","Customer","LineId","Code","Qty","Location",
   "ItemStatus","Worker","OrderStatus","Note","CreatedAt","UpdatedAt"
@@ -37,19 +37,18 @@ function pickSheet_() {
     ss = SpreadsheetApp.create("Nebras Pick Queue Data");
     props.setProperty(PICK_QUEUE_FILE_PROP, ss.getId());
   }
+
   let sh = ss.getSheetByName(PICK_QUEUE_SHEET);
   if (!sh) sh = ss.insertSheet(PICK_QUEUE_SHEET);
-  if (sh.getLastRow() === 0) {
+
+  const first = sh.getRange(1,1,1,PICK_QUEUE_HEADERS.length).getValues()[0];
+  const validHeader = PICK_QUEUE_HEADERS.every((h,i)=>String(first[i]||"")===h);
+  if (!validHeader) {
+    sh.clearContents();
     sh.getRange(1,1,1,PICK_QUEUE_HEADERS.length).setValues([PICK_QUEUE_HEADERS]);
     sh.setFrozenRows(1);
   }
   return sh;
-}
-
-function pickRows_() {
-  const sh = pickSheet_();
-  const values = sh.getDataRange().getValues();
-  return {sh, values};
 }
 
 function pickDoGet(e) {
@@ -59,7 +58,7 @@ function pickDoGet(e) {
     if (!pickAuthorized_(p.key)) return pickOut_({ok:false,error:"unauthorized"}, cb);
     if (p.action === "pickQueueList") return pickOut_(pickQueueList_(p), cb);
     if (p.action === "pickQueueSet") return pickOut_(pickQueueSet_(p), cb);
-    return pickOut_({ok:true,name:"صف برداشت سفارش‌های نبراس",service:"pick-queue-v13"}, cb);
+    return pickOut_({ok:true,name:"صف برداشت سفارش‌های نبراس",service:"pick-queue-v13-v2"}, cb);
   } catch (err) {
     return pickOut_({ok:false,error:String(err && err.message || err)}, e && e.parameter && e.parameter.callback);
   }
@@ -70,11 +69,11 @@ function pickDoPost(e) {
     const type = String((e && e.postData && e.postData.type) || "");
     let p = (e && e.parameter) || {};
     if (type.indexOf("application/json") >= 0) {
-      const q = JSON.parse(e.postData.contents || "{}");
-      p = Object.assign({}, p, q);
+      p = Object.assign({}, p, JSON.parse(e.postData.contents || "{}"));
     }
     if (!pickAuthorized_(p.key)) return pickOut_({ok:false,error:"unauthorized"});
     if (p.action === "pickQueuePut") return pickOut_(pickQueuePut_(p));
+    if (p.action === "pickQueuePutMany") return pickOut_(pickQueuePutMany_(p));
     if (p.action === "pickQueueSet") return pickOut_(pickQueueSet_(p));
     return pickOut_({ok:false,error:"invalid action"});
   } catch (err) {
@@ -84,27 +83,59 @@ function pickDoPost(e) {
 
 function pickQueuePut_(p) {
   const payload = typeof p.payload === "string" ? JSON.parse(p.payload) : p.payload;
-  if (!payload || !payload.orderId || !Array.isArray(payload.items)) throw new Error("invalid payload");
+  return pickQueuePutOrders_([payload]);
+}
+
+function pickQueuePutMany_(p) {
+  const payload = typeof p.payload === "string" ? JSON.parse(p.payload) : p.payload;
+  if (!payload || !Array.isArray(payload.orders)) throw new Error("invalid payload");
+  return pickQueuePutOrders_(payload.orders);
+}
+
+function pickQueuePutOrders_(orders) {
+  const cleanOrders = orders.filter(o=>o && o.orderId && Array.isArray(o.items));
+  if (!cleanOrders.length) throw new Error("no orders");
+
   const sh = pickSheet_();
   const data = sh.getDataRange().getValues();
+  const replacing = new Set(cleanOrders.map(o=>String(o.orderId)));
   const keep = [PICK_QUEUE_HEADERS];
-  for (let i=1;i<data.length;i++) if (String(data[i][0]) !== String(payload.orderId)) keep.push(data[i]);
+
+  for (let i=1;i<data.length;i++) {
+    if (!replacing.has(String(data[i][0]||""))) keep.push(data[i]);
+  }
+
   const now = new Date();
-  payload.items.forEach(it => keep.push([
-    String(payload.orderId), String(payload.batch || ""), String(payload.customer || ""),
-    String(it.lineId || ""), String(it.code || ""), Number(it.qty || 0), String(it.location || ""),
-    "در انتظار", "", "در انتظار برداشت", "", now, now
-  ]));
+  let itemCount = 0;
+  cleanOrders.forEach(order=>{
+    order.items.forEach(it=>{
+      itemCount++;
+      keep.push([
+        String(order.orderId),
+        String(order.batch || ""),
+        String(order.customer || ""),
+        String(it.lineId || ""),
+        pickCodeText_(it.code),
+        Number(it.qty || 0),
+        String(it.location || ""),
+        "در انتظار",
+        "",
+        "در انتظار برداشت",
+        "",
+        now,
+        now
+      ]);
+    });
+  });
+
+  // IMPORTANT: no setNumberFormat calls here.
+  // Google Sheets "typed columns" reject programmatic number-format changes.
+  // We write plain values only, so the queue works whether or not another sheet uses tables.
   sh.clearContents();
-  // Keep identifiers, product codes and locations as plain text so values such as 10-5058
-  // are never converted by Google Sheets into dates.
-  sh.getRange(1,1,keep.length,5).setNumberFormat("@");
-  sh.getRange(1,7,keep.length,5).setNumberFormat("@");
-  for (let i=1;i<keep.length;i++) keep[i][4]=pickCodeText_(keep[i][4]);
   sh.getRange(1,1,keep.length,PICK_QUEUE_HEADERS.length).setValues(keep);
-  sh.getRange(2,12,Math.max(keep.length-1,1),2).setNumberFormat("yyyy-mm-dd hh:mm:ss");
   sh.setFrozenRows(1);
-  return {ok:true,orderId:String(payload.orderId),items:payload.items.length};
+
+  return {ok:true,orders:cleanOrders.length,items:itemCount};
 }
 
 function pickQueueList_(p) {
@@ -133,14 +164,13 @@ function pickQueueList_(p) {
 function pickQueueSet_(p) {
   const orderId=String(p.orderId||""), lineId=String(p.lineId||"");
   if (!orderId) throw new Error("orderId required");
+
   const allowedItem=new Set(["در انتظار","برداشت شد","ناقص","مغایرت"]);
   const allowedOrder=new Set(["در انتظار برداشت","در حال برداشت","آماده بسته‌بندی","تحویل بسته‌بندی"]);
   const sh=pickSheet_();
   const lastRow=sh.getLastRow();
   if (lastRow < 2) throw new Error("order not found");
 
-  // Read once, but write only the cells that actually changed.
-  // This avoids rewriting the whole queue on every mobile tap.
   const values=sh.getRange(2,1,lastRow-1,PICK_QUEUE_HEADERS.length).getValues();
   const matches=[];
   let lineFound=!lineId;
@@ -148,12 +178,13 @@ function pickQueueSet_(p) {
   for (let i=0;i<values.length;i++) {
     const r=values[i];
     if (String(r[0]||"")!==orderId) continue;
-    const row=i+2;
-    matches.push(row);
+    matches.push(i+2);
     if (lineId && String(r[3]||"")===lineId) lineFound=true;
   }
   if (!matches.length) throw new Error("order not found");
   if (!lineFound) throw new Error("item not found");
+
+  const now=new Date();
 
   if (p.worker !== undefined) {
     const v=String(p.worker||"");
@@ -175,23 +206,19 @@ function pickQueueSet_(p) {
       const r=values[i];
       if (String(r[0]||"")===orderId && String(r[3]||"")===lineId) {
         sh.getRange(i+2,8).setValue(v);
-        sh.getRange(i+2,13).setValue(new Date());
+        sh.getRange(i+2,13).setValue(now);
         break;
       }
     }
   }
-
-  // Update timestamps for order-wide changes only when needed.
   if (p.worker !== undefined || p.orderStatus !== undefined || p.note !== undefined) {
-    const now=new Date();
     matches.forEach(row=>sh.getRange(row,13).setValue(now));
   }
 
   return {ok:true,changed:matches.length};
 }
 
-// Standalone Web App entry points for the independent V13 pick queue.
 function doGet(e) { return pickDoGet(e); }
 function doPost(e) { return pickDoPost(e); }
 
-// This queue is independent. It never reads or writes InventoryBankTable.
+// Independent queue only. Never reads or writes InventoryBankTable.
