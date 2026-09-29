@@ -182,3 +182,6 @@
     toast(wasShared ? `خروج ${fa(q)} عدد از موجودی مشترک ثبت شد.` : `خروج ${fa(q)} عدد ثبت شد.`);
   });
 })();
+
+/* محافظ مستقل همگام‌سازی و لوکیشن صفرموجودی */
+(()=>{const s=document.createElement('script');s.src='sync-guard.js?v=20260929-1';document.head.appendChild(s)})();
