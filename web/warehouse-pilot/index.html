@@ -146,18 +146,37 @@ const faTensWords={بیست:20,بيست:20,سی:30,سي:30,چهل:40,پنجاه:
 const faHundredsWords={صد:100,یکصد:100,يكصد:100,دویست:200,دويست:200,سیصد:300,سيصد:300,چهارصد:400,پانصد:500,پنجصد:500,پونصد:500,ششصد:600,هفتصد:700,هشتصد:800,نهصد:900};
 const spokenLetters={'اِم':'M','ام':'M','اِف':'F','اف':'F','بی':'B','بى':'B','بِي':'B','اس':'S','اِس':'S','جی':'G','جى':'G','ان':'N','اِن':'N','آر':'R','ار':'R','ال':'L','اِل':'L','تی':'T','تى':'T','دی':'D','دى':'D','سی':'C','سى':'C','اچ':'H','اِچ':'H','کی':'K','کِی':'K','پی':'P','پى':'P','وی':'V','وى':'V','ای':'A','اِی':'A','زد':'Z','زِد':'Z'};
 function asciiDigits(s){return String(s??'').replace(/[۰-۹٠-٩]/g,ch=>faDigitMap[ch]||ch)}
-function faTextNorm(s){return asciiDigits(String(s??'')).replace(/[\u064B-\u065F\u0670]/g,'').replace(/ي/g,'ی').replace(/ك/g,'ک').replace(/[‌ـ]/g,' ').replace(/[،,؛;:.!?؟()\[\]{}]/g,' ').replace(/\s+/g,' ').trim()}
+function faTextNorm(s){return asciiDigits(String(s??'')).replace(/[\u064B-\u065F\u0670]/g,'').replace(/ي/g,'ی').replace(/ك/g,'ک').replace(/[‌ـ]/g,' ').replace(/[،,؛;:.!?؟()\[\]{}]/g,' ').replace(/\s+/g,' ').trim().replace(/\bپونصد\b/g,'پانصد').replace(/\bپنجصد\b/g,'پانصد').replace(/\bشیش\b/g,'شش').replace(/\bچار\b/g,'چهار')}
 function canonicalCode(s){return asciiDigits(String(s??'')).toUpperCase().replace(/[^0-9A-Z]/g,'')}
 function productAliases(p){const raw=[p?.code,p?.altCode,p?.code2,p?.alias,p?.aliases].filter(Boolean).join('/');const bits=raw.split(/[\/|،,؛;\s]+/).map(x=>x.trim()).filter(Boolean);const codeLike=raw.match(/[0-9۰-۹A-Za-z]+(?:[-_][0-9۰-۹A-Za-z]+)+|[0-9۰-۹]+[A-Za-z][0-9A-Za-z۰-۹-]*/g)||[];return [...new Set([p?.code,...bits,...codeLike].filter(Boolean))]}
 function intToFaWords(n){n=Math.max(0,Math.floor(Number(n)||0));const u=['صفر','یک','دو','سه','چهار','پنج','شش','هفت','هشت','نه'],te=['ده','یازده','دوازده','سیزده','چهارده','پانزده','شانزده','هفده','هجده','نوزده'],tw=['','','بیست','سی','چهل','پنجاه','شصت','هفتاد','هشتاد','نود'],hu=['','صد','دویست','سیصد','چهارصد','پانصد','ششصد','هفتصد','هشتصد','نهصد'];if(n<10)return u[n];if(n<20)return te[n-10];if(n<100)return tw[Math.floor(n/10)]+(n%10?' و '+u[n%10]:'');if(n<1000)return hu[Math.floor(n/100)]+(n%100?' و '+intToFaWords(n%100):'');if(n<1000000){const a=Math.floor(n/1000),b=n%1000;return intToFaWords(a)+' هزار'+(b?' و '+intToFaWords(b):'')}return String(n)}
 function digitWords(s){return asciiDigits(String(s)).split('').map(d=>['صفر','یک','دو','سه','چهار','پنج','شش','هفت','هشت','نه'][Number(d)]||d).join(' ')}
+function spokenNumericSegmentVariants(seg){
+ const raw=asciiDigits(String(seg||''));const out=new Set();if(!/^\d+$/.test(raw))return[];
+ out.add(faTextNorm(intToFaWords(Number(raw))));out.add(faTextNorm(digitWords(raw)));
+ // روش واقعی انبار: 5024 => «پنجاه بیست و چهار»، 3041 => «سی چهل و یک».
+ if(raw.length>=4){
+   const firstLen=raw.length%2||2,parts=[];let i=0;
+   if(firstLen!==2){parts.push(raw.slice(0,firstLen));i=firstLen}
+   for(;i<raw.length;i+=2)parts.push(raw.slice(i,i+2));
+   if(parts.length>1)out.add(faTextNorm(parts.map(x=>intToFaWords(Number(x))).join(' ')));
+ }
+ // سه رقمی‌ها معمولاً کامل خوانده می‌شوند؛ شکل رقم‌به‌رقم هم پذیرفته است.
+ return [...out].filter(Boolean)
+}
 function codeSpokenVariants(code){
- const raw=asciiDigits(String(code||'')).toUpperCase(),parts=raw.match(/\d+|[A-Z]+/g)||[];
- const vars=new Set([faTextNorm(raw),faTextNorm(raw.replace(/[-_/]/g,' '))]);
+ const raw=asciiDigits(String(code||'')).toUpperCase();const vars=new Set([faTextNorm(raw),faTextNorm(raw.replace(/[-_/]/g,' '))]);
  const primaryLetters={M:'ام',F:'اف',B:'بی',S:'اس',G:'جی',N:'ان',R:'آر',L:'ال',T:'تی',D:'دی',C:'سی',H:'اچ',K:'کی',P:'پی',V:'وی',A:'ای',Z:'زد'};
+ const explicit=raw.split(/[-_/]+/).filter(Boolean);
+ if(explicit.length>1){
+   let phrases=[''];
+   for(const part of explicit){const pv=/^\d+$/.test(part)?spokenNumericSegmentVariants(part):[part.split('').map(c=>primaryLetters[c]||c).join(' ')];const next=[];for(const a of phrases)for(const b of pv){next.push((a+' '+b).trim());if(next.length>=80)break}phrases=next}
+   for(const p of phrases)vars.add(faTextNorm(p));
+ }
+ const parts=raw.match(/\d+|[A-Z]+/g)||[];
  if(parts.length){
-  const groups=parts.map(x=>{if(/^\d+$/.test(x)){const a=intToFaWords(Number(x)),b=digitWords(x);return a===b?[a]:[a,b]}return[x.split('').map(c=>primaryLetters[c]||c).join(' ')]});
-  let phrases=[''];for(const g of groups){const next=[];for(const a of phrases)for(const b of g){next.push((a+' '+b).trim());if(next.length>=32)break}phrases=next}
+  const groups=parts.map(x=>/^\d+$/.test(x)?spokenNumericSegmentVariants(x):[x.split('').map(c=>primaryLetters[c]||c).join(' ')]);
+  let phrases=[''];for(const g of groups){const next=[];for(const a of phrases)for(const b of g){next.push((a+' '+b).trim());if(next.length>=80)break}phrases=next}
   for(const phrase of phrases)vars.add(faTextNorm(phrase));
  }
  return [...vars].filter(Boolean)
@@ -242,41 +261,35 @@ function inferUnknownSpokenCode(text){
  if(!clean)return'';
  const filler=new Set(['کد','محصول','شماره','لطفا','لطفاً','بزن','بگرد','پیدا','کن','جستجو','جست','جو']);
  const words=clean.split(' ').filter(Boolean).filter(w=>!filler.has(w));
- // Letter codes: «ده ام صد و بیست و سه» => 10M123
+ // حرف انگلیسی: «ده ام صد و بیست و سه» => 10M123
  for(let i=0;i<words.length;i++){
   if(!isSpokenLetterToken(words[i]))continue;
-  const left=words.slice(0,i),right=words.slice(i+1);
-  const a=parseFaNumberTokens(left),b=parseFaNumberTokens(right);
-  if(a!==null&&b!==null&&a>=1&&a<=99&&b>=0&&b<=99999)return String(a)+spokenLetterValue(words[i])+String(b);
+  const left=words.slice(0,i),right=words.slice(i+1),ls=numericSpeechCandidates(left),rs=numericSpeechCandidates(right);let best='';let score=-1e9;
+  for(const a of ls)for(const b of rs){if(!/^\d+$/.test(a)||!/^\d+$/.test(b))continue;const av=Number(a);if(av<1||av>99||b.length>5)continue;let sc=(a.length===2?8:3)+(b.length>=3&&b.length<=4?8:b.length===2?4:1);if(sc>score){score=sc;best=String(av)+spokenLetterValue(words[i])+b}}
+  if(best)return best;
  }
- // Explicit separator, if recognition preserved one.
  const bar=words.indexOf('|');
- if(bar>0&&bar<words.length-1){const a=parseFaNumberTokens(words.slice(0,bar)),b=parseFaNumberTokens(words.slice(bar+1));if(a!==null&&b!==null&&a>=1&&a<=99&&b>=0&&b<=99999)return `${a}-${b}`}
- // Normal warehouse style: first spoken number is the left side; the rest is the right side.
- // Try every valid split and prefer a 2-digit left side and 2-4 digit right side.
+ if(bar>0&&bar<words.length-1){const ls=numericSpeechCandidates(words.slice(0,bar)),rs=numericSpeechCandidates(words.slice(bar+1));for(const a of ls)for(const b of rs)if(/^\d{1,2}$/.test(a)&&/^\d{1,5}$/.test(b))return `${Number(a)}-${b}`}
+ // کدهای خط‌تیره: تمام محل‌های ممکن مکث را امتحان می‌کنیم.
  const candidates=[];
  for(let cut=1;cut<words.length;cut++){
-  const left=words.slice(0,cut),right=words.slice(cut);
-  if(left[0]==='و'||left[left.length-1]==='و'||right[0]==='و'||right[right.length-1]==='و')continue;
-  const a=parseFaNumberTokens(left),b=parseFaNumberTokens(right);if(a===null||b===null||a<1||a>99||b<0||b>99999)continue;
-  const blen=String(b).length,alen=String(a).length;
-  let score=0;if(alen===2)score+=5;else score+=1;if(blen>=2&&blen<=4)score+=5;else if(blen===1||blen===5)score+=1;
-  // Prefer a compact left phrase and a substantial right phrase.
-  score-=Math.max(0,left.filter(x=>x!=='و').length-3)*0.3;
-  candidates.push({code:`${a}-${b}`,score,cut});
+  const left=words.slice(0,cut),right=words.slice(cut);if(left[0]==='و'||left.at(-1)==='و'||right[0]==='و'||right.at(-1)==='و')continue;
+  const ls=numericSpeechCandidates(left),rs=numericSpeechCandidates(right);
+  for(const a0 of ls)for(const b0 of rs){if(!/^\d+$/.test(a0)||!/^\d+$/.test(b0))continue;const a=String(Number(a0)),b=b0;if(Number(a)<1||Number(a)>99||b.length>5)continue;let score=0;score+=a.length===2?12:4;score+=b.length===4?12:b.length===3?10:b.length===2?5:b.length===5?2:0;score-=Math.max(0,left.filter(x=>x!=='و').length-3);if(b.length===1)score-=4;candidates.push({code:`${a}-${b}`,score})}
  }
- candidates.sort((x,y)=>y.score-x.score||x.cut-y.cut);
- return candidates[0]?.code||'';
+ candidates.sort((x,y)=>y.score-x.score);return candidates[0]?.code||''
 }
+function speechSkeleton(s){return faTextNorm(s).split(' ').filter(x=>x&&x!=='و').join(' ')}
 function resolveSpokenProduct(transcript){
- const cmd=parseVoiceCommandText(transcript),heard=faTextNorm(cmd.codeText),compact=spokenToCompactCandidates(cmd.codeText);let exact=[];
- for(const p of db?.products||[]){for(const a of productAliases(p)){const c=canonicalCode(a);if(compact.includes(c)||codeSpokenVariants(a).includes(heard)){exact.push({p,a,score:0});break}}}
- if(exact.length===1)return {product:exact[0].p,alias:exact[0].a,confidence:'exact',qty:cmd.qty,action:cmd.action};
- if(exact.length>1)return {ambiguous:exact.map(x=>x.p),qty:cmd.qty,action:cmd.action};
- let best=[];for(const p of db?.products||[]){let ps=99,pa=p.code;for(const a of productAliases(p)){const c=canonicalCode(a);for(const h of compact){if(!h||Math.abs(c.length-h.length)>2)continue;const d=levenshtein(c,h),ratio=d/Math.max(c.length,h.length);if(ratio<ps){ps=ratio;pa=a}}for(const v of codeSpokenVariants(a)){const d=levenshtein(v.replace(/\s/g,''),heard.replace(/\s/g,'')),ratio=d/Math.max(v.length,heard.length,1);if(ratio<ps){ps=ratio;pa=a}}}best.push({p,alias:pa,score:ps})}
- best.sort((a,b)=>a.score-b.score);if(best[0]&&best[0].score<=0.16&&(!best[1]||best[1].score-best[0].score>=0.08))return {product:best[0].p,alias:best[0].alias,confidence:'fuzzy',qty:cmd.qty,action:cmd.action};
- const inferredCode=inferUnknownSpokenCode(cmd.codeText);
- return {notFound:true,inferredCode,candidates:best.slice(0,3).filter(x=>x.score<=0.30),qty:cmd.qty,action:cmd.action}
+ const cmd=parseVoiceCommandText(transcript),heard=faTextNorm(cmd.codeText),heardSk=speechSkeleton(cmd.codeText),compact=spokenToCompactCandidates(cmd.codeText);let exact=[];
+ const compactSet=new Set(compact.map(canonicalCode));
+ for(const p of db?.products||[]){for(const a of productAliases(p)){const c=canonicalCode(a),variants=codeSpokenVariants(a);if(compactSet.has(c)||variants.some(v=>v===heard||speechSkeleton(v)===heardSk)){exact.push({p,a,score:0});break}}}
+ const uniqueExact=[];const seen=new Set();for(const x of exact){const k=canonicalCode(x.p.code);if(!seen.has(k)){seen.add(k);uniqueExact.push(x)}}
+ if(uniqueExact.length===1)return {product:uniqueExact[0].p,alias:uniqueExact[0].a,confidence:'exact',qty:cmd.qty,action:cmd.action};
+ if(uniqueExact.length>1)return {ambiguous:uniqueExact.map(x=>x.p),qty:cmd.qty,action:cmd.action};
+ let best=[];for(const p of db?.products||[]){let ps=99,pa=p.code;for(const a of productAliases(p)){const c=canonicalCode(a);for(const h of compactSet){if(!h||Math.abs(c.length-h.length)>2)continue;const d=levenshtein(c,h),ratio=d/Math.max(c.length,h.length);if(ratio<ps){ps=ratio;pa=a}}for(const v of codeSpokenVariants(a)){const vs=speechSkeleton(v).replace(/\s/g,''),hs=heardSk.replace(/\s/g,'');const d=levenshtein(vs,hs),ratio=d/Math.max(vs.length,hs.length,1);if(ratio<ps){ps=ratio;pa=a}}}best.push({p,alias:pa,score:ps})}
+ best.sort((a,b)=>a.score-b.score);if(best[0]&&best[0].score<=0.12&&(!best[1]||best[1].score-best[0].score>=0.06))return {product:best[0].p,alias:best[0].alias,confidence:'fuzzy',qty:cmd.qty,action:cmd.action};
+ const inferredCode=inferUnknownSpokenCode(cmd.codeText);return {notFound:true,inferredCode,candidates:best.slice(0,3).filter(x=>x.score<=0.22),qty:cmd.qty,action:cmd.action}
 }
 function productStockRows(code){const aliases=new Set(productAliases({code}).map(canonicalCode));return (db?.stock||[]).filter(x=>aliases.has(canonicalCode(x.p))||canonicalCode(x.p)===canonicalCode(code)).sort((a,b)=>Number(b.q||0)-Number(a.q||0))}
 function matchingPickItems(code){const p=(db?.products||[]).find(x=>canonicalCode(x.code)===canonicalCode(code)||productAliases(x).some(a=>canonicalCode(a)===canonicalCode(code)));const codes=new Set((p?productAliases(p):[code]).map(canonicalCode));const hits=[];for(const o of pickOrders||[])for(const it of o.items||[]){const a=canonicalCode(pickDisplayCode(it.code||it.productCode||'')),b=canonicalCode(it.code||'');if(codes.has(a)||codes.has(b))hits.push({order:o,item:it})}return hits}
@@ -290,23 +303,23 @@ function handleVoiceTranscript(transcript){const heard=document.querySelector('#
 function handleVoiceAlternatives(list){const uniq=[...new Set((list||[]).map(x=>String(x||'').trim()).filter(Boolean))];for(const t of uniq){const r=resolveSpokenProduct(t);if(r.product&&r.confidence==='exact'){handleVoiceTranscript(t);return}}const resolved=uniq.map(t=>({t,r:resolveSpokenProduct(t)})).filter(x=>x.r.product);if(resolved.length){const ids=new Set(resolved.map(x=>canonicalCode(x.r.product.code)));if(ids.size===1){handleVoiceTranscript(resolved[0].t);return}}handleVoiceTranscript(uniq[0]||'')}
 function clearVoiceRecognitionTimers(){if(voiceRestartTimer){clearTimeout(voiceRestartTimer);voiceRestartTimer=null}}
 function setVoiceRecognitionUi(active,message=''){const b=document.querySelector('#voiceCommandBtn'),heard=document.querySelector('#voiceHeard');if(b){b.classList.toggle('listening',active);b.textContent=active?'⏹ پایان شنیدن':'🎙️ گفتن کد محصول'}if(heard&&message)heard.textContent=message}
+function scheduleVoiceRestart(delay=450){clearVoiceRecognitionTimers();if(!voiceSessionActive||voiceHadSpeech)return;setVoiceRecognitionUi(true,'در حال شنیدن… هر وقت آماده بودید کد را بخوانید.');voiceRestartTimer=setTimeout(()=>{if(voiceSessionActive&&!voiceHadSpeech&&!voiceRecognizer)launchVoiceRecognizer()},delay)}
 function stopVoiceRecognition(){voiceSessionActive=false;voiceListening=false;voiceFinalizing=false;clearVoiceRecognitionTimers();if(voiceRecognizer){const r=voiceRecognizer;voiceRecognizer=null;try{r.abort()}catch{}}setVoiceRecognitionUi(false)}
-function finishVoiceRecognition(manual=false){if(!voiceSessionActive||voiceFinalizing)return;voiceFinalizing=true;voiceSessionActive=false;voiceListening=false;clearVoiceRecognitionTimers();const t=(voiceFinalText.trim()||voiceInterimText.trim()),alts=[t,...voiceAlternatives].filter(Boolean);if(voiceRecognizer){const r=voiceRecognizer;voiceRecognizer=null;try{r.stop()}catch{}}setVoiceRecognitionUi(false,t?'شنیده شد: '+t:(manual?'شنیدن متوقف شد.':'صدایی تشخیص داده نشد؛ دوباره بزنید.'));voiceFinalizing=false;if(t)setTimeout(()=>handleVoiceAlternatives(alts),0)}
+function finishVoiceRecognition(manual=false){if(!voiceSessionActive||voiceFinalizing)return;const t=(voiceFinalText.trim()||voiceInterimText.trim());if(!t&&!manual){scheduleVoiceRestart(500);return}voiceFinalizing=true;voiceSessionActive=false;voiceListening=false;clearVoiceRecognitionTimers();const alts=[t,...voiceAlternatives].filter(Boolean);if(voiceRecognizer){const r=voiceRecognizer;voiceRecognizer=null;try{r.stop()}catch{}}setVoiceRecognitionUi(false,t?'شنیده شد: '+t:(manual?'شنیدن متوقف شد.':'صدایی تشخیص داده نشد.'));voiceFinalizing=false;if(t)setTimeout(()=>handleVoiceAlternatives(alts),0)}
 function launchVoiceRecognizer(){
- if(!voiceSessionActive)return;const r=new SpeechRecognitionApi();voiceRecognizer=r;r.lang='fa-IR';r.interimResults=true;r.continuous=true;r.maxAlternatives=10;
- r.onstart=()=>{voiceListening=true;setVoiceRecognitionUi(true,voiceHadSpeech?'در حال شنیدن…':'در حال شنیدن… هر وقت آماده بودید کد را بخوانید.')};
+ if(!voiceSessionActive||voiceRecognizer)return;const r=new SpeechRecognitionApi();voiceRecognizer=r;r.lang='fa-IR';r.interimResults=true;r.continuous=true;r.maxAlternatives=10;
+ r.onstart=()=>{if(!voiceSessionActive)return;voiceListening=true;setVoiceRecognitionUi(true,voiceHadSpeech?'در حال شنیدن…':'در حال شنیدن… هر وقت آماده بودید کد را بخوانید.')};
  r.onspeechstart=()=>{voiceHadSpeech=true;setVoiceRecognitionUi(true,'صدای شما دریافت شد…')};
  r.onresult=e=>{let interim='';for(let i=e.resultIndex;i<e.results.length;i++){const res=e.results[i],best=String(res[0]?.transcript||'').trim();if(!best)continue;voiceHadSpeech=true;if(res.isFinal){voiceFinalText+=(voiceFinalText?' ':'')+best;for(let j=0;j<Math.min(res.length,10);j++){const a=String(res[j]?.transcript||'').trim();if(a)voiceAlternatives.push(a)}setVoiceRecognitionUi(true,'شنیده شد: '+voiceFinalText);setTimeout(()=>finishVoiceRecognition(false),0);return}else interim+=(interim?' ':'')+best}voiceInterimText=interim;setVoiceRecognitionUi(true,interim?'در حال شنیدن: '+interim:'در حال شنیدن…')};
- r.onerror=e=>{if(!voiceSessionActive)return;if(e.error==='not-allowed'||e.error==='service-not-allowed'){toast('اجازه میکروفن داده نشده است.');stopVoiceRecognition();return}if(e.error==='no-speech'&&!voiceHadSpeech){voiceListening=false;voiceRecognizer=null;clearVoiceRecognitionTimers();voiceRestartTimer=setTimeout(()=>{if(voiceSessionActive&&!voiceHadSpeech)launchVoiceRecognizer()},120);setVoiceRecognitionUi(true,'در حال شنیدن… هر وقت آماده بودید کد را بخوانید.');return}if(e.error!=='aborted')toast('تشخیص صدا انجام نشد؛ دوباره امتحان کنید.')};
- r.onend=()=>{if(voiceRecognizer===r)voiceRecognizer=null;if(!voiceSessionActive)return;voiceListening=false;if(voiceFinalText.trim()||voiceInterimText.trim()){finishVoiceRecognition(false);return}if(!voiceHadSpeech){clearVoiceRecognitionTimers();voiceRestartTimer=setTimeout(()=>{if(voiceSessionActive&&!voiceHadSpeech)launchVoiceRecognizer()},120);setVoiceRecognitionUi(true,'در حال شنیدن… هر وقت آماده بودید کد را بخوانید.');return}finishVoiceRecognition(false)};
- try{r.start()}catch{voiceSessionActive=false;voiceRecognizer=null;setVoiceRecognitionUi(false,'میکروفن شروع نشد؛ دوباره بزنید.')}
+ r.onerror=e=>{if(voiceRecognizer===r)voiceRecognizer=null;if(!voiceSessionActive)return;if(e.error==='not-allowed'||e.error==='service-not-allowed'){toast('اجازه میکروفن داده نشده است.');stopVoiceRecognition();return}if(!voiceHadSpeech&&(e.error==='no-speech'||e.error==='aborted'||e.error==='network')){voiceListening=false;scheduleVoiceRestart(e.error==='network'?900:450);return}if(e.error!=='aborted')toast('تشخیص صدا کامل نشد؛ دوباره در حال گوش دادن است.');if(!voiceHadSpeech)scheduleVoiceRestart(700)};
+ r.onend=()=>{if(voiceRecognizer===r)voiceRecognizer=null;if(!voiceSessionActive)return;voiceListening=false;if(voiceFinalText.trim()||voiceInterimText.trim()||voiceHadSpeech){finishVoiceRecognition(false);return}scheduleVoiceRestart(450)};
+ try{r.start()}catch{if(voiceRecognizer===r)voiceRecognizer=null;if(voiceSessionActive&&!voiceHadSpeech)scheduleVoiceRestart(700)}
 }
 function startVoiceRecognition(){
  if(!SpeechRecognitionApi){toast('تشخیص گفتار در این مرورگر فعال نیست. برای بهترین نتیجه از Chrome استفاده کنید.');return}
  stopVoice();if(voiceSessionActive){finishVoiceRecognition(true);return}
- voiceSessionActive=true;voiceListening=true;voiceHadSpeech=false;voiceFinalText='';voiceInterimText='';voiceAlternatives=[];voiceSegments=[];voiceFinalizing=false;clearVoiceRecognitionTimers();setVoiceRecognitionUi(true,'در حال شنیدن… کد را بخوانید.');launchVoiceRecognizer()
+ voiceSessionActive=true;voiceListening=false;voiceHadSpeech=false;voiceFinalText='';voiceInterimText='';voiceAlternatives=[];voiceSegments=[];voiceFinalizing=false;clearVoiceRecognitionTimers();setVoiceRecognitionUi(true,'در حال شنیدن… هر وقت آماده بودید کد را بخوانید.');launchVoiceRecognizer()
 }
-
 
 function b64bytes(s){return Uint8Array.from(atob(s),c=>c.charCodeAt(0))}
 function bytes64(a){let s='';for(const b of new Uint8Array(a))s+=String.fromCharCode(b);return btoa(s)}
