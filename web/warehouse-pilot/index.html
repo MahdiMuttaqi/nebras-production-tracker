@@ -52,7 +52,7 @@
           <div><h2 style="margin-bottom:4px">لیست برداشت سفارش‌ها</h2><p class="section-note" style="margin:0">این بخش فقط چک‌لیست جمع‌آوری سفارش‌های نهایی‌شدهٔ اکسل است و موجودی را تغییر نمی‌دهد.</p></div>
           <div class="actions" style="margin-top:0"><button class="voice-mini" id="speakPickQueue" type="button">🔊 خواندن صف</button><button class="secondary refresh-btn" id="refreshPickOrders">↻ دریافت سفارش‌ها</button></div>
         </div>
-        <div id="pickQueueState" class="notice" style="margin-top:12px">برای دریافت سفارش‌های ارسالی از اکسل، روی «دریافت سفارش‌ها» بزنید.</div><p class="section-note" style="margin:8px 2px 0">برداشت شد: کامل پیدا و جمع شد · ناقص: تعداد کامل پیدا نشد · مغایرت: کد، تعداد یا مکان با واقعیت یکی نیست. سفارش ناقص یا دارای مغایرت تا رفع مشکل آماده بسته‌بندی نمی‌شود.</p>
+        <div id="pickQueueState" class="notice" style="margin-top:12px">برای دریافت سفارش‌های ارسالی از اکسل، روی «دریافت سفارش‌ها» بزنید.</div><p class="section-note" style="margin:8px 2px 0">برداشت شد: کامل پیدا و جمع شد · ناقص: تعداد کامل پیدا نشد · مغایرت: کد، تعداد یا مکان با واقعیت یکی نیست. «آماده بسته‌بندی» و «تحویل بسته‌بندی» فقط مرحله سفارش را جلو می‌برند و ناقص/مغایرت مانع آن نیست؛ مقدار واقعی هر ردیف جداگانه ثبت می‌شود.</p>
         <div class="pick-search"><input id="pickCustomerSearch" autocomplete="off" placeholder="جست‌وجوی مشتری، شماره سفارش یا کد محصول"><button class="secondary" id="clearPickSearch" type="button">پاک‌کردن</button></div>
         <div id="pickFilterCount" class="pick-filter-count"></div>
         <div id="pickOrders"></div>
@@ -92,11 +92,33 @@ function voiceLocation(v){
  if(m)return `قفسه ${Number(m[1])}، ردیف ${Number(m[2])}، جعبه ${Number(m[3])}${m[4]?`، بخش ${Number(m[4])}`:''}`;
  return raw?voiceCode(raw):'مکان ثبت نشده';
 }
-function voiceNumber(v){const n=Number(v);return Number.isFinite(n)?String(n):String(v??'')}
-function preferredVoice(){const vs=speechSynthesis.getVoices();return vs.find(v=>/^fa(-|_)/i.test(v.lang))||vs.find(v=>/persian|farsi/i.test(v.name))||null}
-function speak(text,{force=false,rate=1.02,pitch=1}={}){
+function voiceNumber(v){const n=Number(v);return Number.isFinite(n)&&n>=0&&Math.floor(n)===n?intToFaWords(n):String(v??'')}
+function preferredVoice(){const vs=speechSynthesis.getVoices();return vs.find(v=>/^fa(?:-|_)/i.test(v.lang||''))||vs.find(v=>/persian|farsi|فارسی/i.test(v.name||''))||null}
+let voiceDeferredTimer=null;
+function speak(text,{force=false,rate=1.0,pitch=1}={}){
  if(!text||!voiceSupported()||(!voiceEnabled&&!force))return false;
- try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(String(text));u.lang='fa-IR';const v=preferredVoice();if(v)u.voice=v;u.rate=rate;u.pitch=pitch;u.volume=1;u.onstart=()=>{const x=document.querySelector('#voiceStatus');if(x)x.textContent='در حال خواندن…'};u.onend=u.onerror=()=>{const x=document.querySelector('#voiceStatus');if(x)x.textContent=voiceEnabled?'صوت فعال':'صوت خاموش'};speechSynthesis.speak(u);return true}catch{return false}
+ const phrase=String(text);
+ const run=()=>{
+  try{
+   if(voiceDeferredTimer){clearTimeout(voiceDeferredTimer);voiceDeferredTimer=null}
+   speechSynthesis.cancel();
+   const u=new SpeechSynthesisUtterance(phrase);u.lang='fa-IR';
+   const v=preferredVoice();if(v)u.voice=v;
+   u.rate=rate;u.pitch=pitch;u.volume=1;
+   u.onstart=()=>{const x=document.querySelector('#voiceStatus');if(x)x.textContent='در حال خواندن فارسی…'};
+   u.onend=u.onerror=()=>{const x=document.querySelector('#voiceStatus');if(x)x.textContent=voiceEnabled?'صوت فارسی فعال':'صوت خاموش'};
+   speechSynthesis.speak(u);
+  }catch{}
+ };
+ // Mobile browsers often expose voices a little after page load. Wait briefly so an English default voice is not selected by mistake.
+ if(preferredVoice())run();
+ else{
+  let fired=false;
+  const onVoices=()=>{if(fired)return;const v=preferredVoice();if(v){fired=true;try{speechSynthesis.removeEventListener('voiceschanged',onVoices)}catch{}run()}};
+  try{speechSynthesis.addEventListener('voiceschanged',onVoices)}catch{}
+  voiceDeferredTimer=setTimeout(()=>{if(fired)return;fired=true;try{speechSynthesis.removeEventListener('voiceschanged',onVoices)}catch{}run()},900);
+ }
+ return true
 }
 function updateVoiceUi(){const b=document.querySelector('#voiceToggle'),st=document.querySelector('#voiceStatus');if(!b)return;if(!voiceSupported()){b.textContent='🔇 صوت پشتیبانی نمی‌شود';b.classList.add('unsupported');b.disabled=true;if(st)st.textContent='مرورگر بدون صوت';return}b.disabled=false;b.classList.remove('unsupported');b.classList.toggle('on',voiceEnabled);b.textContent=voiceEnabled?'🔊 صوت روشن':'🔇 صوت خاموش';if(st)st.textContent=voiceEnabled?'صوت فعال':'صوت خاموش'}
 function toggleVoice(){if(!voiceSupported()){toast('این مرورگر گفتار صوتی را پشتیبانی نمی‌کند.');return}voiceEnabled=!voiceEnabled;localStorage.setItem(VOICE_KEY,voiceEnabled?'1':'0');if(!voiceEnabled)speechSynthesis.cancel();updateVoiceUi();if(voiceEnabled)speak('راهنمای صوتی انبار فعال شد.',{force:true})}
@@ -645,7 +667,12 @@ async function setPickItem(orderId,lineId,itemStatus,extra={}){
    if(!confirmed)try{confirmed=await confirmPickItem(orderId,lineId,{itemStatus,actualQty:extra.actualQty})}catch{}
   }
   if(confirmed){toast('ثبت با تأخیر تأیید شد.');speak('ثبت با تأخیر از سرور تأیید شد.')}
-  else {Object.assign(item,old);toast(e.message||'ثبت وضعیت انجام نشد.');}
+  else {
+   // A timeout can happen after Google Sheet already accepted the write. Do not step the UI backwards.
+   const current=pickFindItem(pickFindOrder(orderId),lineId);
+   if(current){current.status=itemStatus;if(extra.actualQty!==undefined){current.actualQty=Number(extra.actualQty);current.hasActual=true}if(extra.issueNote!==undefined)current.issueNote=extra.issueNote}
+   toast('درخواست ارسال شد؛ تأیید سرور دیر رسیده است. وضعیت فعلی قفل ماند و با «دریافت سفارش‌ها» دوباره تطبیق داده می‌شود.');
+  }
  }finally{pickActionBusy.delete(key)}
  renderPickOrders();
 }
@@ -655,13 +682,8 @@ async function setPickOrder(orderId,changes){
  const order=pickFindOrder(orderId);
  if(!order)return toast('این سفارش پیدا نشد.');
 
- if(changes.orderStatus==='آماده بسته‌بندی'){
-  const unresolved=(order.items||[]).filter(x=>x.status!=='برداشت شد');
-  if(unresolved.length)return toast('برای آماده بسته‌بندی، همه ردیف‌ها باید «برداشت شد» باشند.');
- }
- if(changes.orderStatus==='تحویل بسته‌بندی' && order.orderStatus!=='آماده بسته‌بندی'){
-  return toast('ابتدا سفارش را «آماده بسته‌بندی» کنید.');
- }
+ // Packaging is intentionally independent from full picking completion.
+ // Incomplete/discrepant rows keep their own actual quantities and follow-up path.
 
  const old={worker:order.worker,orderStatus:order.orderStatus,note:order.note};
  Object.assign(order,changes);
@@ -689,8 +711,11 @@ async function setPickOrder(orderId,changes){
    if(changes.orderStatus==='تحویل بسته‌بندی')pickOrders=pickOrders.filter(o=>String(o.orderId)!==String(orderId));
    renderPickOrders();toast('ثبت با تأخیر تأیید شد.');
   }else{
-   Object.assign(order,old);renderPickOrders();
-   toast(e.message==='pick timeout'?'پاسخ سرور دیر رسید؛ دوباره تلاش کنید.':(e.message||'ثبت سفارش انجام نشد.'));
+   // Do not roll back an order status merely because the JSONP acknowledgement was late.
+   const current=pickFindOrder(orderId);if(current)Object.assign(current,changes);
+   if(changes.orderStatus==='تحویل بسته‌بندی')pickOrders=pickOrders.filter(o=>String(o.orderId)!==String(orderId));
+   renderPickOrders();
+   toast('درخواست ارسال شد؛ وضعیت سفارش قفل ماند تا با دریافت بعدی از سرور تطبیق داده شود.');
   }
  }finally{pickActionBusy.delete(key)}
  renderPickOrders();
