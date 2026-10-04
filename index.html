@@ -1,0 +1,938 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0b7168">
+  <title>سامانه انبار هوشمند نبراس</title>
+  <style>
+    :root{--ink:#132a3b;--navy:#173852;--teal:#0b7168;--teal2:#11998a;--sky:#eaf5f7;--line:#d6e3e7;--muted:#6d7e88;--white:#fff;--red:#b43b4c;--amber:#d58928;--green:#237a53;--shadow:0 10px 30px rgba(19,42,59,.12)}
+    *{box-sizing:border-box}body{margin:0;background:#f3f7f8;color:var(--ink);font-family:Tahoma,"Segoe UI",sans-serif;font-size:16px}button,input,select,textarea{font:inherit}button{cursor:pointer}.app{max-width:1180px;margin:auto;min-height:100vh;background:#f8fbfc}.top{position:sticky;top:0;z-index:20;background:var(--navy);color:#fff;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 3px 14px #17385233}.brand b{font-size:1.15rem}.brand small{display:block;color:#bce9e3;margin-top:3px}.top-actions{display:flex;align-items:center;gap:10px}.online{display:flex;gap:7px;align-items:center;font-size:.82rem}.logout-btn{border:1px solid #ffffff55;background:#ffffff12;color:#fff;border-radius:10px;padding:7px 10px;font-weight:800;font-size:.78rem}.logout-btn:active{background:#ffffff24}.dot{width:9px;height:9px;border-radius:50%;background:#50d59e}.main{padding:16px 16px 92px}.notice{background:#fff6dc;border:1px solid #f0d686;color:#6b5313;padding:10px 12px;border-radius:12px;font-size:.85rem;margin-bottom:14px}.hero{display:grid;grid-template-columns:1.45fr .8fr;gap:14px;margin-bottom:16px}.scan-card{background:linear-gradient(135deg,#0b7168,#0a8e82);color:#fff;border-radius:20px;padding:18px;box-shadow:var(--shadow);display:flex;justify-content:space-between;align-items:center}.scan-card h1{font-size:1.35rem;margin:0 0 7px}.scan-card p{margin:0;color:#d9fffa;font-size:.9rem}.scan-btn{border:0;border-radius:14px;background:#fff;color:var(--teal);padding:13px 16px;font-weight:800;min-width:124px}.summary{display:grid;grid-template-columns:1fr 1fr;gap:10px}.stat{background:#fff;border:1px solid var(--line);border-radius:16px;padding:13px}.stat strong{font-size:1.35rem;display:block}.stat span{font-size:.8rem;color:var(--muted)}.tabs{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin:15px 0}.tab{border:1px solid var(--line);background:#fff;color:var(--navy);border-radius:13px;padding:12px 6px;font-weight:700}.tab.active{background:var(--navy);color:#fff;border-color:var(--navy)}.panel{display:none}.panel.active{display:block}.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 5px 18px rgba(19,42,59,.06);margin-bottom:14px}.card h2{font-size:1.08rem;margin:0 0 14px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.field{display:flex;flex-direction:column;gap:6px}.field.full{grid-column:1/-1}label{font-size:.83rem;color:#536773;font-weight:700}input,select,textarea{width:100%;border:1px solid #bdcdd3;border-radius:12px;padding:12px;background:#fbfdfe;color:var(--ink);outline:none}input:focus,select:focus,textarea:focus{border-color:var(--teal);box-shadow:0 0 0 3px #11998a1c}.location-input{display:flex;gap:8px}.location-input input{flex:1}.mini-scan{border:0;border-radius:12px;background:#dff3f0;color:var(--teal);font-weight:800;padding:0 14px}.primary,.secondary,.danger{border:0;border-radius:13px;padding:13px 16px;font-weight:800}.primary{background:var(--teal);color:#fff}.secondary{background:#e8f0f3;color:var(--navy)}.danger{background:#f8e4e7;color:var(--red)}.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}.result{border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-top:12px}.result-head{background:#eef5f6;padding:11px 13px;display:flex;justify-content:space-between;gap:10px}.result-row{display:grid;grid-template-columns:minmax(0,1.4fr) .65fr .55fr;gap:16px;padding:12px 13px;border-top:1px solid var(--line);align-items:center}.location-code{direction:ltr;unicode-bidi:isolate;white-space:nowrap;text-align:left;font-family:"Segoe UI",Tahoma,sans-serif;font-variant-numeric:tabular-nums;font-weight:700;letter-spacing:.01em;color:#102f43}.badge{display:inline-flex;border-radius:999px;padding:5px 9px;font-size:.75rem;font-weight:800;background:#dff3f0;color:var(--teal)}.qty{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-width:58px;padding:5px 8px;border-radius:10px;background:#f0f6f8;color:#173852;font-weight:900;font-size:1rem}.qty small{font-size:.62rem;font-weight:700;color:#647984;line-height:1}.empty{text-align:center;color:var(--muted);padding:28px 10px}.history-row{display:grid;grid-template-columns:90px 1fr auto;gap:10px;padding:12px 0;border-bottom:1px solid var(--line);font-size:.86rem}.history-row:last-child{border:0}.op{font-weight:800}.op.in{color:var(--green)}.op.out{color:var(--red)}.op.move{color:var(--amber)}.bottom{display:none}.modal{position:fixed;inset:0;z-index:50;background:#102a3c99;display:none;align-items:flex-end;justify-content:center}.modal.show{display:flex}.sheet{width:min(560px,100%);background:#fff;border-radius:24px 24px 0 0;padding:18px;max-height:92vh;overflow:auto}.sheet-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}.close{border:0;background:#edf3f5;border-radius:50%;width:38px;height:38px;font-size:1.25rem}.camera{aspect-ratio:4/3;background:#10222f;border-radius:16px;overflow:hidden;position:relative}.camera video{width:100%;height:100%;object-fit:cover}.scanline{position:absolute;left:8%;right:8%;top:50%;height:2px;background:#51f3d7;box-shadow:0 0 10px #51f3d7}.toast{position:fixed;z-index:80;bottom:24px;left:50%;transform:translate(-50%,20px);background:#173852;color:#fff;padding:12px 17px;border-radius:12px;opacity:0;pointer-events:none;transition:.25s;max-width:90%;text-align:center}.toast.show{opacity:1;transform:translate(-50%,0)}
+    .voice-btn{border:1px solid #ffffff55;background:#ffffff12;color:#fff;border-radius:10px;padding:7px 10px;font-weight:800;font-size:.78rem;white-space:nowrap}.voice-btn.on{background:#dff3f0;color:#075f58;border-color:#dff3f0}.voice-btn.unsupported{opacity:.55}.voice-mini{border:0;border-radius:9px;background:#e8f0f3;color:var(--navy);padding:8px 10px;font-weight:800;font-size:.76rem}.voice-mini:active{transform:scale(.96)}.voice-confirm{border:2px solid #0b716833;background:#f8fffe;border-radius:16px;padding:13px;margin:10px 0}.voice-confirm-title{font-weight:900;font-size:1.02rem;margin-bottom:9px}.voice-confirm-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.voice-confirm-row{background:#fff;border:1px solid var(--line);border-radius:10px;padding:9px 10px}.voice-confirm-row b{display:block;color:var(--muted);font-size:.72rem;margin-bottom:3px}.voice-confirm-row span{font-weight:900;word-break:break-word}.voice-confirm-row.full{grid-column:1/-1}.voice-confirm-warning{background:#fff6dc;border:1px solid #f0d686;color:#6b5313;border-radius:10px;padding:9px 10px;margin-top:8px;font-size:.82rem;line-height:1.7}.pick-head-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:flex-end}.pick-speak{padding:6px 9px!important}.voice-status{font-size:.72rem;color:#bce9e3}.voice-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.voice-actions button{flex:1;min-width:120px}@media(max-width:640px){.voice-confirm-grid{grid-template-columns:1fr}.voice-confirm-row.full{grid-column:auto}.voice-btn{padding:7px 8px;font-size:.72rem}.voice-status{display:none}}
+    .lock{position:fixed;inset:0;z-index:200;background:linear-gradient(145deg,#173852,#0b7168);display:flex;align-items:center;justify-content:center;padding:18px}.lock-card{width:min(430px,100%);background:#fff;border-radius:22px;padding:24px;box-shadow:0 20px 60px #001a}.lock-card h1{font-size:1.3rem;margin:0 0 8px}.lock-card p{font-size:.86rem;color:var(--muted);line-height:1.8}.lock-error{color:var(--red)!important;font-weight:800;min-height:24px}.app.locked{display:none}.refresh-bar{display:flex;align-items:center;justify-content:space-between;gap:10px}.refresh-bar .notice{flex:1;margin-bottom:0}.refresh-btn{white-space:nowrap}.allocation{border:1px solid var(--line);border-radius:14px;padding:11px;margin-top:10px;background:#f8fbfc}.allocation.warn{border:2px solid var(--red);background:#fff0f2}.allocation-grid{display:grid;grid-template-columns:minmax(0,1.5fr) .65fr .65fr auto;gap:8px;align-items:end}.allocation small{display:block;color:var(--muted);margin-top:7px}.allocation.warn small{color:var(--red);font-weight:800}.shared-box{border:1px solid #efc56d;background:#fff8e7;border-radius:14px;padding:12px;margin-top:12px}.shared-box strong{display:block;margin-bottom:5px}.split-summary{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}.danger-text{color:var(--red);font-weight:800}.section-note{font-size:.82rem;color:var(--muted);line-height:1.8;margin:8px 0}.remove-allocation{border:0;border-radius:10px;background:#f8e4e7;color:var(--red);height:44px;padding:0 13px;font-weight:800}.out-locations{margin-top:12px;border:1px solid var(--line);border-radius:14px;overflow:hidden}.out-locations-title{padding:10px 12px;background:#eef5f6;font-weight:800}.out-location{width:100%;border:0;border-top:1px solid var(--line);background:#fff;padding:11px 12px;display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--navy);text-align:right}.out-location:hover,.out-location:focus{background:#e8f7f4}.out-location .location-code{font-size:.88rem}.out-location .qty{flex:0 0 auto}
+    .pick-order{border:1px solid var(--line);border-radius:16px;overflow:hidden;margin-top:10px;background:#fff}.pick-head{background:#eef5f6;padding:12px 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px}.pick-customer{font-weight:900;font-size:1.05rem}.pick-meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:5px;color:var(--muted);font-size:.76rem}.pick-meta span{background:#fff;border:1px solid var(--line);border-radius:999px;padding:3px 7px}.pick-progress{white-space:nowrap}.pick-worker{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:end;padding:10px 12px;border-bottom:1px solid var(--line)}.pick-worker .field{gap:4px}.pick-worker input{padding:9px 10px}.pick-status{display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:7px 10px;border-radius:10px;background:#dff3f0;color:var(--teal);font-weight:800;font-size:.8rem}.pick-status.pending{background:#fff6dc;color:#885f10}.pick-items{padding:0 12px}.pick-item{padding:12px 0;border-bottom:1px solid var(--line)}.pick-item:last-child{border-bottom:0}.pick-item-top{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:start}.pick-code{font-weight:900;font-size:1rem;direction:ltr;text-align:right;unicode-bidi:isolate}.pick-location{margin-top:5px;color:#385466;font-size:.78rem;direction:ltr;text-align:right;unicode-bidi:isolate;word-break:break-all}.pick-item-status{display:inline-flex;margin-top:7px;border-radius:999px;padding:4px 8px;font-size:.75rem;font-weight:800;background:#fff4df;color:var(--amber)}.pick-item-status.done{background:#e3f5eb;color:var(--green)}.pick-item-status.bad{background:#f9e5e8;color:var(--red)}.pick-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:9px}.pick-actions button{padding:8px 5px;border-radius:9px;font-size:.78rem;transition:transform .12s ease,opacity .15s ease,box-shadow .15s ease}.pick-actions button:active,.pick-footer button:active{transform:scale(.96)}.pick-actions button.pick-saving{opacity:.68;pointer-events:none;box-shadow:inset 0 0 0 2px #0b716855;animation:pickPulse .85s ease-in-out infinite}.pick-actions button[disabled],.pick-footer button[disabled]{cursor:wait}@keyframes pickPulse{50%{opacity:.4}}.pick-detail{margin-top:8px;padding:7px 9px;border-radius:9px;background:#fff6df;color:#765616;font-size:.76rem;line-height:1.65}.pick-detail.bad{background:#fff0f2;color:#983242}.pick-search{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;margin-top:12px}.pick-search input{padding:10px 12px}.pick-filter-count{font-size:.78rem;color:var(--muted);margin:8px 2px 0}.pick-footer{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:11px 12px;background:#f8fbfc;border-top:1px solid var(--line)}.pick-footer button{padding:10px 8px}.pick-footer-finish .pick-exit{grid-column:1/-1}.pick-archive-note{grid-column:1/-1;background:#fff6dc;color:#6b5313;border:1px solid #f0d686;border-radius:10px;padding:8px 9px;font-size:.76rem;line-height:1.65}.pick-empty{padding:18px;text-align:center;color:var(--muted)}.pick-view-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}.pick-view-tab{border:1px solid var(--line);border-radius:12px;background:#f8fbfc;color:var(--navy);padding:11px 8px;font-weight:900}.pick-view-tab.active{border-color:var(--teal);background:#e3f5f1;color:#075f58}.pick-view-tab b{display:inline-flex;align-items:center;justify-content:center;min-width:24px;margin-right:5px;border-radius:99px;background:#fff;padding:2px 6px;font-size:.75rem}.pick-customer-group{margin-top:12px;border:1px solid var(--line);border-radius:16px;background:#fff;overflow:hidden}.pick-customer-group>summary{list-style:none;cursor:pointer;padding:13px 14px;display:flex;align-items:center;justify-content:space-between;gap:10px;background:#fff}.pick-customer-group>summary::-webkit-details-marker{display:none}.pick-customer-group[open]>summary{background:#eef5f6;border-bottom:1px solid var(--line)}.pick-customer-summary{font-weight:900;font-size:1.02rem}.pick-customer-summary-meta{display:flex;align-items:center;gap:7px;color:var(--muted);font-size:.76rem}.pick-customer-summary-meta i{font-style:normal;transition:transform .18s ease}.pick-customer-group[open] .pick-customer-summary-meta i{transform:rotate(180deg)}.pick-customer-content{padding:0 10px 10px}.pick-reconcile{margin:10px 12px 12px;border:1px solid #b9ded7;background:#f4fbfa;border-radius:13px;padding:10px}.pick-reconcile-head{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:.82rem}.pick-reconcile-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:center;border-top:1px solid #cfe4df;padding:9px 0;font-size:.8rem}.pick-reconcile-row input{width:19px;height:19px}.pick-reconcile-row small{display:block;color:var(--muted);margin-top:2px}.pick-reconcile-foot{margin-top:8px;display:flex;gap:8px;flex-wrap:wrap}.pick-reconcile-foot button{padding:8px 10px;font-size:.76rem}
+    @media(max-width:760px){.main{padding:10px 10px 90px}.pick-head{padding:10px 11px}.pick-worker{grid-template-columns:1fr;padding:9px 10px}.pick-status{justify-self:start;min-height:32px;padding:5px 9px}.pick-items{padding:0 10px}.pick-item{padding:10px 0}.pick-actions{gap:5px}.pick-actions button{font-size:.74rem;padding:8px 3px}.pick-footer{padding:9px 10px}.pick-meta{font-size:.7rem}.pick-customer{font-size:1rem}.refresh-bar{align-items:stretch;flex-direction:column;margin-bottom:14px}.refresh-bar .notice{margin:0}.refresh-btn{width:100%}.hero{grid-template-columns:1fr}.scan-card{align-items:flex-start}.summary{grid-template-columns:repeat(4,1fr)}.stat{padding:9px}.stat strong{font-size:1.05rem}.stat span{font-size:.68rem}.tabs{display:none}.grid{grid-template-columns:1fr}.field.full{grid-column:auto}.bottom{position:fixed;z-index:25;display:grid;grid-template-columns:repeat(6,1fr);bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);padding:7px 4px calc(7px + env(safe-area-inset-bottom));box-shadow:0 -5px 18px #17385218}.bottom button{border:0;background:transparent;color:#58707d;font-size:.72rem;padding:5px 2px}.bottom button b{display:block;font-size:1.2rem;margin-bottom:2px}.bottom button.active{color:var(--teal);font-weight:800}.result-row{grid-template-columns:minmax(0,1fr) 62px 92px;gap:12px;padding:11px 9px}.location-code{font-size:.86rem;font-weight:800;letter-spacing:-.025em}.history-row{grid-template-columns:78px 1fr}.history-row>span:last-child{grid-column:2}.scan-btn{min-width:auto}.scan-card h1{font-size:1.15rem}.allocation-grid{grid-template-columns:1fr 1fr}.allocation-grid .field:first-child{grid-column:1/-1}.remove-allocation{width:100%}}
+    .pick-footer button.pick-saving{opacity:.68;pointer-events:none;box-shadow:inset 0 0 0 2px #0b716855;animation:pickPulse .85s ease-in-out infinite}
+
+    .voice-command{margin-top:12px;background:#f7fbfc;border:1px solid var(--line);border-radius:16px;padding:12px;display:grid;gap:10px}.voice-command-status{font-size:.82rem;color:var(--muted);line-height:1.75}.voice-command-status b{color:var(--navy)}.voice-text-entry{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:stretch}.voice-text-entry input{direction:ltr;text-align:left;unicode-bidi:plaintext;font-weight:800}.voice-text-entry button{min-height:46px;white-space:nowrap}.voice-heard{font-weight:900;color:#075f58;word-break:break-word}.product-modal-card{display:grid;gap:10px}.product-card-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.product-code-big{font-size:1.35rem;font-weight:1000;direction:ltr;text-align:right}.product-name-big{font-size:1rem;font-weight:900;margin-top:3px}.product-meta{display:flex;gap:7px;flex-wrap:wrap}.product-stock-list{display:grid;gap:7px}.product-stock-row{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:#fff}.product-stock-row.zero{opacity:.72}.product-card-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.product-card-actions button{min-height:46px}.voice-match-note{background:#e8f6f3;border:1px solid #b9ded7;border-radius:10px;padding:8px 10px;font-size:.8rem;line-height:1.65}.zero-location-assign{margin-top:12px;padding:12px;border:1px dashed #0b716866;border-radius:14px;background:#f4fbfa}.zero-location-assign b{display:block;margin-bottom:5px}.zero-location-assign .section-note{margin:3px 0 10px}.zero-location-assign .location-input{margin-top:8px}.zero-location-assign .primary{margin-top:9px;width:100%}#voiceConfirmModal{z-index:75}#scanner{z-index:90}.pick-match{outline:3px solid #d7a90055;scroll-margin-top:90px}.mic-inline{border:0;background:#173f5f;color:#fff;border-radius:9px;padding:8px 11px;font-weight:900;cursor:pointer}@media(max-width:700px){.voice-text-entry{grid-template-columns:1fr}.voice-text-entry button{width:100%}.product-card-actions{grid-template-columns:1fr 1fr}}
+    .close.product-close{width:54px;height:54px;min-width:54px;font-size:2rem;line-height:1;touch-action:manipulation}
+</style>
+</head>
+<body>
+<div class="lock" id="lock"><div class="lock-card"><h1>ورود مدیر انبار نبراس</h1><p>اطلاعات انبار رمزگذاری شده است. رمز مدیریت را وارد کنید.</p><div class="field"><label>رمز مدیریت</label><input id="managerPassword" type="password" autocomplete="current-password" placeholder="رمز عبور"></div><div class="actions"><button class="primary" id="unlockBtn">ورود به سامانه</button></div><p class="lock-error" id="lockError"></p></div></div>
+<div class="app locked" id="app">
+  <header class="top"><div class="brand"><b>انبار هوشمند نبراس</b><small>متصل به فایل انبار و صف مرکزی</small></div><div class="top-actions"><div class="online"><i class="dot" id="syncDot"></i><span id="syncText">آماده ثبت</span></div><button class="logout-btn" id="logoutBtn" type="button">خروج</button></div></header>
+  <main class="main">
+    <div class="refresh-bar"><div class="notice">اطلاعات اولیه از آخرین فایل انبار بارگذاری شده است. عملیات موبایل در صف مرکزی ثبت می‌شود و با دکمهٔ همگام‌سازی داخل فایل اکسل اعمال خواهد شد.</div><button class="secondary refresh-btn" id="refreshExcel">↻ تازه‌سازی از اکسل</button></div>
+    <section class="hero">
+      <div class="scan-card"><div><h1>اسکن هوشمند انبار</h1><p>بارکد محصول یا QR مکان را مقابل دوربین بگیرید.</p></div><button class="scan-btn" data-scan-target="global">اسکن هوشمند</button></div>
+      <div class="summary"><div class="stat"><strong id="totalStock">۰</strong><span>کل موجودی</span></div><div class="stat"><strong id="activeLocs">۰</strong><span>مکان فعال</span></div><div class="stat"><strong id="productCount">۰</strong><span>کد موجود</span></div><div class="stat"><strong id="todayOps">۰</strong><span>عملیات امروز</span></div></div>
+    </section>
+    <div class="voice-command" id="voiceCommandBox">
+      <div class="voice-command-status"><b>گفتن یا نوشتن کد</b> — داخل کادر بزنید و از میکروفنِ صفحه‌کلید گوشی استفاده کنید؛ پس از پایان ورود متن، جست‌وجو خودکار انجام می‌شود. نمونه: «بیست و پنج، سه هزار و چهار، دو تا خروج» یا «ده ام صد و بیست و سه». مکث بین دو بخش، همان خط تیرهٔ کد است.</div>
+      <div class="voice-text-entry"><input id="voiceCommandText" type="text" inputmode="text" autocomplete="off" enterkeyhint="search" placeholder="کد، تعداد و عملیات را بگویید یا بنویسید"><button class="primary" id="voiceCommandSubmit" type="button">پیدا کن</button></div>
+      <div class="voice-heard" id="voiceHeard">آماده دریافت کد</div>
+    </div>
+    <nav class="tabs" aria-label="عملیات انبار">
+      <button class="tab active" data-tab="find">جست‌وجو</button><button class="tab" data-tab="in">ورود</button><button class="tab" data-tab="out">خروج</button><button class="tab" data-tab="move">انتقال</button><button class="tab" data-tab="adjust">اصلاح</button><button class="tab" data-tab="pick">سفارش‌ها</button><button class="tab" data-tab="history">سوابق</button>
+    </nav>
+
+    <section class="panel active" id="find">
+      <div class="card"><h2>پیداکردن محصول یا مشاهده جعبه</h2><div class="grid"><div class="field"><label>کد یا نام محصول</label><div class="location-input"><input id="findProduct" placeholder="مثلاً 10-5041 یا شعبان"><button class="mini-scan" data-scan-target="findProduct">اسکن کد</button></div></div><div class="field"><label>کد مکان</label><div class="location-input"><input id="findLocation" placeholder="مثلاً NBR-S01-R02-B01-02"><button class="mini-scan" data-scan-target="findLocation">اسکن مکان</button></div></div></div><div class="actions"><button class="primary" id="searchProductBtn">جست‌وجوی محصول</button><button class="secondary" id="showBoxBtn">محتویات مکان</button><button class="secondary" id="sharedListBtn">موجودی‌های مشترک</button></div><div id="searchResults"></div></div>
+    </section>
+
+    <section class="panel" id="in"><div class="card"><h2>ورود هوشمند محصول</h2><p class="section-note">کد و تعداد کل را وارد کنید. اگر محصول در یک جعبه جا نشد، مقدار ورودی را بین چند مکان تقسیم کنید.</p><div class="grid"><div class="field"><label>کد محصول</label><div class="location-input"><input id="inProduct" list="products" placeholder="کد محصول"><button class="mini-scan" data-scan-target="inProduct">اسکن</button></div></div><div class="field"><label>مناسبت محصول جدید</label><input id="inOccasion" placeholder="برای کد موجود خودکار نمایش داده می‌شود"></div><div class="field"><label>تعداد کل ورود</label><input id="inQty" type="number" min="1" inputmode="numeric" placeholder="تعداد کل"></div><div class="field"><label>نوع ورود</label><select id="inReason"><option>تولید جدید</option><option>برگشت از مشتری</option><option>موجودی اولیه</option></select></div></div><div id="inExisting"></div><h3>تقسیم ورودی بین جعبه‌ها</h3><div id="inAllocations"></div><div class="actions"><button class="secondary" id="addInLocation">افزودن لوکیشن دیگر</button><button class="primary" id="inSubmit">ثبت ورود هوشمند</button></div></div></section>
+
+    <section class="panel" id="out"><div class="card"><h2>برداشت و خروج محصول</h2><div class="grid"><div class="field"><label>مکان برداشت</label><div class="location-input"><input id="outLoc" placeholder="کد QR مکان"><button class="mini-scan" data-scan-target="outLoc">اسکن</button></div></div><div class="field"><label>کد محصول</label><input id="outProduct" list="products" placeholder="کد محصول"></div><div class="field"><label>تعداد خروج</label><input id="outQty" type="number" min="1" inputmode="numeric" placeholder="تعداد"></div><div class="field"><label>مشتری / توضیح</label><input id="outNote" placeholder="اختیاری"></div></div><div id="outAvailable"></div><div class="actions"><button class="primary" id="outSubmit">ثبت خروج</button></div></div></section>
+
+    <section class="panel" id="move"><div class="card"><h2>انتقال بین دو مکان</h2><div class="grid"><div class="field"><label>مکان مبدأ</label><div class="location-input"><input id="moveFrom" placeholder="اسکن مبدأ"><button class="mini-scan" data-scan-target="moveFrom">اسکن</button></div></div><div class="field"><label>مکان مقصد</label><div class="location-input"><input id="moveTo" placeholder="اسکن مقصد"><button class="mini-scan" data-scan-target="moveTo">اسکن</button></div></div><div class="field"><label>کد محصول</label><input id="moveProduct" list="products" placeholder="کد محصول"></div><div class="field"><label>تعداد انتقال</label><input id="moveQty" type="number" min="1" inputmode="numeric" placeholder="تعداد"></div></div><div class="actions"><button class="primary" id="moveSubmit">ثبت انتقال</button></div></div></section>
+
+    <section class="panel" id="adjust"><div class="card"><h2>اصلاح موجودی شمارش‌شده</h2><div class="grid"><div class="field"><label>مکان</label><div class="location-input"><input id="adjustLoc" placeholder="کد QR مکان"><button class="mini-scan" data-scan-target="adjustLoc">اسکن</button></div></div><div class="field"><label>کد محصول</label><input id="adjustProduct" list="products" placeholder="کد محصول"></div><div class="field"><label>تعداد واقعی شمارش‌شده</label><input id="adjustQty" type="number" min="0" inputmode="numeric" placeholder="تعداد واقعی"></div><div class="field"><label>علت اصلاح</label><select id="adjustReason"><option>مغایرت شمارش</option><option>اشتباه ثبت قبلی</option><option>خرابی یا ضایعات</option><option>جابه‌جایی ثبت‌نشده</option></select></div></div><div class="actions"><button class="primary" id="adjustSubmit">ثبت اصلاح</button></div></div></section>
+    <section class="panel" id="pick">
+      <div class="card">
+        <div class="refresh-bar">
+          <div><h2 style="margin-bottom:4px">لیست برداشت سفارش‌ها</h2><p class="section-note" style="margin:0">این بخش فقط چک‌لیست جمع‌آوری سفارش‌های نهایی‌شدهٔ اکسل است و موجودی را تغییر نمی‌دهد.</p></div>
+          <div class="actions" style="margin-top:0"><button class="secondary refresh-btn" id="refreshPickOrders">↻ دریافت سفارش‌ها</button></div>
+        </div>
+        <div id="pickQueueState" class="notice" style="margin-top:12px">برای دریافت سفارش‌های ارسالی از اکسل، روی «دریافت سفارش‌ها» بزنید.</div><p class="section-note" style="margin:8px 2px 0">برداشت شد: کامل پیدا و جمع شد · ناقص: تعداد کامل پیدا نشد · مغایرت: کد، تعداد یا مکان با واقعیت یکی نیست. پایان دادن سفارش، موجودی را تغییر نمی‌دهد؛ موارد ناقص و مغایرت جداگانه برای پیگیری و چاپ محفوظ می‌مانند.</p>
+        <div class="pick-view-tabs" aria-label="نمایش سفارش‌ها"><button class="pick-view-tab active" id="pickViewReady" data-pick-view="ready" type="button">آماده جمع‌آوری <b id="pickReadyCount">۰</b></button><button class="pick-view-tab" id="pickViewCollected" data-pick-view="collected" type="button">جمع‌آوری‌شده <b id="pickCollectedCount">۰</b></button></div>
+        <div class="pick-search"><input id="pickCustomerSearch" autocomplete="off" placeholder="جست‌وجوی نام مشتری"><button class="secondary" id="clearPickSearch" type="button">پاک‌کردن</button></div>
+        <div id="pickFilterCount" class="pick-filter-count"></div>
+        <div id="pickOrders"></div>
+      </div>
+    </section>
+    <section class="panel" id="history"><div class="card"><h2>سوابق عملیات این دستگاه</h2><div class="actions" style="margin-top:0"><button class="secondary" id="exportHistory">خروجی سوابق</button><button class="danger" id="resetDemo">بازنشانی به اطلاعات فایل اکسل</button></div><div id="historyList"></div></div></section>
+    <datalist id="products"></datalist>
+  </main>
+  <nav class="bottom"><button class="active" data-tab="find"><b>⌕</b>جست‌وجو</button><button data-tab="in"><b>＋</b>ورود</button><button data-tab="out"><b>−</b>خروج</button><button data-tab="move"><b>⇄</b>انتقال</button><button data-tab="adjust"><b>✓</b>اصلاح</button><button data-tab="pick"><b>☷</b>سفارش‌ها</button></nav>
+</div>
+
+<div class="modal" id="scanner"><div class="sheet"><div class="sheet-top"><b id="scannerTitle">اسکن بارکد</b><button class="close" id="closeScanner">×</button></div><div class="camera"><video id="video" playsinline muted></video><i class="scanline"></i></div><p id="scanStatus">بارکد را مقابل دوربین نگه دارید.</p><div class="field"><label>اگر دوربین در دسترس نبود، کد را وارد کنید</label><input id="manualScan" placeholder="10-5041"></div><div class="actions"><button class="primary" id="useManual">تأیید کد</button></div></div></div>
+<div class="modal" id="splitModal"><div class="sheet"><div class="sheet-top"><b>تفکیک موجودی مشترک</b><button class="close" id="closeSplit">×</button></div><div id="splitInfo" class="shared-box"></div><p class="section-note">QR هر جعبه را اسکن و تعداد واقعی همان جعبه را وارد کنید. مجموع ثبت‌شده نباید از موجودی مشترک بیشتر شود.</p><div id="splitAllocations"></div><div class="actions"><button class="secondary" id="addSplitLocation">افزودن جعبه دیگر</button><button class="primary" id="splitSubmit">ثبت تفکیک</button></div></div></div>
+<div class="modal" id="pickIssueModal"><div class="sheet"><div class="sheet-top"><b id="pickIssueTitle">ثبت مورد پیگیری</b><button class="close" id="closePickIssue" type="button">×</button></div><div id="pickIssueInfo" class="notice"></div><div class="field"><label>تعداد واقعی پیدا شده</label><input id="pickActualQty" type="number" min="0" inputmode="numeric" placeholder="مثلاً ۱"></div><div class="field" style="margin-top:12px"><label>توضیح برای پیگیری و چاپ</label><textarea id="pickIssueNote" rows="3" placeholder="مثلاً یک عدد پیدا شد / موجود نبود"></textarea></div><div class="actions"><button class="primary" id="pickIssueSubmit" type="button">ثبت مورد</button></div></div></div>
+<div class="modal" id="voiceConfirmModal"><div class="sheet"><div class="sheet-top"><b id="voiceConfirmTitle">تأیید عملیات</b><button class="close" id="closeVoiceConfirm" type="button">×</button></div><div id="voiceConfirmBody" class="voice-confirm"></div><div class="voice-confirm-warning">قبل از ثبت، کد، تعداد و مکان را با متن روی صفحه و صدایی که می‌شنوید تطبیق دهید.</div><div class="voice-actions"><button class="secondary" id="repeatVoiceConfirm" type="button">🔊 تکرار صدا</button><button class="primary" id="acceptVoiceConfirm" type="button">تأیید و ثبت</button><button class="danger" id="cancelVoiceConfirm" type="button">لغو</button></div></div></div>
+
+<div class="modal" id="productVoiceModal"><div class="sheet"><div class="sheet-top"><b>کارت هوشمند محصول</b><button class="close product-close" id="closeProductVoiceModal" type="button" aria-label="بستن کارت">×</button></div><div id="productVoiceCard" class="product-modal-card"></div></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+let initial=null,db=null,cryptoKey=null,securePayload=null,scanTarget='global',stream=null,scanTimer=null,syncTimer=null,syncBusy=false,statusBusy=false,smartInRows=[],splitRows=[],splitSource=null,pickOrders=[],pickPrintCustomers=[],pickView='ready';
+const SECURE_KEY='nebrasWarehousePilotSecureV1';
+const SESSION_PASSWORD_KEY='nebrasWarehousePilotSessionPasswordV1';
+const DATA_VERSION='inventory-2026-09-09-2';
+const BRIDGE_URL='https://script.google.com/macros/s/AKfycbx3Kl16l2U21knbjy-7BVWvB0u0H2gNMvpp8nIr-SrnFLe9WplVYjdNxFDYmqymZPsrHA/exec';
+const PICK_QUEUE_URL='https://script.google.com/macros/s/AKfycbwaz6vrezdBIX0klg4th7_G4dYZIm05AvLHGMmzJ35Pxcoxp_ceshrPlw42cnk0Z1l3/exec';
+// Voice assistant: local browser TTS only; it never changes inventory or server payloads.
+const VOICE_KEY='nebrasWarehouseVoiceV1';
+// Spoken descriptions are intentionally disabled. Voice *input* below remains enabled.
+let voiceEnabled=false,voiceConfirmAction=null,voiceConfirmSpeech='',voiceConfirmData=null;
+function voiceSupported(){return 'speechSynthesis' in window&&'SpeechSynthesisUtterance' in window}
+function voiceFaDigits(v){return String(v??'').replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[Number(d)])}
+const voiceLetterNames={A:'اِی',B:'بی',C:'سی',D:'دی',E:'ای',F:'اِف',G:'جی',H:'اِچ',I:'آی',J:'جِی',K:'کِی',L:'اِل',M:'اِم',N:'اِن',O:'او',P:'پی',Q:'کیو',R:'آر',S:'اِس',T:'تی',U:'یو',V:'وی',W:'دابلیو',X:'اِکس',Y:'وای',Z:'زِد'};
+function voiceCode(v){const raw=asciiDigits(String(v??'').trim()).toUpperCase(),parts=raw.match(/\d+|[A-Z]+/g)||[];if(!parts.length)return raw;const primary={M:'اِم',F:'اِف',B:'بی',S:'اِس',G:'جی',N:'اِن',R:'آر',L:'اِل',T:'تی',D:'دی',C:'سی',H:'اِچ',K:'کِی',P:'پی',V:'وی',A:'اِی',Z:'زِد'};return parts.map(part=>/^\d+$/.test(part)?intToFaWords(Number(part)):part.split('').map(c=>primary[c]||voiceLetterNames[c]||c).join('، ')).join('، ')}
+function voiceLocation(v){
+ const raw=String(v??'').trim().toUpperCase();
+ const m=raw.match(/^NBR-S(\d+)-R(\d+)-B(\d+)(?:-(\d+))?$/);
+ if(m)return `قفسه ${Number(m[1])}، ردیف ${Number(m[2])}، جعبه ${Number(m[3])}${m[4]?`، بخش ${Number(m[4])}`:''}`;
+ return raw?voiceCode(raw):'مکان ثبت نشده';
+}
+function voiceNumber(v){const n=Number(v);return Number.isFinite(n)&&n>=0&&Math.floor(n)===n?intToFaWords(n):String(v??'')}
+function preferredVoice(){const vs=speechSynthesis.getVoices();return vs.find(v=>/^fa(?:-|_)/i.test(v.lang||''))||vs.find(v=>/persian|farsi|فارسی/i.test(v.name||''))||null}
+let voiceDeferredTimer=null;
+function speak(text,{force=false,rate=1.0,pitch=1}={}){
+ // Never play automatic or manual descriptions in this build. This must not affect microphone input.
+ return false;
+ /*
+ if(!text||!voiceSupported()||(!voiceEnabled&&!force))return false;
+ const phrase=String(text);
+ const run=()=>{
+  try{
+   if(voiceDeferredTimer){clearTimeout(voiceDeferredTimer);voiceDeferredTimer=null}
+   speechSynthesis.cancel();
+   const u=new SpeechSynthesisUtterance(phrase);u.lang='fa-IR';
+   const v=preferredVoice();if(v)u.voice=v;
+   u.rate=rate;u.pitch=pitch;u.volume=1;
+   u.onstart=()=>{const x=document.querySelector('#voiceStatus');if(x)x.textContent='در حال خواندن فارسی…'};
+   u.onend=u.onerror=()=>{const x=document.querySelector('#voiceStatus');if(x)x.textContent=voiceEnabled?'صوت فارسی فعال':'صوت خاموش'};
+   speechSynthesis.speak(u);
+  }catch{}
+ };
+ // Mobile browsers often expose voices a little after page load. Wait briefly so an English default voice is not selected by mistake.
+ if(preferredVoice())run();
+ else{
+  let fired=false;
+  const onVoices=()=>{if(fired)return;const v=preferredVoice();if(v){fired=true;try{speechSynthesis.removeEventListener('voiceschanged',onVoices)}catch{}run()}};
+  try{speechSynthesis.addEventListener('voiceschanged',onVoices)}catch{}
+  voiceDeferredTimer=setTimeout(()=>{if(fired)return;fired=true;try{speechSynthesis.removeEventListener('voiceschanged',onVoices)}catch{}run()},900);
+ }
+ return true
+ */
+}
+function updateVoiceUi(){const b=document.querySelector('#voiceToggle'),st=document.querySelector('#voiceStatus');voiceEnabled=false;try{localStorage.setItem(VOICE_KEY,'0');speechSynthesis.cancel()}catch{}if(!b)return;b.disabled=true;b.classList.remove('on');b.classList.add('unsupported');b.textContent='🔇 صوت خاموش';if(st)st.textContent='صوت خاموش'}
+function toggleVoice(){voiceEnabled=false;try{localStorage.setItem(VOICE_KEY,'0');speechSynthesis.cancel()}catch{}updateVoiceUi();toast('صدای راهنما خاموش است.')}
+function stopVoice(){if(voiceSupported())speechSynthesis.cancel()}
+function voiceRow(label,value,full=false){return `<div class="voice-confirm-row ${full?'full':''}"><b>${html(label)}</b><span>${html(value)}</span></div>`}
+function openVoiceConfirm({title,rows,speech,onConfirm}){voiceConfirmAction=onConfirm;voiceConfirmSpeech=speech||'';voiceConfirmData={title,rows};document.querySelector('#voiceConfirmTitle').textContent=title;document.querySelector('#voiceConfirmBody').innerHTML=`<div class="voice-confirm-title">اطلاعاتی که ثبت می‌شود</div><div class="voice-confirm-grid">${rows.map(x=>voiceRow(x[0],x[1],!!x[2])).join('')}</div>`;document.querySelector('#voiceConfirmModal').classList.add('show');if(voiceEnabled)speak(voiceConfirmSpeech)}
+function closeVoiceConfirm(){stopVoice();document.querySelector('#voiceConfirmModal').classList.remove('show');voiceConfirmAction=null;voiceConfirmSpeech='';voiceConfirmData=null}
+function acceptVoiceConfirm(){const fn=voiceConfirmAction;stopVoice();document.querySelector('#voiceConfirmModal').classList.remove('show');voiceConfirmAction=null;voiceConfirmSpeech='';voiceConfirmData=null;if(fn)fn()}
+function operationSpeech(type,code,qty,from,to,extra=''){let t=`تأیید ${type}. کد ${voiceCode(code)}. تعداد ${voiceNumber(qty)}.`;if(from)t+=` مبدأ ${voiceLocation(from)}.`;if(to)t+=` مقصد ${voiceLocation(to)}.`;if(extra)t+=` ${extra}`;t+=' اگر اطلاعات درست است، تأیید و ثبت را بزنید.';return t}
+function speakScanProduct(code){speak(`کد محصول ${voiceCode(code)} شناسایی شد.`)}
+function speakScanLocation(loc){speak(`مکان ${voiceLocation(loc)} شناسایی شد.`)}
+function pickItemSpeech(order,item){return `مشتری ${order?.customer||'بدون نام'}. کد ${voiceCode(pickDisplayCode(item?.code||''))}. تعداد ${voiceNumber(item?.qty||0)}. مکان ${voiceLocation(item?.location||'')}.`}
+function speakPickItem(orderId,lineId){const o=pickFindOrder(orderId),it=pickFindItem(o,lineId);if(!o||!it)return toast('این ردیف سفارش پیدا نشد.');speak(pickItemSpeech(o,it),{force:true})}
+function speakPickOrder(orderId){const o=pickFindOrder(orderId);if(!o)return toast('این سفارش پیدا نشد.');const pending=(o.items||[]).filter(x=>x.status!=='برداشت شد');let text=`سفارش مشتری ${o.customer||'بدون نام'}. ${pending.length} ردیف باقی مانده.`;for(const it of pending.slice(0,12))text+=' '+pickItemSpeech(o,it);if(pending.length>12)text+=` ${pending.length-12} ردیف دیگر باقی مانده.`;speak(text,{force:true})}
+function speakPickQueue(){if(!pickOrders.length)return speak('سفارش بازی برای برداشت وجود ندارد.',{force:true});let text=`${pickOrders.length} سفارش باز برای برداشت.`;for(const o of pickOrders.slice(0,5)){const left=(o.items||[]).filter(x=>x.status!=='برداشت شد').length;text+=` مشتری ${o.customer||'بدون نام'}، ${left} ردیف باقی مانده.`}if(pickOrders.length>5)text+=`${pickOrders.length-5} سفارش دیگر نیز وجود دارد.`;speak(text,{force:true})}
+window.speakPickItem=speakPickItem;window.speakPickOrder=speakPickOrder;
+
+// Persian speech input and smart code resolver. This layer only searches/prefills UI; inventory writes remain in existing submit handlers.
+// Mobile browser recognition is deliberately disabled. The phone keyboard's
+// microphone writes here as normal text, so it does not start/stop mid-sentence.
+const SpeechRecognitionApi=null;
+let voiceRecognizer=null,voiceListening=false,lastVoiceProductCode='',voiceSessionActive=false,voiceHadSpeech=false,voiceRestartTimer=null,voiceFinalizeTimer=null,voiceNoSpeechTimer=null,voiceFinalText='',voiceInterimText='',voiceAlternatives=[],voiceFinalizing=false,voiceSegments=[],voiceStartBeepPlayed=false,lastVoiceQuantity=null,lastVoiceSuggestedAction='',voiceLastHeard='',voiceLastSpeechAt=0,voiceSessionStartedAt=0,voiceSilentRecoveryCount=0,voiceTextProcessTimer=null,voiceTextLastProcessed='',voiceTextComposing=false;
+const VOICE_AUTO_FINISH_SILENCE_MS=1900;
+const VOICE_NO_SPEECH_TIMEOUT_MS=15000;
+const VOICE_SILENT_RECOVERY_DELAY_MS=700;
+const VOICE_MAX_SILENT_RECOVERIES=1;
+const faDigitMap={'۰':'0','۱':'1','۲':'2','۳':'3','۴':'4','۵':'5','۶':'6','۷':'7','۸':'8','۹':'9','٠':'0','١':'1','٢':'2','٣':'3','٤':'4','٥':'5','٦':'6','٧':'7','٨':'8','٩':'9'};
+const faUnitWords={صفر:0,یک:1,يك:1,یه:1,يک:1,دو:2,سه:3,چهار:4,پنج:5,شش:6,شیش:6,هفت:7,هشت:8,نه:9};
+const faTeenWords={ده:10,یازده:11,يازده:11,دوازده:12,سیزده:13,سيزده:13,چهارده:14,پانزده:15,شانزده:16,هفده:17,هجده:18,نوزده:19};
+const faTensWords={بیست:20,بيست:20,بیس:20,سی:30,سي:30,چهل:40,پنجاه:50,شصت:60,هفتاد:70,هشتاد:80,نود:90};
+const faHundredsWords={صد:100,یکصد:100,يكصد:100,دویست:200,دويست:200,سیصد:300,سيصد:300,چهارصد:400,پانصد:500,پنجصد:500,پونصد:500,ششصد:600,هفتصد:700,هشتصد:800,نهصد:900};
+const spokenLetters={'اِم':'M','ام':'M','اِف':'F','اف':'F','بی':'B','بى':'B','بِي':'B','اس':'S','اِس':'S','جی':'G','جى':'G','ان':'N','اِن':'N','آر':'R','ار':'R','ال':'L','اِل':'L','تی':'T','تى':'T','دی':'D','دى':'D','سی':'C','سى':'C','اچ':'H','اِچ':'H','کی':'K','کِی':'K','پی':'P','پى':'P','وی':'V','وى':'V','ای':'A','اِی':'A','زد':'Z','زِد':'Z'};
+function asciiDigits(s){return String(s??'').replace(/[۰-۹٠-٩]/g,ch=>faDigitMap[ch]||ch)}
+function faTextNorm(s){return asciiDigits(String(s??'')).replace(/[\u064B-\u065F\u0670]/g,'').replace(/ي/g,'ی').replace(/ك/g,'ک').replace(/[‌ـ]/g,' ').replace(/[،,؛;:.!?؟()\[\]{}]/g,' ').replace(/\s+/g,' ').trim().replace(/(^|\s)(?:بستو|بیستو)(?=\s|$)/g,'$1بیست و').replace(/(^|\s)پونصد(?=\s|$)/g,'$1پانصد').replace(/(^|\s)پنجصد(?=\s|$)/g,'$1پانصد').replace(/(^|\s)شیش(?=\s|$)/g,'$1شش').replace(/(^|\s)چار(?=\s|$)/g,'$1چهار')}
+function canonicalCode(s){return asciiDigits(String(s??'')).toUpperCase().replace(/[^0-9A-Z]/g,'')}
+function displayWarehouseCode(value){const raw=asciiDigits(String(value??'')).toUpperCase().trim().replace(/[–—_\s/]+/g,'-');if(raw.includes('-'))return raw;const compact=canonicalCode(raw),numeric=compact.match(/^(\d{1,2})(\d{3,5})$/);return numeric?`${numeric[1]}-${numeric[2]}`:raw}
+function productAliases(p){const raw=[p?.code,p?.altCode,p?.code2,p?.alias,p?.aliases].filter(Boolean).join('/');const bits=raw.split(/[\/|،,؛;\s]+/).map(x=>x.trim()).filter(Boolean);const codeLike=raw.match(/[0-9۰-۹A-Za-z]+(?:[-_][0-9۰-۹A-Za-z]+)+|[0-9۰-۹]+[A-Za-z][0-9A-Za-z۰-۹-]*/g)||[];return [...new Set([p?.code,...bits,...codeLike].filter(Boolean))]}
+function intToFaWords(n){n=Math.max(0,Math.floor(Number(n)||0));const u=['صفر','یک','دو','سه','چهار','پنج','شش','هفت','هشت','نه'],te=['ده','یازده','دوازده','سیزده','چهارده','پانزده','شانزده','هفده','هجده','نوزده'],tw=['','','بیست','سی','چهل','پنجاه','شصت','هفتاد','هشتاد','نود'],hu=['','صد','دویست','سیصد','چهارصد','پانصد','ششصد','هفتصد','هشتصد','نهصد'];if(n<10)return u[n];if(n<20)return te[n-10];if(n<100)return tw[Math.floor(n/10)]+(n%10?' و '+u[n%10]:'');if(n<1000)return hu[Math.floor(n/100)]+(n%100?' و '+intToFaWords(n%100):'');if(n<1000000){const a=Math.floor(n/1000),b=n%1000;return intToFaWords(a)+' هزار'+(b?' و '+intToFaWords(b):'')}return String(n)}
+function digitWords(s){return asciiDigits(String(s)).split('').map(d=>['صفر','یک','دو','سه','چهار','پنج','شش','هفت','هشت','نه'][Number(d)]||d).join(' ')}
+function spokenNumericSegmentVariants(seg){
+ const raw=asciiDigits(String(seg||''));const out=new Set();if(!/^\d+$/.test(raw))return[];
+ out.add(faTextNorm(intToFaWords(Number(raw))));out.add(faTextNorm(digitWords(raw)));
+ // روش واقعی انبار: 5024 => «پنجاه بیست و چهار»، 3041 => «سی چهل و یک».
+ if(raw.length>=4){
+   const firstLen=raw.length%2||2,parts=[];let i=0;
+   if(firstLen!==2){parts.push(raw.slice(0,firstLen));i=firstLen}
+   for(;i<raw.length;i+=2)parts.push(raw.slice(i,i+2));
+   if(parts.length>1)out.add(faTextNorm(parts.map(x=>intToFaWords(Number(x))).join(' ')));
+ }
+ // سه رقمی‌ها معمولاً کامل خوانده می‌شوند؛ شکل رقم‌به‌رقم هم پذیرفته است.
+ return [...out].filter(Boolean)
+}
+function codeSpokenVariants(code){
+ const raw=asciiDigits(String(code||'')).toUpperCase();const vars=new Set([faTextNorm(raw),faTextNorm(raw.replace(/[-_/]/g,' '))]);
+ const primaryLetters={M:'ام',F:'اف',B:'بی',S:'اس',G:'جی',N:'ان',R:'آر',L:'ال',T:'تی',D:'دی',C:'سی',H:'اچ',K:'کی',P:'پی',V:'وی',A:'ای',Z:'زد'};
+ const explicit=raw.split(/[-_/]+/).filter(Boolean);
+ if(explicit.length>1){
+   let phrases=[''];
+   for(const part of explicit){const pv=/^\d+$/.test(part)?spokenNumericSegmentVariants(part):[part.split('').map(c=>primaryLetters[c]||c).join(' ')];const next=[];for(const a of phrases)for(const b of pv){next.push((a+' '+b).trim());if(next.length>=80)break}phrases=next}
+   for(const p of phrases)vars.add(faTextNorm(p));
+ }
+ const parts=raw.match(/\d+|[A-Z]+/g)||[];
+ if(parts.length){
+  const groups=parts.map(x=>/^\d+$/.test(x)?spokenNumericSegmentVariants(x):[x.split('').map(c=>primaryLetters[c]||c).join(' ')]);
+  let phrases=[''];for(const g of groups){const next=[];for(const a of phrases)for(const b of g){next.push((a+' '+b).trim());if(next.length>=80)break}phrases=next}
+  for(const phrase of phrases)vars.add(faTextNorm(phrase));
+ }
+ return [...vars].filter(Boolean)
+}
+function parseFaNumberTokens(tokens){let total=0,current=0,used=false;for(const t0 of tokens){const t=t0.trim();if(!t||t==='و')continue;if(/^\d+$/.test(t)){current+=Number(t);used=true;continue}if(t in faUnitWords){current+=faUnitWords[t];used=true;continue}if(t in faTeenWords){current+=faTeenWords[t];used=true;continue}if(t in faTensWords){current+=faTensWords[t];used=true;continue}if(t in faHundredsWords){current+=faHundredsWords[t];used=true;continue}if(t==='هزار'){total+=(current||1)*1000;current=0;used=true;continue}return null}return used?total+current:null}
+function isSpokenLetterToken(w){return !!spokenLetters[w]||/^[A-Za-z]$/.test(w)}
+function spokenLetterValue(w){return spokenLetters[w]||(/^[A-Za-z]$/.test(w)?w.toUpperCase():'')}
+function isNumericSpeechToken(w){return w==='و'||/^\d+$/.test(w)||w in faUnitWords||w in faTeenWords||w in faTensWords||w in faHundredsWords||w==='هزار'}
+function numericSpeechCandidates(tokens){
+ const ts=tokens.filter(Boolean),out=new Set();if(!ts.length)return[];
+ const whole=parseFaNumberTokens(ts);if(whole!==null)out.add(String(whole));
+ const meaningful=ts.filter(x=>x!=='و');
+ if(meaningful.length&&meaningful.every(x=>/^\d+$/.test(x)||x in faUnitWords)){let seq='';for(const x of meaningful)seq+=/^\d+$/.test(x)?x:String(faUnitWords[x]);if(seq)out.add(seq)}
+ if(meaningful.length===1&&/^\d+$/.test(meaningful[0]))out.add(meaningful[0]);
+ // روش واقعی خواندن انبار: «پنجاه بیست و چهار» => 50 + 24 => 5024، «سی چهل و یک» => 3041.
+ // تمام شکست‌های معقول عبارت عددی را می‌سازیم و سپس با بانک کد تطبیق می‌دهیم.
+ const clean=ts.filter(Boolean);
+ const memo=new Map();
+ function rec(i){if(i>=clean.length)return [''];if(memo.has(i))return memo.get(i);const vals=[];for(let j=i+1;j<=clean.length;j++){
+   const slice=clean.slice(i,j);if(slice[0]==='و'||slice[slice.length-1]==='و')continue;
+   const n=parseFaNumberTokens(slice);if(n===null)continue;
+   for(const tail of rec(j)){vals.push(String(n)+tail);if(vals.length>=80)break}
+   if(vals.length>=80)break
+ }memo.set(i,vals);return vals}
+ for(const v of rec(0))if(v)out.add(v);
+ return[...out].filter(Boolean)
+}
+function cartesianJoin(groups,limit=100){let acc=[''];for(const g of groups){if(!g.length)return[];const next=[];outer:for(const a of acc)for(const b of g){next.push(a+b);if(next.length>=limit)break outer}acc=next}return acc}
+function spokenToCompactCandidates(text){
+ let clean=faTextNorm(text);
+ const filler=new Set(['کد','محصول','شماره','لطفا','لطفاً','بزن','بگرد','پیدا','کن','جستجو','جست','جو','برداشت','خروج','ورود','انتقال','اصلاح']);
+ clean=clean.replace(/خط\s+تیره/g,' | ').replace(/(?:^|\s)(?:دش|منهای|اسلش|فاصله)(?=\s|$)/g,' | ').replace(/\s+/g,' ').trim();
+ const words=clean.split(' ').filter(Boolean).filter(w=>!filler.has(w));
+ const out=new Set();out.add(canonicalCode(words.join(' ')));
+ const groups=[],current=[];const flush=()=>{if(current.length){groups.push(numericSpeechCandidates(current));current.length=0}};
+ for(const w of words){if(w==='|'){flush();continue}if(isSpokenLetterToken(w)){flush();groups.push([spokenLetterValue(w)]);continue}if(isNumericSpeechToken(w)){current.push(w);continue}const c=canonicalCode(w);if(c){flush();groups.push([c])}}
+ flush();for(const c of cartesianJoin(groups))out.add(c);
+ const nonSep=words.filter(w=>w!=='|');
+ if(nonSep.length&&nonSep.every(w=>isNumericSpeechToken(w))){
+  for(const c of numericSpeechCandidates(nonSep))out.add(c);
+  for(let cut=1;cut<nonSep.length;cut++){const left=numericSpeechCandidates(nonSep.slice(0,cut)),right=numericSpeechCandidates(nonSep.slice(cut));for(const a of left)for(const b of right)out.add(a+b)}
+ }
+ let mapped='';for(const w of words){if(w==='|'||w==='و')continue;if(w in faUnitWords)mapped+=faUnitWords[w];else if(/^\d+$/.test(w))mapped+=w;else if(isSpokenLetterToken(w))mapped+=spokenLetterValue(w)}if(mapped)out.add(mapped);
+ return[...out].filter(Boolean)
+}
+// Gboard may write a code in several short bursts.  Keep literal code forms as
+// first-class candidates, so Persian digits and a spoken F/M are never lost
+// while the general spoken-number parser is also running.
+function directVoiceCodeCandidates(text){
+ const clean=asciiDigits(String(text??'')).toUpperCase().replace(/[–—_\/]+/g,'-').replace(/[\s]+/g,' ').trim();
+ const out=new Set();
+ for(const m of clean.matchAll(/\b(\d{1,2})\s*-\s*(\d{3,5})\b/g))out.add(m[1]+m[2]);
+ for(const m of clean.matchAll(/\b(\d{1,2})\s*(?:([A-Z])|(?:اِ?م|اِ?ف|بی|اِ?س|جی|اِ?ن|آر|اِ?ل|تی|دی|سی|اِ?چ|کِ?ی|پی|وی|اِ?ی|زِ?د))\s*(\d{2,5})\b/g)){
+  const letter=m[2]||spokenLetterValue(faTextNorm(m[0]).split(' ')[1]||'');
+  if(letter)out.add(m[1]+letter+m[3]);
+ }
+ return [...out];
+}
+function levenshtein(a,b){a=String(a);b=String(b);const m=Array(b.length+1).fill(0).map((_,i)=>i);for(let i=1;i<=a.length;i++){let prev=m[0];m[0]=i;for(let j=1;j<=b.length;j++){const tmp=m[j];m[j]=Math.min(m[j]+1,m[j-1]+1,prev+(a[i-1]===b[j-1]?0:1));prev=tmp}}return m[b.length]}
+const voiceOperationWords={خروج:'out',برداشت:'pick',ورود:'in',انتقال:'move',جابجایی:'move',جابهجایی:'move',اصلاح:'adjust'};
+function splitVoiceAction(text){
+ const normed=faTextNorm(text),tokens=normed.split(' ').filter(Boolean);let action='',actionIndex=-1;
+ for(let i=tokens.length-1;i>=0;i--){const k=tokens[i].replace(/\s/g,'');if(voiceOperationWords[k]){action=voiceOperationWords[k];actionIndex=i;break}}
+ return{normed,tokens,action,actionIndex,pre:actionIndex>=0?tokens.slice(0,actionIndex):tokens.slice()}
+}
+function exactVoiceProductFromText(codeText){
+ const heard=faTextNorm(codeText),compact=spokenToCompactCandidates(codeText),hits=[];
+ for(const p of db?.products||[]){for(const a of productAliases(p)){const c=canonicalCode(a);if(compact.includes(c)||codeSpokenVariants(a).includes(heard)){hits.push({p,a});break}}}
+ if(hits.length===1)return hits[0];
+ return null
+}
+function parseVoiceCommandText(text){
+ const base=splitVoiceAction(text),pre=base.pre.slice();let qty=null,codeText=pre.join(' ');
+ // If an operation was spoken, choose the split whose LEFT side resolves to a real product
+ // and whose RIGHT side is a valid quantity. This prevents «سه سه» from becoming 6.
+ if(base.action){
+  const cleaned=pre.slice();while(cleaned.length&&['تا','عدد','دونه','دانه'].includes(cleaned[cleaned.length-1]))cleaned.pop();
+  let best=null;
+  for(let cut=1;cut<cleaned.length;cut++){
+   let right=cleaned.slice(cut);while(right.length&&['تا','عدد','دونه','دانه'].includes(right[right.length-1]))right.pop();
+   while(right.length&&['تا','عدد','دونه','دانه'].includes(right[0]))right.shift();
+   const n=parseFaNumberTokens(right);if(n===null||n<=0||n>9999)continue;
+   const left=cleaned.slice(0,cut);if(!left.length)continue;
+   const hit=exactVoiceProductFromText(left.join(' '));if(!hit)continue;
+   // Prefer the split consuming the shortest quantity phrase; spoken quantities are usually short.
+   const score=right.filter(x=>x!=='و').length;
+   if(!best||score<best.score)best={qty:n,codeText:left.join(' '),score}
+  }
+  if(best){qty=best.qty;codeText=best.codeText}
+ }
+ return{codeText,qty,action:base.action,normalized:base.normed}
+}
+function inferUnknownSpokenCode(text){
+ const clean=faTextNorm(text).replace(/خط\s+تیره/g,' | ').replace(/(?:^|\s)(?:دش|منهای|اسلش)(?=\s|$)/g,' | ').replace(/\s+/g,' ').trim();
+ if(!clean)return'';
+ const filler=new Set(['کد','محصول','شماره','لطفا','لطفاً','بزن','بگرد','پیدا','کن','جستجو','جست','جو']);
+ const words=clean.split(' ').filter(Boolean).filter(w=>!filler.has(w));
+ // حرف انگلیسی: «ده ام صد و بیست و سه» => 10M123
+ for(let i=0;i<words.length;i++){
+  if(!isSpokenLetterToken(words[i]))continue;
+  const left=words.slice(0,i),right=words.slice(i+1),ls=numericSpeechCandidates(left),rs=numericSpeechCandidates(right);let best='';let score=-1e9;
+  for(const a of ls)for(const b of rs){if(!/^\d+$/.test(a)||!/^\d+$/.test(b))continue;const av=Number(a);if(av<1||av>99||b.length>5)continue;let sc=(a.length===2?8:3)+(b.length>=3&&b.length<=4?8:b.length===2?4:1);if(sc>score){score=sc;best=String(av)+spokenLetterValue(words[i])+b}}
+  if(best)return best;
+ }
+ const bar=words.indexOf('|');
+ if(bar>0&&bar<words.length-1){const ls=numericSpeechCandidates(words.slice(0,bar)),rs=numericSpeechCandidates(words.slice(bar+1));for(const a of ls)for(const b of rs)if(/^\d{1,2}$/.test(a)&&/^\d{1,5}$/.test(b))return `${Number(a)}-${b}`}
+ // کدهای خط‌تیره: تمام محل‌های ممکن مکث را امتحان می‌کنیم.
+ const candidates=[];
+ for(let cut=1;cut<words.length;cut++){
+  const left=words.slice(0,cut),right=words.slice(cut);if(left[0]==='و'||left.at(-1)==='و'||right[0]==='و'||right.at(-1)==='و')continue;
+  const ls=numericSpeechCandidates(left),rs=numericSpeechCandidates(right);
+  for(const a0 of ls)for(const b0 of rs){if(!/^\d+$/.test(a0)||!/^\d+$/.test(b0))continue;const a=String(Number(a0)),b=b0;if(Number(a)<1||Number(a)>99||b.length>5)continue;let score=0;score+=a.length===2?12:4;score+=b.length===4?12:b.length===3?10:b.length===2?5:b.length===5?2:0;score-=Math.max(0,left.filter(x=>x!=='و').length-3);if(b.length===1)score-=4;candidates.push({code:`${a}-${b}`,score})}
+ }
+ candidates.sort((x,y)=>y.score-x.score);return candidates[0]?.code||''
+}
+function speechSkeleton(s){return faTextNorm(s).split(' ').filter(x=>x&&x!=='و').join(' ')}
+function resolveSpokenProduct(transcript){
+ const cmd=parseVoiceCommandText(transcript),heard=faTextNorm(cmd.codeText),heardSk=speechSkeleton(cmd.codeText),compact=[...new Set([...directVoiceCodeCandidates(cmd.codeText),...spokenToCompactCandidates(cmd.codeText)])];let exact=[];
+ const compactSet=new Set(compact.map(canonicalCode));
+ for(const p of db?.products||[]){for(const a of productAliases(p)){const c=canonicalCode(a),variants=codeSpokenVariants(a);if(compactSet.has(c)||variants.some(v=>v===heard||speechSkeleton(v)===heardSk)){exact.push({p,a,score:0});break}}}
+ const uniqueExact=[];const seen=new Set();for(const x of exact){const k=canonicalCode(x.p.code);if(!seen.has(k)){seen.add(k);uniqueExact.push(x)}}
+ if(uniqueExact.length===1)return {product:uniqueExact[0].p,alias:uniqueExact[0].a,confidence:'exact',qty:cmd.qty,action:cmd.action};
+ if(uniqueExact.length>1)return {ambiguous:uniqueExact.map(x=>x.p),qty:cmd.qty,action:cmd.action};
+ let best=[];for(const p of db?.products||[]){let ps=99,pa=p.code;for(const a of productAliases(p)){const c=canonicalCode(a);for(const h of compactSet){if(!h||Math.abs(c.length-h.length)>2)continue;const d=levenshtein(c,h),ratio=d/Math.max(c.length,h.length);if(ratio<ps){ps=ratio;pa=a}}for(const v of codeSpokenVariants(a)){const vs=speechSkeleton(v).replace(/\s/g,''),hs=heardSk.replace(/\s/g,'');const d=levenshtein(vs,hs),ratio=d/Math.max(vs.length,hs.length,1);if(ratio<ps){ps=ratio;pa=a}}}best.push({p,alias:pa,score:ps})}
+ best.sort((a,b)=>a.score-b.score);if(best[0]&&best[0].score<=0.15&&(!best[1]||best[1].score-best[0].score>=0.055))return {product:best[0].p,alias:best[0].alias,confidence:'fuzzy',qty:cmd.qty,action:cmd.action};
+ const inferredCode=inferUnknownSpokenCode(cmd.codeText);return {notFound:true,inferredCode,candidates:best.slice(0,3).filter(x=>x.score<=0.22),qty:cmd.qty,action:cmd.action}
+}
+function productStockRows(code){const aliases=new Set(productAliases({code}).map(canonicalCode));return (db?.stock||[]).filter(x=>aliases.has(canonicalCode(x.p))||canonicalCode(x.p)===canonicalCode(code)).sort((a,b)=>Number(b.q||0)-Number(a.q||0))}
+function matchingPickItems(code){const p=(db?.products||[]).find(x=>canonicalCode(x.code)===canonicalCode(code)||productAliases(x).some(a=>canonicalCode(a)===canonicalCode(code)));const codes=new Set((p?productAliases(p):[code]).map(canonicalCode));const hits=[];for(const o of pickOrders||[])for(const it of o.items||[]){const a=canonicalCode(pickDisplayCode(it.code||it.productCode||'')),b=canonicalCode(it.code||'');if(codes.has(a)||codes.has(b))hits.push({order:o,item:it})}return hits}
+function smartProductCard(p,{heard='',confidence='',qty=null,action=''}={}){const rows=(db.stock||[]).filter(x=>productAliases(p).some(a=>canonicalCode(a)===canonicalCode(x.p))||canonicalCode(x.p)===canonicalCode(p.code));const total=rows.reduce((s,x)=>s+Math.max(0,Number(x.q)||0),0),hits=matchingPickItems(p.code);const aliases=productAliases(p);lastVoiceQuantity=Number.isFinite(Number(qty))&&Number(qty)>0?Number(qty):null;lastVoiceSuggestedAction=action||'';const extraMeta=[['سایز',p.size||p.dimensions],['جنس',p.material||p.fabric],['دسته',p.category||p.group]].filter(x=>x[1]);const locHtml=rows.length?rows.map(x=>`<div class="product-stock-row ${Number(x.q)<=0?'zero':''}"><span><b>${html(x.display||x.l||'بدون مکان')}</b>${x.shared?' · موجودی مشترک':''}</span><span class="badge">${fa(x.q||0)} عدد</span></div>`).join(''):'<div class="empty">لوکیشنی برای این کد ثبت نشده است.</div>';const pickHtml=hits.length?`<div class="voice-match-note"><b>${fa(hits.length)} مورد در سفارش‌های باز پیدا شد.</b><br>${hits.slice(0,5).map(h=>`${html(h.order.customer||'بدون نام')} · ${fa(h.item.qty||0)} عدد · ${html(h.item.location||'بدون مکان')}`).join('<br>')}</div>`:'';const zeroAssign=total<=0?`<div class="zero-location-assign"><b>${p._voiceNew?'ایجاد لوکیشن برای کد جدید':'تعیین لوکیشن برای کالای بدون موجودی'}</b><div class="section-note">${p._voiceNew?'این کد هنوز در بانک اطلاعات نیست. با ثبت لوکیشن، کد با موجودی صفر ایجاد می‌شود.':'این کار فقط لوکیشن این کد را با موجودی صفر ثبت می‌کند و تعداد کالا را افزایش نمی‌دهد.'}</div><div class="location-input"><input id="voiceAssignLocation" placeholder="NBR-S01-R02-B01-02"><button class="mini-scan" type="button" onclick="openScanner('voiceAssignLoc')">اسکن</button></div><button class="primary" type="button" onclick="registerZeroStockLocation('${html(p.code)}')">${p._voiceNew?'ایجاد لوکیشن':'ثبت لوکیشن با موجودی صفر'}</button></div>`:'';document.querySelector('#productVoiceCard').innerHTML=`<div class="product-card-head"><div><div class="product-code-big">${html(p.code)}</div><div class="product-name-big">${html(p.name||'')}</div></div><span class="badge">مجموع ${fa(total)}</span></div><div class="product-meta">${p._voiceNew?`<span class="badge">کد جدید — در بانک نیست</span>`:''}${p.occasion?`<span class="badge">${html(p.occasion)}</span>`:''}${extraMeta.map(x=>`<span class="badge">${html(x[0])}: ${html(x[1])}</span>`).join('')}${aliases.length>1?`<span class="badge">کدها: ${html(aliases.join(' / '))}</span>`:''}</div>${heard?`<div class="voice-match-note">شنیده شد: <b>${html(heard)}</b>${confidence==='fuzzy'?' — با تطبیق هوشمند پیدا شد.':''}</div>`:''}${lastVoiceQuantity?`<div class="voice-match-note"><b>تعداد شنیده‌شده: ${fa(lastVoiceQuantity)} عدد</b> · با زدن هر عملیات، همین تعداد خودکار در فیلد تعداد همان فرم قرار می‌گیرد.${lastVoiceSuggestedAction?` عملیات پیشنهادی: ${html({out:'خروج',in:'ورود',move:'انتقال',adjust:'اصلاح',pick:'برداشت'}[lastVoiceSuggestedAction]||'')}`:''}</div>`:''}<div class="product-stock-list">${locHtml}</div>${zeroAssign}${pickHtml}<div class="product-card-actions"><button class="primary" onclick="voiceProductAction('pick','${html(p.code)}')">برداشت سفارش</button><button class="primary ${lastVoiceSuggestedAction==='out'?'voice-suggested':''}" onclick="voiceProductAction('out','${html(p.code)}')">خروج</button><button class="secondary ${lastVoiceSuggestedAction==='in'?'voice-suggested':''}" onclick="voiceProductAction('in','${html(p.code)}')">ورود</button><button class="secondary ${lastVoiceSuggestedAction==='move'?'voice-suggested':''}" onclick="voiceProductAction('move','${html(p.code)}')">انتقال</button><button class="secondary ${lastVoiceSuggestedAction==='adjust'?'voice-suggested':''}" onclick="voiceProductAction('adjust','${html(p.code)}')">اصلاح</button><button class="voice-mini" onclick="speakVoiceProductCard('${html(p.code)}')">🔊 خواندن مشخصات</button></div>`;document.querySelector('#productVoiceModal').classList.add('show');lastVoiceProductCode=p.code}
+function registerZeroStockLocation(code){run(()=>{code=norm(code);let p=(db.products||[]).find(x=>canonicalCode(x.code)===canonicalCode(code));const isNew=!p;if(!p)p={code,name:'کد جدید',occasion:'تعیین‌نشده',_voiceNew:true};const l=norm(document.querySelector('#voiceAssignLocation')?.value||'');if(!locationValid(l))throw Error('کد مکان صحیح نیست. نمونه: NBR-S01-R02-B01-02');const existing=item(code,l);if(existing){toast(Number(existing.q)>0?'این لوکیشن از قبل موجودی دارد.':'این لوکیشن قبلاً برای این کد ثبت شده است.');speak(`لوکیشن ${voiceLocation(l)} قبلاً برای کد ${voiceCode(code)} ثبت شده است.`);return}openVoiceConfirm({title:isNew?'تأیید ایجاد کد و لوکیشن':'تأیید تعیین لوکیشن',rows:[['عملیات',isNew?'ایجاد کد و تعیین لوکیشن':'تعیین لوکیشن'],['کد محصول',code],['لوکیشن',l,true],['موجودی ثبت‌شونده','۰ عدد']],speech:`تأیید تعیین لوکیشن. کد ${voiceCode(code)}. لوکیشن ${voiceLocation(l)}. موجودی صفر. اگر درست است تأیید و ثبت را بزنید.`,onConfirm:()=>{commitAdjustSubmit({l,p:code,q:0,reason:isNew?'ایجاد کد جدید و تعیین لوکیشن با موجودی صفر':'تعیین لوکیشن برای موجودی صفر'});setTimeout(()=>{const saved=(db.products||[]).find(x=>canonicalCode(x.code)===canonicalCode(code))||p;smartProductCard(saved)},100)}})})}
+window.registerZeroStockLocation=registerZeroStockLocation;
+function speakVoiceProductCard(code){const p=(db.products||[]).find(x=>canonicalCode(x.code)===canonicalCode(code));if(!p)return;const rows=(db.stock||[]).filter(x=>canonicalCode(x.p)===canonicalCode(p.code)),total=rows.reduce((s,x)=>s+Math.max(0,Number(x.q)||0),0);let t=`کد ${voiceCode(p.code)}. ${p.name||''}. موجودی کل ${voiceNumber(total)}.`;for(const x of rows.slice(0,6))t+=` ${voiceLocation(x.l)}، ${voiceNumber(x.q)} عدد.`;const hits=matchingPickItems(p.code);if(hits.length)t+=` این کد در ${hits.length} ردیف سفارش باز وجود دارد.`;speak(t,{force:true})}
+function voiceProductAction(action,code){document.querySelector('#productVoiceModal').classList.remove('show');const p=(db.products||[]).find(x=>canonicalCode(x.code)===canonicalCode(code));if(!p)return;const rows=(db.stock||[]).filter(x=>canonicalCode(x.p)===canonicalCode(p.code)&&locationValid(x.l));const active=rows.filter(x=>Number(x.q)>0);if(action==='pick'){lastVoiceProductCode=p.code;switchTab('pick');document.querySelector('#pickCustomerSearch').value='';renderPickOrders();setTimeout(()=>{const first=document.querySelector('.pick-match');if(first)first.scrollIntoView({behavior:'smooth',block:'center'});else toast('این کد در سفارش‌های باز پیدا نشد.')},80);speak(`سفارش‌های کد ${voiceCode(p.code)} بررسی شد.`);return}if(action==='out'){switchTab('out');document.querySelector('#outProduct').value=p.code;if(active.length===1)document.querySelector('#outLoc').value=active[0].l;if(lastVoiceQuantity)document.querySelector('#outQty').value=lastVoiceQuantity;showAvailable();document.querySelector(active.length===1?'#outQty':'#outLoc').focus();return}if(action==='in'){switchTab('in');document.querySelector('#inProduct').value=p.code;if(lastVoiceQuantity)document.querySelector('#inQty').value=lastVoiceQuantity;inProductInfo();document.querySelector('#inQty').focus();return}if(action==='move'){switchTab('move');document.querySelector('#moveProduct').value=p.code;if(active.length===1)document.querySelector('#moveFrom').value=active[0].l;if(lastVoiceQuantity)document.querySelector('#moveQty').value=lastVoiceQuantity;document.querySelector(active.length===1?'#moveTo':'#moveFrom').focus();return}if(action==='adjust'){switchTab('adjust');document.querySelector('#adjustProduct').value=p.code;if(rows.length===1)document.querySelector('#adjustLoc').value=rows[0].l;if(lastVoiceQuantity)document.querySelector('#adjustQty').value=lastVoiceQuantity;document.querySelector(rows.length===1?'#adjustQty':'#adjustLoc').focus();return}}
+window.voiceProductAction=voiceProductAction;window.speakVoiceProductCard=speakVoiceProductCard;
+function showRecognizedVoiceCode(code){const shown=displayWarehouseCode(code),heard=document.querySelector('#voiceHeard'),input=document.querySelector('#voiceCommandText');if(heard)heard.textContent='شنیده شد: '+shown;if(input)input.value=shown;return shown}
+function clearVoiceCommandAfterCard(){const input=document.querySelector('#voiceCommandText');if(input)input.value='';voiceTextLastProcessed=''}
+function handleVoiceTranscript(transcript){const r=resolveSpokenProduct(transcript);if(r.product){const shown=showRecognizedVoiceCode(r.product.code);smartProductCard(r.product,{heard:shown,confidence:r.confidence,qty:r.qty,action:r.action});clearVoiceCommandAfterCard(shown);return}if(r.ambiguous?.length){toast('چند کد نزدیک پیدا شد؛ لطفاً کد را دوباره واضح‌تر بخوانید.');return}if(r.inferredCode){const p={code:displayWarehouseCode(r.inferredCode),name:'کد جدید',occasion:'',_voiceNew:true},shown=showRecognizedVoiceCode(p.code);smartProductCard(p,{heard:shown,confidence:'new',qty:r.qty,action:r.action});clearVoiceCommandAfterCard(shown);toast('این کد در بانک نیست؛ در صورت درست بودن می‌توانید برایش لوکیشن ایجاد کنید.');return}const heard=document.querySelector('#voiceHeard');if(heard)heard.textContent='کد قابل تشخیص نبود: '+transcript;toast('کد قابل تشخیص نبود. دوباره بخوانید یا کد را تایپ کنید.')}
+function voiceCommandText(){return String(document.querySelector('#voiceCommandText')?.value||'').replace(/\s+/g,' ').trim()}
+function processVoiceCommandText(force=false){if(voiceTextProcessTimer){clearTimeout(voiceTextProcessTimer);voiceTextProcessTimer=null}if(voiceTextComposing&&!force)return;const text=voiceCommandText();if(!text){if(force)toast('کد یا دستور را بگویید یا بنویسید.');return}if(!force&&text===voiceTextLastProcessed)return;voiceTextLastProcessed=text;handleVoiceTranscript(text)}
+function queueVoiceCommandText(){if(voiceTextProcessTimer)clearTimeout(voiceTextProcessTimer);if(voiceTextComposing)return;voiceTextProcessTimer=setTimeout(()=>processVoiceCommandText(false),1250)}
+function handleVoiceAlternatives(list){const uniq=[...new Set((list||[]).map(x=>String(x||'').trim()).filter(Boolean))];for(const t of uniq){const r=resolveSpokenProduct(t);if(r.product&&r.confidence==='exact'){handleVoiceTranscript(t);return}}const resolved=uniq.map(t=>({t,r:resolveSpokenProduct(t)})).filter(x=>x.r.product);if(resolved.length){const ids=new Set(resolved.map(x=>canonicalCode(x.r.product.code)));if(ids.size===1){handleVoiceTranscript(resolved[0].t);return}}handleVoiceTranscript(uniq[0]||'')}
+function clearVoiceRecognitionTimers(){if(voiceRestartTimer){clearTimeout(voiceRestartTimer);voiceRestartTimer=null}if(voiceFinalizeTimer){clearTimeout(voiceFinalizeTimer);voiceFinalizeTimer=null}if(voiceNoSpeechTimer){clearTimeout(voiceNoSpeechTimer);voiceNoSpeechTimer=null}}
+function setVoiceRecognitionUi(active,message=''){const b=document.querySelector('#voiceCommandBtn'),heard=document.querySelector('#voiceHeard');if(b){b.classList.toggle('listening',active);b.textContent=active?'🎙️ در حال شنیدن…':'🎙️ گفتن کد محصول';b.title=active?'بعد از پایان طبیعی گفتار، خودکار جست‌وجو می‌شود. برای لغو، دوباره بزنید.':'شروع جست‌وجوی صوتی'}if(heard&&message)heard.textContent=message}
+function voiceHasTranscript(){return !!(voiceFinalText.trim()||voiceInterimText.trim())}
+function scheduleVoiceNoSpeechTimeout(){if(voiceNoSpeechTimer)clearTimeout(voiceNoSpeechTimer);voiceNoSpeechTimer=setTimeout(()=>{if(voiceSessionActive&&!voiceHasTranscript())stopVoiceRecognition('صدایی دریافت نشد؛ دوباره بزنید و کد را بخوانید.')},VOICE_NO_SPEECH_TIMEOUT_MS)}
+function voiceMergeText(base,next){const a=String(base||'').trim(),b=String(next||'').trim();if(!a)return b;if(!b)return a;const ka=faTextNorm(a),kb=faTextNorm(b);if(!ka||!kb||ka===kb||ka.endsWith(kb))return a;if(kb.startsWith(ka))return b;const aw=ka.split(' '),bw=kb.split(' ');let overlap=0;for(let n=Math.min(aw.length,bw.length,8);n>0;n--){if(aw.slice(-n).join(' ')===bw.slice(0,n).join(' ')){overlap=n;break}}return a+' '+(overlap?b.split(/\s+/).slice(overlap).join(' '):b)}
+function voiceResultText(parts){return (parts||[]).reduce((out,part)=>voiceMergeText(out,part),'').trim()}
+function rememberVoiceAlternative(text){const t=String(text||'').trim();if(!t)return;const key=faTextNorm(t);if(!voiceAlternatives.some(x=>faTextNorm(x)===key))voiceAlternatives.push(t)}
+function scheduleVoiceRestart(delay=VOICE_SILENT_RECOVERY_DELAY_MS,quiet=true){if(voiceRestartTimer){clearTimeout(voiceRestartTimer);voiceRestartTimer=null}if(!voiceSessionActive)return;if(!quiet)setVoiceRecognitionUi(true,'در حال شنیدن… کد را کامل و طبیعی بخوانید.');voiceRestartTimer=setTimeout(()=>{voiceRestartTimer=null;if(voiceSessionActive&&!voiceRecognizer)launchVoiceRecognizer(true)},delay)}
+function scheduleVoiceFinalize(delay=VOICE_AUTO_FINISH_SILENCE_MS,reset=false){if(voiceFinalizeTimer&&!reset)return;if(voiceFinalizeTimer)clearTimeout(voiceFinalizeTimer);voiceFinalizeTimer=setTimeout(()=>{voiceFinalizeTimer=null;if(!voiceSessionActive||!voiceHasTranscript())return;const elapsed=voiceLastSpeechAt?Date.now()-voiceLastSpeechAt:VOICE_AUTO_FINISH_SILENCE_MS;if(elapsed<VOICE_AUTO_FINISH_SILENCE_MS){scheduleVoiceFinalize(VOICE_AUTO_FINISH_SILENCE_MS-elapsed,true);return}finishVoiceRecognition(false)},Math.max(140,delay))}
+function stopVoiceRecognition(message=''){voiceSessionActive=false;voiceListening=false;voiceFinalizing=false;clearVoiceRecognitionTimers();if(voiceRecognizer){const r=voiceRecognizer;voiceRecognizer=null;try{r.abort()}catch{}}setVoiceRecognitionUi(false,message||'آماده شنیدن کد')}
+function finishVoiceRecognition(manual=false){if(!voiceSessionActive||voiceFinalizing)return;const t=voiceResultText([voiceFinalText,voiceInterimText]);if(!t&&!manual){scheduleVoiceRestart(500);return}voiceFinalizing=true;voiceSessionActive=false;voiceListening=false;clearVoiceRecognitionTimers();const alts=[t,voiceFinalText.trim(),voiceInterimText.trim(),...voiceAlternatives].filter(Boolean);if(voiceRecognizer){const r=voiceRecognizer;voiceRecognizer=null;try{r.stop()}catch{}}setVoiceRecognitionUi(false,t?'شنیده شد: '+t:(manual?'شنیدن لغو شد.':'صدایی تشخیص داده نشد.'));voiceFinalizing=false;if(t)setTimeout(()=>handleVoiceAlternatives(alts),0)}
+function voiceTranscriptCanResolve(text){const r=resolveSpokenProduct(text);return !!(r?.product||r?.inferredCode||(Array.isArray(r?.ambiguous)&&r.ambiguous.length))}
+function launchVoiceRecognizer(resuming=false){
+ if(!voiceSessionActive||voiceRecognizer)return;const r=new SpeechRecognitionApi();voiceRecognizer=r;r.lang='fa-IR';r.interimResults=true;r.continuous=false;r.maxAlternatives=10;r._voiceFinalByIndex=new Map();r._voicePrefix=voiceFinalText;
+ r.onstart=()=>{if(!voiceSessionActive)return;voiceListening=true;if(!resuming)setVoiceRecognitionUi(true,'در حال شنیدن… کد را کامل و طبیعی بخوانید.')};
+ r.onspeechstart=()=>{voiceHadSpeech=true;if(voiceFinalizeTimer){clearTimeout(voiceFinalizeTimer);voiceFinalizeTimer=null}setVoiceRecognitionUi(true,'صدای شما دریافت شد؛ جمله را کامل بگویید…')};
+ // Android Chrome may fire these events between parts of one sentence. They are
+ // only signals; finalization is driven by a *changed* recognition result below.
+ r.onspeechend=()=>{};
+ r.onsoundend=()=>{};
+ r.onresult=e=>{
+  const finals=r._voiceFinalByIndex,interimParts=[];
+  for(let i=0;i<e.results.length;i++){
+   const res=e.results[i],best=String(res[0]?.transcript||'').trim();
+   if(!best)continue;
+   voiceHadSpeech=true;
+   if(res.isFinal){
+    if(finals.get(i)!==best){finals.set(i,best);for(let j=0;j<Math.min(res.length,10);j++)rememberVoiceAlternative(res[j]?.transcript)}
+   }else interimParts.push(best);
+  }
+  const nextFinal=voiceResultText([r._voicePrefix,...[...finals.keys()].sort((a,b)=>a-b).map(i=>finals.get(i))]);
+  const nextInterim=voiceResultText(interimParts);
+  const heardNow=voiceResultText([nextFinal,nextInterim]);
+  voiceFinalText=nextFinal;voiceInterimText=nextInterim;
+  if(!heardNow)return;
+  if(voiceNoSpeechTimer){clearTimeout(voiceNoSpeechTimer);voiceNoSpeechTimer=null}
+  // The browser repeats previous final results in later onresult events. Do not
+  // append or reset the silence timer unless a genuinely new phrase arrived.
+  if(faTextNorm(heardNow)===faTextNorm(voiceLastHeard))return;
+  voiceLastHeard=heardNow;voiceLastSpeechAt=Date.now();setVoiceRecognitionUi(true,'شنیده شد: '+heardNow+' — پس از پایان جمله، خودکار جست‌وجو می‌شود.');scheduleVoiceFinalize(VOICE_AUTO_FINISH_SILENCE_MS,true);
+ };
+ r.onerror=e=>{if(voiceRecognizer===r)voiceRecognizer=null;if(!voiceSessionActive)return;if(e.error==='not-allowed'||e.error==='service-not-allowed'){toast('اجازه میکروفن داده نشده است.');stopVoiceRecognition();return}voiceListening=false;if(!voiceHasTranscript()&&Date.now()-voiceSessionStartedAt>=VOICE_NO_SPEECH_TIMEOUT_MS){stopVoiceRecognition('صدایی دریافت نشد؛ دوباره بزنید و کد را بخوانید.');return}if(e.error==='network')toast('ارتباط تشخیص صدا لحظه‌ای قطع شد؛ تلاش می‌کنم دوباره گوش بدهم.');/* onend decides whether one quiet recovery is needed. */};
+ r.onend=()=>{
+  if(voiceRecognizer===r)voiceRecognizer=null;
+  if(!voiceSessionActive||voiceFinalizing)return;
+  voiceListening=false;
+  // Once any text exists, never reopen the microphone: this is what previously
+  // kept it listening to unrelated speech and prevented automatic completion.
+  if(voiceHasTranscript()){
+   scheduleVoiceFinalize(VOICE_AUTO_FINISH_SILENCE_MS);
+   // When Android ends after only the first part of a segmented code (for
+   // example «بیست و پنج» before «سه هزار و چهار»), keep the same stable
+   // listening state and allow exactly one quiet continuation.
+   if(!voiceTranscriptCanResolve(voiceResultText([voiceFinalText,voiceInterimText]))&&voiceSilentRecoveryCount<VOICE_MAX_SILENT_RECOVERIES){voiceSilentRecoveryCount+=1;scheduleVoiceRestart(260,true)}
+   return;
+  }
+  // A browser may close once before the user starts speaking. Recover quietly
+  // one time only; a tight repeated start/stop loop is deliberately forbidden.
+  if(voiceSilentRecoveryCount<VOICE_MAX_SILENT_RECOVERIES){voiceSilentRecoveryCount+=1;scheduleVoiceRestart(VOICE_SILENT_RECOVERY_DELAY_MS,true);return}
+  stopVoiceRecognition(voiceHadSpeech?'صدا دریافت شد اما متن تشخیص داده نشد؛ دوباره یک جملهٔ کوتاه و واضح بگویید.':'میکروفن پیش از شنیدن صدا بسته شد؛ دوباره بزنید و کد را بخوانید.');
+ };
+ try{r.start()}catch{if(voiceRecognizer===r)voiceRecognizer=null;if(voiceSessionActive&&voiceSilentRecoveryCount<VOICE_MAX_SILENT_RECOVERIES){voiceSilentRecoveryCount+=1;scheduleVoiceRestart(VOICE_SILENT_RECOVERY_DELAY_MS,true)}else stopVoiceRecognition('شروع تشخیص صدا ممکن نشد؛ دوباره بزنید.')}
+}
+function startVoiceRecognition(){
+ if(!SpeechRecognitionApi){toast('تشخیص گفتار در این مرورگر فعال نیست. برای بهترین نتیجه از Chrome استفاده کنید.');return}
+ stopVoice();if(voiceSessionActive){stopVoiceRecognition('شنیدن لغو شد.');return}
+ voiceSessionActive=true;voiceListening=false;voiceHadSpeech=false;voiceFinalText='';voiceInterimText='';voiceAlternatives=[];voiceSegments=[];voiceFinalizing=false;voiceLastHeard='';voiceLastSpeechAt=0;voiceSessionStartedAt=Date.now();voiceSilentRecoveryCount=0;clearVoiceRecognitionTimers();setVoiceRecognitionUi(true,'در حال شنیدن… کد را کامل و طبیعی بخوانید.');scheduleVoiceNoSpeechTimeout();launchVoiceRecognizer(false)
+}
+
+function b64bytes(s){return Uint8Array.from(atob(s),c=>c.charCodeAt(0))}
+function bytes64(a){let s='';for(const b of new Uint8Array(a))s+=String.fromCharCode(b);return btoa(s)}
+async function deriveKey(password,salt,iterations){const base=await crypto.subtle.importKey('raw',new TextEncoder().encode(password),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',hash:'SHA-256',salt,iterations},base,{name:'AES-GCM',length:256},false,['encrypt','decrypt'])}
+async function decryptJson(payload,key){const plain=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64bytes(payload.iv)},key,b64bytes(payload.data));return JSON.parse(new TextDecoder().decode(plain))}
+async function encryptJson(value,key){const iv=crypto.getRandomValues(new Uint8Array(12)),data=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,new TextEncoder().encode(JSON.stringify(value)));return{version:1,iv:bytes64(iv),data:bytes64(data)}}
+function save(){cleanupConfirmedHistory();render();encryptJson(db,cryptoKey).then(x=>{localStorage.setItem(SECURE_KEY,JSON.stringify(x));scheduleSync(150)}).catch(()=>toast('ذخیره امن انجام نشد.'))}
+// Two test requests explicitly cancelled by the owner on 2026-09-16.
+const cancelledTestIds=new Set(['9eaff053-f66b-47ae-83ca-1a1c7a68ef6a','b6221d85-769b-4bb0-9925-b88849f4a8d6']);
+function removeCancelledTests(data){if(!Array.isArray(data?.history))return false;const count=data.history.length;data.history=data.history.filter(h=>!cancelledTestIds.has(String(h.id)));return data.history.length!==count}
+async function unlock(){const btn=document.querySelector('#unlockBtn'),error=document.querySelector('#lockError'),password=document.querySelector('#managerPassword').value;error.textContent='';if(!password){error.textContent='رمز را وارد کنید.';return}btn.disabled=true;btn.textContent='در حال بررسی…';try{securePayload=securePayload||await fetch('inventory.secure.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error();return r.json()});cryptoKey=await deriveKey(password,b64bytes(securePayload.salt),securePayload.iterations);initial=await decryptJson(securePayload,cryptoKey);initial.sourceVersion=DATA_VERSION;const savedText=localStorage.getItem(SECURE_KEY);let saved=null;if(savedText){try{saved=await decryptJson(JSON.parse(savedText),cryptoKey)}catch{saved=null}}const savedVersion=String(saved?.sourceVersion||'');db=saved&&(savedVersion===DATA_VERSION||savedVersion.startsWith('excel-'))?saved:structuredClone(initial);const removedTests=removeCancelledTests(db);removeCancelledTests(initial);db.bridgeKey=initial.bridgeKey;if(!db.syncSchema){db.history.forEach(h=>{if(!h.sync)h.sync='pending'});db.syncSchema=1}document.querySelector('#lock').style.display='none';document.querySelector('#app').classList.remove('locked');localStorage.setItem(SESSION_PASSWORD_KEY,password);sessionStorage.removeItem(SESSION_PASSWORD_KEY);document.querySelector('#managerPassword').value='';save();document.querySelector('#searchResults').innerHTML=productResults('10-5041');if(removedTests)await refreshFromExcel();else scheduleSync(100)}catch{cryptoKey=null;error.textContent='رمز اشتباه است یا اطلاعات امن بارگذاری نشد.'}finally{btn.disabled=false;btn.textContent='ورود به سامانه'}}
+document.querySelector('#unlockBtn').onclick=unlock;document.querySelector('#managerPassword').onkeydown=e=>{if(e.key==='Enter')unlock()};
+function logoutWarehouse(){
+ const unsent=db&&Array.isArray(db.history)?db.history.filter(h=>h.sync!=='synced').length:0;
+ if(unsent&&!confirm(`${fa(unsent)} عملیات هنوز در صف ارسال است. عملیات در گوشی محفوظ می‌ماند و در ورود بعدی دوباره ارسال می‌شود. خارج شوید؟`))return;
+ localStorage.removeItem(SESSION_PASSWORD_KEY);sessionStorage.removeItem(SESSION_PASSWORD_KEY);
+ clearTimeout(syncTimer);
+ if(scanTimer)cancelAnimationFrame(scanTimer);
+ if(stream)stream.getTracks().forEach(t=>t.stop());
+ stream=null;scanTimer=null;cryptoKey=null;db=null;initial=null;
+ document.querySelector('#scanner')?.classList.remove('show');
+ document.querySelector('#splitModal')?.classList.remove('show');
+ document.querySelector('#app').classList.add('locked');
+ document.querySelector('#lock').style.display='flex';
+ document.querySelector('#managerPassword').value='';
+ document.querySelector('#lockError').textContent='';
+ document.querySelector('#managerPassword').focus();
+}
+document.querySelector('#logoutBtn').onclick=logoutWarehouse;
+const rememberedPassword=localStorage.getItem(SESSION_PASSWORD_KEY)||sessionStorage.getItem(SESSION_PASSWORD_KEY);
+if(rememberedPassword){localStorage.setItem(SESSION_PASSWORD_KEY,rememberedPassword);sessionStorage.removeItem(SESSION_PASSWORD_KEY);document.querySelector('#managerPassword').value=rememberedPassword;setTimeout(unlock,0)}
+function fa(n){return Number(n||0).toLocaleString('fa-IR')}
+function now(){return new Intl.DateTimeFormat('fa-IR-u-ca-persian',{dateStyle:'short',timeStyle:'short'}).format(new Date())}
+function toast(s){const t=document.querySelector('#toast');t.textContent=s;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2400)}
+function norm(s){return String(s||'').trim().toUpperCase()}
+function item(p,l){return db.stock.find(x=>x.p===norm(p)&&x.l===norm(l))}
+function product(code){return db.products.find(x=>x.code===norm(code))}
+function ensureProduct(code){code=norm(code);let p=product(code);if(!p){p={code,name:'محصول جدید',occasion:'تعیین‌نشده'};db.products.push(p)}return p}
+function locationValid(l){return /^NBR-(?:A\d{2}-R\d{2}-B\d{2}|S\d{2}-R\d{2}-B\d{2}(?:-\d{2})?)$/i.test(norm(l))}
+function changeStock(p,l,delta,setValue=false){p=norm(p);l=norm(l);ensureProduct(p);if(!db.locations.includes(l))db.locations.push(l);let x=item(p,l);const before=x?x.q:0;const after=setValue?delta:before+delta;if(after<0)throw Error('تعداد خروج بیشتر از موجودی این مکان است.');if(x)x.q=after;else if(after>=0&&l)db.stock.push({p,l,q:after});return{before,after}}
+function log(type,p,qty,from,to,note,before,after){db.history.unshift({id:crypto.randomUUID?crypto.randomUUID():Date.now()+'-'+Math.random().toString(16).slice(2),at:new Date().toISOString(),shownAt:now(),type,p:norm(p),qty,from:from||'',to:to||'',note:note||'',before,after,sync:'pending',attempts:0,lastSyncError:'',retryAt:0})}
+function syncState(text,ok=true){const t=document.querySelector('#syncText'),d=document.querySelector('#syncDot');if(t)t.textContent=text;if(d)d.style.background=ok?'#50d59e':'#f0b34f'}
+function scheduleSync(delay=1000){clearTimeout(syncTimer);syncTimer=setTimeout(syncPending,delay)}
+function deviceId(){let x=localStorage.getItem('nebrasDeviceId');if(!x){x=crypto.randomUUID?crypto.randomUUID():'device-'+Date.now();localStorage.setItem('nebrasDeviceId',x)}return x}
+function jsonpStatus(id){return new Promise((resolve,reject)=>{const cb='nebrasSync_'+Date.now()+'_'+Math.random().toString(16).slice(2),s=document.createElement('script'),timer=setTimeout(()=>done(false),8000);function done(v){clearTimeout(timer);delete window[cb];s.remove();v?resolve(v):reject(Error('status timeout'))}window[cb]=x=>done(x);s.onerror=()=>done(false);s.src=BRIDGE_URL+'?action=warehouseStatus&id='+encodeURIComponent(id)+'&callback='+encodeURIComponent(cb)+'&_='+Date.now();document.head.appendChild(s)})}
+function jsonpSnapshot(){return new Promise((resolve,reject)=>{const cb='nebrasSnapshot_'+Date.now()+'_'+Math.random().toString(16).slice(2),s=document.createElement('script'),timer=setTimeout(()=>done(false),30000);function done(v){clearTimeout(timer);delete window[cb];s.remove();v?resolve(v):reject(Error('snapshot timeout'))}window[cb]=x=>done(x);s.onerror=()=>done(false);s.src=BRIDGE_URL+'?action=warehouseSnapshot&key='+encodeURIComponent(db.bridgeKey)+'&callback='+encodeURIComponent(cb)+'&_='+Date.now();document.head.appendChild(s)})}
+const CONFIRMED_HISTORY_MAX_AGE_MS=7*24*60*60*1000;
+const CONFIRMED_HISTORY_KEEP=100;
+function cleanupConfirmedHistory(){
+ if(!db||!Array.isArray(db.history))return false;
+ const nowMs=Date.now();let confirmedSeen=0,changed=false;const next=[];
+ for(const h of db.history){
+  const applied=h.sync==='synced'&&h.excelStatus==='اعمال شد';
+  if(!applied){next.push(h);continue}
+  confirmedSeen++;
+  const base=Date.parse(h.confirmedAt||h.syncedAt||h.at||'');
+  const tooOld=Number.isFinite(base)&&nowMs-base>CONFIRMED_HISTORY_MAX_AGE_MS;
+  const tooMany=confirmedSeen>CONFIRMED_HISTORY_KEEP;
+  if(tooOld||tooMany){changed=true;continue}
+  next.push(h)
+ }
+ if(changed)db.history=next;
+ return changed
+}
+function excelAppliedStatus(v){return String(v||'').trim()==='اعمال شد'}
+function excelRejectedStatus(v){const x=String(v||'');return x.includes('اعمال نشد')||x.includes('نیازمند بررسی')||x.includes('خطا')}
+function operationNeedsReplay(h){if(h.sync!=='synced')return true;return !excelAppliedStatus(h.excelStatus)&&!excelRejectedStatus(h.excelStatus)}
+async function reconcileStatusesBeforeSnapshot(){
+ if(!db||!Array.isArray(db.history)||!navigator.onLine)return;
+ const missingRejectedIds=new Set();
+ const candidates=db.history.filter(h=>h.sync==='synced'&&!excelAppliedStatus(h.excelStatus)).slice(0,60);
+ for(let i=0;i<candidates.length;i+=6){
+  const batch=candidates.slice(i,i+6);
+  await Promise.allSettled(batch.map(async h=>{
+   const status=await jsonpStatus(h.id);
+   if(status?.found){
+    h.excelStatus=status.excelStatus||h.excelStatus||'در انتظار';
+    if(excelAppliedStatus(h.excelStatus)&&!h.confirmedAt)h.confirmedAt=new Date().toISOString();
+   }else if(excelRejectedStatus(h.excelStatus)){
+    missingRejectedIds.add(String(h.id));
+   }
+  }));
+ }
+ if(missingRejectedIds.size)db.history=db.history.filter(h=>!missingRejectedIds.has(String(h.id)));
+}
+function syncSummary(){const unsent=db.history.filter(h=>h.sync!=='synced').length,retrying=db.history.filter(h=>h.sync==='retry').length,waiting=db.history.filter(h=>h.sync==='synced'&&!excelAppliedStatus(h.excelStatus)&&!excelRejectedStatus(h.excelStatus)).length,review=db.history.filter(h=>h.sync==='synced'&&excelRejectedStatus(h.excelStatus)).length;return{unsent,retrying,waiting,review}}
+function showSyncSummary(prefix=''){const s=syncSummary();if(s.retrying)syncState(`${prefix}${fa(s.retrying)} عملیات در تلاش مجدد`,false);else if(s.unsent)syncState(`${prefix}${fa(s.unsent)} عملیات در صف ارسال`,false);else if(s.waiting)syncState(`${prefix}${fa(s.waiting)} عملیات رسیده؛ منتظر اکسل`,true);else if(s.review)syncState(`${prefix}${fa(s.review)} عملیات نیازمند بررسی`,false);else syncState(prefix?'به‌روز از اکسل':'همگام',true)}
+let statusCursor=0;
+async function refreshStatuses(){
+ if(statusBusy||!db||!navigator.onLine||document.hidden)return;
+ const waiting=db.history.filter(x=>x.sync==='synced'&&x.excelStatus!=='اعمال شد');
+ if(!waiting.length){if(!syncBusy)showSyncSummary();return}
+ const start=statusCursor%waiting.length;
+ const batch=Array.from({length:Math.min(6,waiting.length)},(_,i)=>waiting[(start+i)%waiting.length]);
+ statusCursor=start+batch.length;
+ statusBusy=true;let changed=false;
+ try{
+  await Promise.allSettled(batch.map(async h=>{
+   const status=await jsonpStatus(h.id);
+   if(status?.found){
+    const next=status.excelStatus||'در انتظار';
+    if(h.excelStatus!==next){h.excelStatus=next;changed=true}
+    if(next==='اعمال شد'&&!h.confirmedAt){h.confirmedAt=new Date().toISOString();changed=true}
+   }
+  }));
+  if(cleanupConfirmedHistory())changed=true;
+  if(changed)await encryptJson(db,cryptoKey).then(x=>localStorage.setItem(SECURE_KEY,JSON.stringify(x))).catch(()=>{});
+  if(!syncBusy)showSyncSummary();
+  renderHistory();
+ }finally{statusBusy=false}
+}
+// Read-only polling: pending operations and inventory are never removed or replayed here.
+setInterval(()=>{if(db&&navigator.onLine&&!document.hidden)refreshStatuses()},30000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshStatuses()});
+window.addEventListener('online',()=>refreshStatuses());
+function replayOperation(h){if(h.type==='ورود')changeStock(h.p,h.to,h.qty);else if(h.type==='خروج')changeStock(h.p,h.from,-h.qty);else if(h.type==='انتقال'||h.type==='تفکیک'){changeStock(h.p,h.from,-h.qty);changeStock(h.p,h.to,h.qty)}else if(h.type==='اصلاح')changeStock(h.p,h.from,Number(h.after),true)}
+async function refreshFromExcel(){const btn=document.querySelector('#refreshExcel');if(!navigator.onLine){toast('اینترنت در دسترس نیست.');return}btn.disabled=true;btn.textContent='در حال دریافت…';syncState('بررسی وضعیت عملیات و دریافت اکسل…',false);try{await reconcileStatusesBeforeSnapshot();const snapshot=await jsonpSnapshot();if(!snapshot?.ok)throw Error(snapshot?.error||'پل مرکزی اطلاعات اکسل را برنگرداند.');const localHistory=db.history.slice(),pending=localHistory.filter(operationNeedsReplay);db={sourceVersion:'excel-'+String(snapshot.revision||Date.now()),bridgeKey:db.bridgeKey,products:Array.isArray(snapshot.products)?snapshot.products:[],locations:Array.isArray(snapshot.locations)?snapshot.locations:[],stock:Array.isArray(snapshot.stock)?snapshot.stock:[],history:localHistory,syncSchema:1};let conflicts=0;for(const h of pending){try{replayOperation(h)}catch{conflicts++}}initial=structuredClone(db);await encryptJson(db,cryptoKey).then(x=>localStorage.setItem(SECURE_KEY,JSON.stringify(x)));render();document.querySelector('#searchResults').innerHTML=productResults(document.querySelector('#findProduct').value);showSyncSummary('به‌روز؛ ');toast(conflicts?'اطلاعات اکسل دریافت شد؛ یک مغایرت نیازمند بررسی است.':'موجودی موبایل از اکسل تازه شد.');scheduleSync(50);setTimeout(refreshStatuses,100)}catch(e){syncState('تازه‌سازی ناموفق',false);toast(e.message==='snapshot timeout'?'پل مرکزی تا ۳۰ ثانیه پاسخ نداد.':(e.message||'تازه‌سازی از اکسل انجام نشد.'))}finally{btn.disabled=false;btn.textContent='↻ تازه‌سازی از اکسل'}}
+function jsonpPush(h){return new Promise((resolve,reject)=>{const cb='nebrasPush_'+Date.now()+'_'+Math.random().toString(16).slice(2),s=document.createElement('script'),timer=setTimeout(()=>done(null),15000);function done(v){clearTimeout(timer);delete window[cb];s.remove();v?resolve(v):reject(Error('ارسال به صف تا ۱۵ ثانیه پاسخی نداد.'))}window[cb]=x=>done(x);s.onerror=()=>done(null);const q=new URLSearchParams({action:'warehousePush',key:db.bridgeKey,id:String(h.id),type:h.type,code:h.p,qty:String(h.qty),from:h.from||'',to:h.to||'',note:h.note||'',at:h.at||'',device:deviceId(),before:String(h.before??0),after:String(h.after??0),callback:cb,_:String(Date.now())});s.src=BRIDGE_URL+'?'+q.toString();document.head.appendChild(s)})}
+function markSynced(h,status){h.sync='synced';h.excelStatus=status?.excelStatus||'در انتظار';h.syncedAt=h.syncedAt||new Date().toISOString();h.lastSyncError='';h.retryAt=0;if(h.excelStatus==='اعمال شد'&&!h.confirmedAt)h.confirmedAt=new Date().toISOString()}
+function retryDelayMs(attempts){return Math.min(60000,Math.max(2500,2500*Math.pow(2,Math.min(5,Math.max(0,attempts-1))))+Math.floor(Math.random()*700))}
+function syncErrorText(error){const text=String(error?.message||error||'خطای نامشخص');if(text==='not confirmed')return'صف پاسخ داد ولی ثبت عملیات را تأیید نکرد.';if(text==='status timeout')return'استعلام وضعیت عملیات پاسخ نداد.';return text}
+async function sendPendingOperation(h){
+ h.attempts=(h.attempts||0)+1;h.lastAttemptAt=new Date().toISOString();
+ try{
+  // در تلاش دوباره، ابتدا صف خوانده می‌شود تا قطع پاسخ باعث ثبت تکراری نشود.
+  if(h.attempts>1){const known=await jsonpStatus(h.id);if(known?.found){markSynced(h,known);return true}}
+  const pushed=await jsonpPush(h);if(!pushed?.ok)throw Error(pushed?.error||'صف عملیات را نپذیرفت.');
+  const status=await jsonpStatus(h.id);if(!status?.found)throw Error('not confirmed');
+  markSynced(h,status);return true
+ }catch(error){
+  h.sync='retry';h.lastSyncError=syncErrorText(error);h.retryAt=Date.now()+retryDelayMs(h.attempts);return false
+ }
+}
+async function persistQueue(){await encryptJson(db,cryptoKey).then(x=>localStorage.setItem(SECURE_KEY,JSON.stringify(x)))}
+async function syncPending(){
+ if(syncBusy||!db||!db.bridgeKey)return;
+ const allPending=db.history.filter(h=>h.sync!=='synced').slice().reverse();
+ if(!allPending.length){showSyncSummary();setTimeout(refreshStatuses,100);return}
+ if(!navigator.onLine){syncState(`${fa(allPending.length)} در انتظار اینترنت`,false);scheduleSync(8000);return}
+ const due=allPending.filter(h=>!h.retryAt||Number(h.retryAt)<=Date.now());
+ if(!due.length){showSyncSummary();scheduleSync(Math.max(500,Math.min(...allPending.map(h=>Math.max(500,Number(h.retryAt||0)-Date.now())))));return}
+ syncBusy=true;let checked=0;
+ try{
+  // ارسال دو‌تایی، سریع است و روی اینترنت ضعیف از خطای هم‌زمانی جلوگیری می‌کند.
+  for(let i=0;i<due.length;i+=2){const batch=due.slice(i,i+2);syncState(`${fa(checked)} از ${fa(due.length)} در حال بررسی و ارسال…`,false);await Promise.all(batch.map(sendPendingOperation));checked+=batch.length;await persistQueue()}
+ }finally{syncBusy=false}
+ const left=db.history.filter(h=>h.sync!=='synced').length;showSyncSummary();
+ if(left){const next=Math.min(...db.history.filter(h=>h.sync!=='synced').map(h=>Math.max(500,Number(h.retryAt||0)-Date.now())));scheduleSync(next)}else setTimeout(refreshStatuses,100);
+ renderHistory()
+}
+window.addEventListener('online',()=>scheduleSync(100));window.addEventListener('offline',()=>syncState('بدون اینترنت',false));
+function render(){const active=db.stock.filter(x=>x.q>0);document.querySelector('#totalStock').textContent=fa(active.reduce((a,x)=>a+x.q,0));document.querySelector('#activeLocs').textContent=fa(new Set(active.filter(x=>!x.unassigned).map(x=>x.l)).size);document.querySelector('#productCount').textContent=fa(new Set(active.map(x=>x.p)).size);document.querySelector('#todayOps').textContent=fa(db.history.length);document.querySelector('#products').innerHTML=db.products.map(p=>`<option value="${p.code}">${p.name}</option>`).join('');renderHistory()}
+function switchTab(id){document.querySelectorAll('.panel').forEach(x=>x.classList.toggle('active',x.id===id));document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x.dataset.tab===id));window.scrollTo({top:0,behavior:'smooth'});if(id==='pick'&&!pickOrders.length)refreshPickOrders()}
+document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
+function productResults(query){query=norm(query);const ps=db.products.filter(p=>!query||norm(p.code).includes(query)||norm(p.name).includes(query)||norm(p.occasion).includes(query));if(!ps.length)return'<div class="empty">محصولی پیدا نشد.</div>';return ps.map(p=>{const rows=db.stock.filter(x=>x.p===p.code&&x.l).sort((a,b)=>Number(b.q)-Number(a.q));const total=rows.reduce((a,x)=>a+Math.max(0,Number(x.q)||0),0);return`<div class="result"><div class="result-head"><b>${p.code} — ${p.name}</b><span class="badge">مجموع ${fa(total)}</span></div>${rows.length?rows.map((x,i)=>`<div class="result-row"><span class="location-code">${i+1}. ${x.display||x.l}${x.shared?' (موجودی مشترک)':''}</span><span class="qty"><small>موجودی</small>${fa(x.q)}</span>${Number(x.q)>0?(x.shared||x.unassigned?`<button class="primary" onclick="openSplit('${p.code}','${x.l}')">تفکیک</button>`:`<button class="secondary" onclick="quickOut('${p.code}','${x.l}')">برداشت</button>`):'<span class="badge">موجودی صفر</span>'}</div>`).join(''):'<div class="empty">لوکیشنی برای این کد ثبت نشده است.</div>'}</div>`}).join('')}
+document.querySelector('#searchProductBtn').onclick=()=>document.querySelector('#searchResults').innerHTML=productResults(document.querySelector('#findProduct').value);
+document.querySelector('#sharedListBtn').onclick=()=>{const codes=[...new Set(db.stock.filter(x=>x.q>0&&(x.shared||x.unassigned)).map(x=>x.p))];document.querySelector('#searchResults').innerHTML=codes.length?codes.map(code=>productResults(code)).join(''):'<div class="empty">موجودی مشترک باقی نمانده است.</div>'};
+document.querySelector('#showBoxBtn').onclick=()=>{const l=norm(document.querySelector('#findLocation').value);const rows=db.stock.filter(x=>x.l===l&&x.q>0);document.querySelector('#searchResults').innerHTML=`<div class="result"><div class="result-head"><b>${l||'مکان انتخاب نشده'}</b><span class="badge">${fa(rows.length)} طرح</span></div>${rows.length?rows.map(x=>`<div class="result-row"><span>${x.p} — ${product(x.p)?.name||''}</span><span class="qty">${fa(x.q)}</span><button class="secondary" onclick="quickOut('${x.p}','${l}')">برداشت</button></div>`).join(''):'<div class="empty">این مکان خالی است یا کد آن صحیح نیست.</div>'}</div>`};
+window.quickOut=(p,l)=>{document.querySelector('#outProduct').value=p;document.querySelector('#outLoc').value=l;switchTab('out');showAvailable()};
+function checkLoc(id){const l=norm(document.querySelector(id).value);if(!locationValid(l))throw Error('کد مکان صحیح نیست. نمونه: NBR-S01-R02-B01-02');return l}
+function html(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function inProductInfo(){
+  const code=norm(document.querySelector('#inProduct').value),p=product(code),rows=code?db.stock.filter(x=>x.p===code&&x.l):[];
+  if(p)document.querySelector('#inOccasion').value=p.occasion||p.name||'';
+  const total=rows.reduce((a,x)=>a+Math.max(0,Number(x.q)||0),0);
+  const locations=rows.length?rows.map(x=>`<span class="badge">${html(x.display||x.l)}: ${fa(x.q)}</span>`).join(''):'<span class="badge">لوکیشن ثبت‌شده‌ای ندارد</span>';
+  document.querySelector('#inExisting').innerHTML=!code?'':`<div class="shared-box"><strong>${p?'موجودی فعلی '+html(code):'کد جدید'}</strong><div class="split-summary"><span class="badge">مجموع ${fa(total)}</span>${locations}</div></div>`;
+  renderInRows();
+}
+function ensureInRow(){if(!smartInRows.length)smartInRows.push({loc:'',qty:'',capacity:''})}
+function setInRow(i,key,value){smartInRows[i][key]=value;renderInRows()}
+function removeInRow(i){smartInRows.splice(i,1);ensureInRow();renderInRows()}
+function rowWarning(row,code){const loc=norm(row.loc),qty=Number(row.qty||0),cap=Number(row.capacity||0),current=loc&&db?Number(item(code,loc)?.q||0):0;return cap>0&&current+qty>cap?`ظرفیت کافی نیست؛ ${fa(current+qty-cap)} عدد باید در لوکیشن دیگری قرار گیرد.`:loc?`موجودی فعلی این مکان: ${fa(current)}؛ بعد از ورود: ${fa(current+qty)}`:'ابتدا QR مکان را اسکن کنید.'}
+function renderInRows(){ensureInRow();const code=norm(document.querySelector('#inProduct').value);document.querySelector('#inAllocations').innerHTML=smartInRows.map((r,i)=>{const warn=Number(r.capacity||0)>0&&Number(item(code,norm(r.loc))?.q||0)+Number(r.qty||0)>Number(r.capacity);return`<div class="allocation ${warn?'warn':''}"><div class="allocation-grid"><div class="field"><label>لوکیشن ${i+1}</label><div class="location-input"><input value="${html(r.loc)}" onchange="setInRow(${i},'loc',this.value)" placeholder="QR مکان"><button class="mini-scan" onclick="openAllocationScanner('in',${i})">اسکن</button></div></div><div class="field"><label>تعداد این جعبه</label><input type="number" min="1" inputmode="numeric" value="${html(r.qty)}" onchange="setInRow(${i},'qty',this.value)"></div><div class="field"><label>ظرفیت جعبه</label><input type="number" min="1" inputmode="numeric" value="${html(r.capacity)}" onchange="setInRow(${i},'capacity',this.value)" placeholder="اختیاری"></div><button class="remove-allocation" onclick="removeInRow(${i})">حذف</button></div><small>${rowWarning(r,code)}</small></div>`}).join('')}
+function openAllocationScanner(kind,i){scanTarget=`allocation:${kind}:${i}`;openScanner(scanTarget)}
+document.querySelector('#inProduct').onchange=inProductInfo;document.querySelector('#inProduct').oninput=inProductInfo;
+document.querySelector('#addInLocation').onclick=()=>{smartInRows.push({loc:'',qty:'',capacity:''});renderInRows()};
+function prepareInSubmit(){run(()=>{const code=norm(document.querySelector('#inProduct').value),total=Number(document.querySelector('#inQty').value),occasion=document.querySelector('#inOccasion').value.trim(),reason=document.querySelector('#inReason').value,rows=smartInRows.filter(x=>norm(x.loc)||Number(x.qty)>0).map(x=>({...x,loc:norm(x.loc),qty:Number(x.qty)}));if(!code||!Number.isFinite(total)||total<=0)throw Error('کد محصول و تعداد کل ورود را کامل کنید.');if(!product(code)&&!occasion)throw Error('برای کد جدید، مناسبت را وارد کنید.');if(!rows.length)throw Error('حداقل یک لوکیشن اضافه کنید.');let sum=0;const seen=new Set();for(const r of rows){if(!locationValid(r.loc)||!Number.isFinite(r.qty)||r.qty<=0)throw Error('لوکیشن و تعداد هر جعبه را کامل کنید.');if(seen.has(r.loc))throw Error('یک لوکیشن دوبار وارد شده است.');seen.add(r.loc);const current=Number(item(code,r.loc)?.q||0),cap=Number(r.capacity||0);if(cap>0&&current+r.qty>cap)throw Error('یکی از جعبه‌ها قرمز است و ظرفیت کافی ندارد.');sum+=r.qty}if(sum!==total)throw Error(`جمع لوکیشن‌ها ${fa(sum)} است و باید با تعداد کل ${fa(total)} برابر باشد.`);const locSummary=rows.map((r,i)=>`${i+1}) ${r.loc} — ${r.qty} عدد`).join(' | ');const spokenLocs=rows.map((r,i)=>`مکان ${i+1}، ${voiceLocation(r.loc)}، تعداد ${voiceNumber(r.qty)}`).join('. ');openVoiceConfirm({title:'تأیید ورود',rows:[['عملیات','ورود'],['کد محصول',code],['تعداد کل',`${fa(total)} عدد`],['نوع ورود',reason],['لوکیشن‌ها',locSummary,true]],speech:operationSpeech('ورود',code,total,'','',spokenLocs),onConfirm:()=>commitInSubmit({code,total,occasion,reason,rows})})})}
+function commitInSubmit({code,total,occasion,reason,rows}){run(()=>{const p=ensureProduct(code);if(occasion){p.name=occasion;p.occasion=occasion}for(const r of rows){const changed=changeStock(code,r.loc,r.qty);log('ورود',code,r.qty,'',r.loc,`OCC=${occasion||p.occasion};${reason}`,changed.before,changed.after)}smartInRows=[{loc:'',qty:'',capacity:''}];document.querySelector('#inQty').value='';save();inProductInfo();toast(`ورود ${fa(total)} عدد در ${fa(rows.length)} لوکیشن ثبت شد.`);speak(`ورود کد ${voiceCode(code)}، تعداد ${voiceNumber(total)}، با موفقیت ثبت شد.`)})}
+document.querySelector('#inSubmit').onclick=prepareInSubmit;
+function boxLocation(shelf,row,box){const p=String(box).trim().replace('،',',').split(',');if(!p[0])return'';let out=`NBR-S${String(Number(shelf)).padStart(2,'0')}-R${String(Number(row)).padStart(2,'0')}-B${String(Number(p[0])).padStart(2,'0')}`;if(p[1])out+=`-${String(Number(p[1])).padStart(2,'0')}`;return out}
+function suggestedSplitRows(source){const bits=String(source.display||'').split('/').map(x=>x.trim());if(bits.length<3)return[{loc:'',qty:''}];const shelf=bits[0],row=bits[1],boxes=bits.slice(2).join('/').split('-').map(x=>x.trim()).filter(Boolean);return boxes.map(box=>({loc:boxLocation(shelf,row,box),qty:''}))}
+window.openSplit=(code,loc)=>{splitSource=item(code,loc);if(!splitSource)return toast('موجودی مشترک پیدا نشد.');splitRows=suggestedSplitRows(splitSource);document.querySelector('#splitModal').classList.add('show');renderSplitRows()};
+function setSplitRow(i,key,value){splitRows[i][key]=value;renderSplitRows()}
+function removeSplitRow(i){splitRows.splice(i,1);if(!splitRows.length)splitRows.push({loc:'',qty:''});renderSplitRows()}
+function renderSplitRows(){if(!splitSource)return;const assigned=splitRows.reduce((a,x)=>a+Number(x.qty||0),0),remaining=Number(splitSource.q)-assigned;document.querySelector('#splitInfo').innerHTML=`<strong>${html(splitSource.p)}؛ موجودی مشترک ${fa(splitSource.q)}</strong><div>${html(splitSource.display||splitSource.l)}</div><div class="split-summary"><span class="badge">تفکیک‌شده: ${fa(assigned)}</span><span class="badge ${remaining<0?'danger-text':''}">باقی‌مانده: ${fa(remaining)}</span></div>`;document.querySelector('#splitAllocations').innerHTML=splitRows.map((r,i)=>`<div class="allocation ${remaining<0?'warn':''}"><div class="allocation-grid"><div class="field"><label>لوکیشن ${i+1}</label><div class="location-input"><input value="${html(r.loc)}" onchange="setSplitRow(${i},'loc',this.value)" placeholder="QR مکان"><button class="mini-scan" onclick="openAllocationScanner('split',${i})">اسکن</button></div></div><div class="field"><label>تعداد واقعی</label><input type="number" min="1" inputmode="numeric" value="${html(r.qty)}" onchange="setSplitRow(${i},'qty',this.value)"></div><button class="remove-allocation" onclick="removeSplitRow(${i})">حذف</button></div></div>`).join('')}
+document.querySelector('#addSplitLocation').onclick=()=>{splitRows.push({loc:'',qty:''});renderSplitRows()};document.querySelector('#closeSplit').onclick=()=>document.querySelector('#splitModal').classList.remove('show');
+document.querySelector('#splitSubmit').onclick=()=>run(()=>{if(!splitSource)throw Error('موجودی مشترک انتخاب نشده است.');const rows=splitRows.filter(x=>norm(x.loc)||Number(x.qty)>0),originalQty=Number(splitSource.q),productCode=splitSource.p;let sum=0;const seen=new Set();for(const r of rows){r.loc=norm(r.loc);r.qty=Number(r.qty);if(!locationValid(r.loc)||!Number.isFinite(r.qty)||r.qty<=0)throw Error('لوکیشن و تعداد واقعی هر جعبه را کامل کنید.');if(seen.has(r.loc))throw Error('یک لوکیشن دوبار وارد شده است.');seen.add(r.loc);sum+=r.qty}if(sum<=0)throw Error('حداقل یک جعبه را شمارش کنید.');if(sum>originalQty)throw Error('جمع تعدادها از موجودی مشترک بیشتر است.');for(const r of rows){const a=changeStock(productCode,splitSource.l,-r.qty);changeStock(productCode,r.loc,r.qty);log('تفکیک',productCode,r.qty,splitSource.l,r.loc,'تفکیک موجودی مشترک',a.before,a.after)}const complete=sum===originalQty;save();document.querySelector('#splitModal').classList.remove('show');document.querySelector('#searchResults').innerHTML=productResults(productCode);toast(complete?'تفکیک کامل و برای اکسل ارسال شد.':'تفکیک بخشی ثبت شد؛ باقی‌مانده محفوظ است.');splitSource=null;splitRows=[]});
+function showAvailable(){const p=norm(document.querySelector('#outProduct').value),l=norm(document.querySelector('#outLoc').value),el=document.querySelector('#outAvailable');if(!p){el.innerHTML='';return}const selected=l?item(p,l):null;if(selected){el.innerHTML=`<div class="notice" style="margin-top:12px;margin-bottom:0">موجودی مکان انتخاب‌شده: <b>${fa(selected.q)}</b>${Number(selected.q)<=0?' — موجودی صفر است':''}</div>`;if(Number(selected.q)>0)return}const allRows=db.stock.filter(x=>x.p===p&&locationValid(x.l));const rows=allRows.filter(x=>Number(x.q)>0),zeroRows=allRows.filter(x=>Number(x.q)<=0);const warning=l&&!selected?'<div class="notice" style="margin-top:12px">این محصول در مکان واردشده ثبت نشده است؛ مکان‌های ثبت‌شده در پایین دیده می‌شوند.</div>':'';const activeHtml=rows.length?`<div class="out-locations"><div class="out-locations-title">این محصول در ${fa(rows.length)} مکان موجود است؛ مکان برداشت را انتخاب یا QR آن را اسکن کنید.</div>${rows.map(x=>`<button type="button" class="out-location" onclick="selectOutLocation('${html(x.l)}')"><span class="location-code">${html(x.display||x.l)}</span><span class="qty"><small>موجودی</small>${fa(x.q)}</span></button>`).join('')}</div>`:'';const zeroHtml=zeroRows.length?`<div class="out-locations"><div class="out-locations-title">لوکیشن‌های ثبت‌شده با موجودی صفر</div>${zeroRows.map(x=>`<div class="out-location"><span class="location-code">${html(x.display||x.l)}</span><span class="qty"><small>موجودی</small>۰</span></div>`).join('')}</div>`:'';el.innerHTML=warning+activeHtml+zeroHtml||'<div class="notice" style="margin-top:12px;margin-bottom:0">برای این کد لوکیشنی ثبت نشده است.</div>'}
+window.selectOutLocation=l=>{document.querySelector('#outLoc').value=l;showAvailable();document.querySelector('#outQty').focus()};
+document.querySelector('#outProduct').oninput=showAvailable;document.querySelector('#outLoc').oninput=showAvailable;
+function prepareOutSubmit(){run(()=>{const l=checkLoc('#outLoc'),p=norm(document.querySelector('#outProduct').value),q=Number(document.querySelector('#outQty').value),note=document.querySelector('#outNote').value;if(!p||q<=0)throw Error('کد محصول و تعداد خروج را کامل کنید.');const current=Number(item(p,l)?.q||0);if(q>current)throw Error(`موجودی این مکان ${fa(current)} عدد است و برای خروج ${fa(q)} عدد کافی نیست.`);openVoiceConfirm({title:'تأیید خروج',rows:[['عملیات','خروج'],['کد محصول',p],['تعداد',`${fa(q)} عدد`],['مکان برداشت',l,true],['موجودی قبل',`${fa(current)} عدد`],['بعد از خروج',`${fa(current-q)} عدد`]],speech:operationSpeech('خروج',p,q,l,'',`موجودی فعلی ${voiceNumber(current)}. بعد از خروج ${voiceNumber(current-q)}.`),onConfirm:()=>commitOutSubmit({l,p,q,note})})})}
+function commitOutSubmit({l,p,q,note}){run(()=>{const r=changeStock(p,l,-q);log('خروج',p,q,l,'',note,r.before,r.after);save();showAvailable();toast(`خروج ${fa(q)} عدد ثبت شد.`);speak(`خروج کد ${voiceCode(p)}، تعداد ${voiceNumber(q)}، ثبت شد. موجودی باقی مانده ${voiceNumber(r.after)}.`)})}
+function prepareMoveSubmit(){run(()=>{const from=checkLoc('#moveFrom'),to=checkLoc('#moveTo'),p=norm(document.querySelector('#moveProduct').value),q=Number(document.querySelector('#moveQty').value);if(from===to)throw Error('مبدأ و مقصد نمی‌توانند یکسان باشند.');if(!p||q<=0)throw Error('کد محصول و تعداد انتقال را کامل کنید.');const current=Number(item(p,from)?.q||0);if(q>current)throw Error(`موجودی مبدأ ${fa(current)} عدد است و برای انتقال ${fa(q)} عدد کافی نیست.`);openVoiceConfirm({title:'تأیید انتقال',rows:[['عملیات','انتقال'],['کد محصول',p],['تعداد',`${fa(q)} عدد`],['مبدأ',from,true],['مقصد',to,true]],speech:operationSpeech('انتقال',p,q,from,to),onConfirm:()=>commitMoveSubmit({from,to,p,q})})})}
+function commitMoveSubmit({from,to,p,q}){run(()=>{const a=changeStock(p,from,-q);changeStock(p,to,q);log('انتقال',p,q,from,to,'',a.before,a.after);save();toast(`انتقال ${fa(q)} عدد ثبت شد.`);speak(`انتقال کد ${voiceCode(p)}، تعداد ${voiceNumber(q)}، از ${voiceLocation(from)}، به ${voiceLocation(to)}، ثبت شد.`)})}
+function prepareAdjustSubmit(){run(()=>{const l=checkLoc('#adjustLoc'),p=norm(document.querySelector('#adjustProduct').value),q=Number(document.querySelector('#adjustQty').value),reason=document.querySelector('#adjustReason').value;if(!p||q<0||!Number.isFinite(q))throw Error('کد محصول و تعداد واقعی را کامل کنید.');const before=Number(item(p,l)?.q||0);openVoiceConfirm({title:'تأیید اصلاح موجودی',rows:[['عملیات','اصلاح'],['کد محصول',p],['مکان',l,true],['موجودی فعلی',`${fa(before)} عدد`],['تعداد واقعی جدید',`${fa(q)} عدد`],['علت',reason,true]],speech:operationSpeech('اصلاح موجودی',p,q,l,'',`موجودی فعلی ${voiceNumber(before)}. تعداد واقعی جدید ${voiceNumber(q)}. علت ${reason}.`),onConfirm:()=>commitAdjustSubmit({l,p,q,reason})})})}
+function commitAdjustSubmit({l,p,q,reason}){run(()=>{const r=changeStock(p,l,q,true);log('اصلاح',p,Math.abs(q-r.before),l,l,reason,r.before,r.after);save();toast(`موجودی از ${fa(r.before)} به ${fa(r.after)} اصلاح شد.`);speak(`اصلاح کد ${voiceCode(p)} ثبت شد. موجودی از ${voiceNumber(r.before)} به ${voiceNumber(r.after)} تغییر کرد.`)})}
+document.querySelector('#outSubmit').onclick=prepareOutSubmit;
+document.querySelector('#moveSubmit').onclick=prepareMoveSubmit;
+document.querySelector('#adjustSubmit').onclick=prepareAdjustSubmit;
+function run(fn){try{fn()}catch(e){toast(e.message)}}
+function operationStatus(h){if(h.sync==='retry'){const wait=Math.max(0,Math.ceil((Number(h.retryAt||0)-Date.now())/1000)),reason=h.lastSyncError?`؛ ${h.lastSyncError}`:'';return wait?`ارسال ناموفق${reason}؛ تلاش مجدد تا ${fa(wait)} ثانیه`:`ارسال ناموفق${reason}؛ در حال تلاش مجدد`}if(h.sync!=='synced')return'در حال ارسال';if(excelAppliedStatus(h.excelStatus))return'اعمال شد ✓';if(excelRejectedStatus(h.excelStatus))return'نیازمند بررسی ⚠';return'منتظر اکسل'}
+function renderHistory(){const el=document.querySelector('#historyList');el.innerHTML=db.history.length?db.history.slice(0,100).map(h=>`<div class="history-row"><span>${h.shownAt||h.at}</span><span><b class="op ${h.type==='ورود'?'in':h.type==='خروج'?'out':'move'}">${h.type}</b> · ${h.p}<br><small>${h.from}${h.to&&h.from?' ← ':''}${h.to} ${h.note?'· '+h.note:''}</small></span><span>${fa(h.qty)} عدد<br><small>${operationStatus(h)} · ${fa(h.before)} ← ${fa(h.after)}</small></span></div>`).join(''):'<div class="empty">هنوز عملیاتی ثبت نشده است.</div>'}
+
+function pickJsonp(params,timeoutMs=15000){
+ return new Promise((resolve,reject)=>{
+  if(!db?.bridgeKey)return reject(Error('کلید ارتباطی انبار در دسترس نیست.'));
+  const cb='nebrasPick_'+Date.now()+'_'+Math.random().toString(16).slice(2),sc=document.createElement('script');
+  const timer=setTimeout(()=>done(null),timeoutMs);
+  function done(v){clearTimeout(timer);delete window[cb];sc.remove();v?resolve(v):reject(Error('pick timeout'))}
+  window[cb]=x=>done(x);sc.onerror=()=>done(null);
+  const q=new URLSearchParams({...params,key:db.bridgeKey,callback:cb,_:String(Date.now())});
+  sc.src=PICK_QUEUE_URL+'?'+q.toString();document.head.appendChild(sc);
+ });
+}
+function pickStatusClass(s){return s==='برداشت شد'?'in':(s==='ناقص'||s==='مغایرت'?'out':'move')}
+function faText(v){return String(v??'').replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[Number(d)])}
+function pickDisplayCode(v){
+ const s=String(v??'').trim();
+ const m=s.match(/^[A-Za-z]{3}\s+([A-Za-z]{3})\s+\d{2}\s+(\d{4,})\b/);
+ if(!m)return s;
+ const mon={Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'}[m[1]];
+ return mon?mon+'-'+m[2]:s;
+}
+function pickBatchFa(v){
+ const s=String(v??'').trim(),m=s.match(/^(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})(\d{2})$/);
+ if(!m)return faText(s);
+ const d=new Date(Number(m[1]),Number(m[2])-1,Number(m[3]),Number(m[4]),Number(m[5]),Number(m[6]));
+ const date=new Intl.DateTimeFormat('fa-IR-u-ca-persian-nu-latn',{year:'numeric',month:'2-digit',day:'2-digit'}).format(d);
+ return faText(date+' ساعت '+m[4]+':'+m[5]+':'+m[6]);
+}
+function pickOrderNo(v){
+ const s=String(v??''),m=s.match(/-(\d{3})$/);
+ return m?faText(String(Number(m[1]))):faText(s);
+}
+const PICK_ORDER_SHADOW_KEY='nebrasWarehousePickOrderShadowsV4';
+const PICK_ITEM_SHADOW_KEY='nebrasWarehousePickItemShadowsV4';
+const PICK_ORDER_ARCHIVE_KEY='nebrasWarehousePickCompletedArchiveV1';
+const PICK_ORDER_SHADOW_MAX_AGE=24*60*60*1000;
+const PICK_ORDER_ARCHIVE_MAX_AGE=180*24*60*60*1000;
+let pickOrderShadows=loadPickOrderShadows(),pickItemShadows=loadPickItemShadows(),pickArchivedOrders=loadPickArchivedOrders();
+const pickActionBusy=new Set(),pickPrintBusy=new Set();
+let pickIssueTarget=null;
+function loadPickOrderShadows(){try{const raw=JSON.parse(localStorage.getItem(PICK_ORDER_SHADOW_KEY)||'{}'),nowMs=Date.now();if(!raw||typeof raw!=='object')return{};for(const id of Object.keys(raw)){if(!raw[id]||nowMs-Number(raw[id].at||0)>PICK_ORDER_SHADOW_MAX_AGE)delete raw[id]}return raw}catch{return{}}}
+function savePickOrderShadows(){try{localStorage.setItem(PICK_ORDER_SHADOW_KEY,JSON.stringify(pickOrderShadows))}catch{}}
+function pickItemShadowKey(orderId,lineId){return String(orderId)+'|'+String(lineId)}
+function loadPickItemShadows(){try{const raw=JSON.parse(localStorage.getItem(PICK_ITEM_SHADOW_KEY)||'{}'),nowMs=Date.now();if(!raw||typeof raw!=='object')return{};for(const id of Object.keys(raw)){if(!raw[id]||nowMs-Number(raw[id].at||0)>PICK_ORDER_SHADOW_MAX_AGE)delete raw[id]}return raw}catch{return{}}}
+function savePickItemShadows(){try{localStorage.setItem(PICK_ITEM_SHADOW_KEY,JSON.stringify(pickItemShadows))}catch{}}
+function pickArchiveKey(order){return String(order?.orderId||'')+'\u0001'+String(order?.batch||'')}
+function loadPickArchivedOrders(){try{const raw=JSON.parse(localStorage.getItem(PICK_ORDER_ARCHIVE_KEY)||'{}'),nowMs=Date.now();if(!raw||typeof raw!=='object')return{};let changed=false;for(const key of Object.keys(raw)){if(!raw[key]||nowMs-Number(raw[key].at||0)>PICK_ORDER_ARCHIVE_MAX_AGE){delete raw[key];changed=true}}if(changed)localStorage.setItem(PICK_ORDER_ARCHIVE_KEY,JSON.stringify(raw));return raw}catch{return{}}}
+function savePickArchivedOrders(){try{localStorage.setItem(PICK_ORDER_ARCHIVE_KEY,JSON.stringify(pickArchivedOrders))}catch{}}
+function pickOrderIsArchived(order){return !!pickArchivedOrders[pickArchiveKey(order)]}
+function archivePickOrder(orderId){const order=pickFindOrder(orderId);if(!order)return toast('این سفارش پیدا نشد.');if(!pickOrderIsCollected(order))return toast('این سفارش هنوز در مرحلهٔ جمع‌آوری است.');if(order._serverPending||pickActionBusy.has(pickBusyKey(orderId,'ORDER')))return toast('ابتدا ثبت قبلی این سفارش تأیید شود.');if(!confirm(`سفارش «${order.customer||'بدون نام'}» پس از تحویل به مشتری از فهرست جمع‌آوری‌شدهٔ همین دستگاه پنهان شود؟\n\nموجودی، فایل اکسل، سوابق و گزارش کسری هیچ تغییری نمی‌کند.`))return;pickArchivedOrders[pickArchiveKey(order)]={at:Date.now(),customer:String(order.customer||''),orderStatus:String(order.orderStatus||'')};savePickArchivedOrders();renderPickOrders();toast('سفارش از فهرست جمع‌آوری‌شده خارج شد.');}
+function pickOrderMatchesChanges(order,changes){return Object.keys(changes||{}).every(k=>String(order?.[k]??'')===String(changes[k]??''))}
+function pickItemMatchesChanges(item,changes){return Object.keys(changes||{}).every(k=>String(item?.[k]??'')===String(changes[k]??''))}
+function applyPickOrderShadows(orders){
+ const nowMs=Date.now();let changed=false;
+ const out=(Array.isArray(orders)?orders:[]).map(order=>{
+  const shadow=pickOrderShadows[String(order.orderId)];
+  if(!shadow)return order;
+  if(pickOrderMatchesChanges(order,shadow.changes)){delete pickOrderShadows[String(order.orderId)];changed=true;return order}
+  return {...order,...shadow.changes,_serverPending:true,_serverPendingStale:nowMs-Number(shadow.at||0)>PICK_ORDER_SHADOW_MAX_AGE/2};
+ });
+ if(changed)savePickOrderShadows();
+ return out;
+}
+function applyPickItemShadows(orders){
+ const nowMs=Date.now();let changed=false;
+ const out=(Array.isArray(orders)?orders:[]).map(order=>{
+  const items=(order.items||[]).map(item=>{
+   const key=pickItemShadowKey(order.orderId,item.lineId),shadow=pickItemShadows[key];
+   if(!shadow)return item;
+   if(pickItemMatchesChanges(item,shadow.changes)){delete pickItemShadows[key];changed=true;return item}
+   return {...item,...shadow.changes,_serverPending:true,_serverPendingStale:nowMs-Number(shadow.at||0)>PICK_ORDER_SHADOW_MAX_AGE/2};
+  });
+  return {...order,items};
+ });
+ if(changed)savePickItemShadows();
+ return out;
+}
+function receivePickOrders(orders){pickOrders=applyPickOrderShadows(applyPickItemShadows(orders));renderPickOrders()}
+function pickOrderIsCollected(order){const s=String(order?.orderStatus||'');return s==='آماده بسته‌بندی'||s==='تحویل بسته‌بندی'}
+function pickCustomerKey(order){return norm(order?.customer||'بدون نام')||'بدون نام'}
+function pickOrdersForView(){const collected=pickView==='collected';return pickOrders.filter(order=>!pickOrderIsArchived(order)&&pickOrderIsCollected(order)===collected)}
+function pickOrderStatusText(order){const base=String(order?.orderStatus||'در انتظار برداشت');return order?._serverPending?`${base} · در انتظار تأیید سرور`:base}
+function pickOrderStatusClass(order){return order?._serverPending?'pending':''}
+function renderPickItems(order,interactive){
+ const items=Array.isArray(order.items)?order.items:[];
+ return items.map(it=>{
+  const st=String(it.status||'در انتظار'),cls=st==='برداشت شد'?'done':(st==='ناقص'||st==='مغایرت'?'bad':'');
+  const busy=pickActionBusy.has(pickBusyKey(order.orderId,it.lineId))||!!it._serverPending;
+  const statusText=it._serverPending?`${st} · در انتظار تأیید سرور`:st;
+  const actual=it.hasActual?Number(it.actualQty||0):(st==='برداشت شد'?Number(it.qty||0):null);
+  const issue=st==='ناقص'||st==='مغایرت';
+  const detail=actual===null?'':`واقعی: ${fa(actual)} از ${fa(it.qty)}${issue?` · کسری: ${fa(Math.max(0,Number(it.qty||0)-actual))}`:''}${it.issueNote?`<br>${html(it.issueNote)}`:''}`;
+  const actions=!interactive?'':`<div class="pick-actions" style="grid-template-columns:repeat(3,1fr)"><button class="secondary ${busy?'pick-saving':''}" ${busy?'disabled':''} onclick="setPickItem('${html(order.orderId)}','${html(it.lineId)}','برداشت شد',{actualQty:${Number(it.qty||0)},issueNote:''})">${busy?'در حال ثبت…':'برداشت شد'}</button><button class="secondary ${busy?'pick-saving':''}" ${busy?'disabled':''} onclick="openPickIssue('${html(order.orderId)}','${html(it.lineId)}','ناقص')">ناقص</button><button class="danger ${busy?'pick-saving':''}" ${busy?'disabled':''} onclick="openPickIssue('${html(order.orderId)}','${html(it.lineId)}','مغایرت')">مغایرت</button></div>`;
+  return `<div class="pick-item"><div class="pick-item-top"><div><div class="pick-code">${html(pickDisplayCode(it.code))}</div><div class="pick-location">${html(it.location||'بدون مکان ثبت‌شده')}</div><span class="pick-item-status ${cls}">${html(statusText)}</span></div><span class="qty"><small>درخواست</small>${fa(it.qty)}</span></div>${detail?`<div class="pick-detail ${issue?'bad':''}">${detail}</div>`:''}${actions}</div>`;
+ }).join('');
+}
+function renderPickOrder(order,interactive){
+ const items=Array.isArray(order.items)?order.items:[],done=items.filter(x=>x.status==='برداشت شد').length,total=items.length;
+ const orderBusy=pickActionBusy.has(pickBusyKey(order.orderId,'ORDER'))||!!order._serverPending;
+ const orderStatus=pickOrderStatusText(order),statusClass=pickOrderStatusClass(order);
+ const worker=!interactive?'':`<div class="pick-worker"><div class="field"><label>انباردار مسئول</label><input ${orderBusy?'disabled':''} value="${html(order.worker||'')}" onchange="setPickOrder('${html(order.orderId)}',{worker:this.value,orderStatus:'در حال برداشت'})" placeholder="نام انباردار"></div><span class="pick-status ${statusClass}">${html(orderStatus)}</span></div>`;
+ const passive=!interactive?`<div class="pick-worker"><span class="pick-status ${statusClass}">${html(orderStatus)}</span>${order.worker?`<span class="pick-status">${html(order.worker)}</span>`:''}</div>`:'';
+ let footer='';
+ if(interactive)footer=`<div class="pick-footer"><button class="primary ${orderBusy?'pick-saving':''}" ${orderBusy?'disabled':''} onclick="setPickOrder('${html(order.orderId)}',{orderStatus:'آماده بسته‌بندی'})">${orderBusy?'در حال ثبت…':'آماده بسته‌بندی'}</button><button class="secondary ${orderBusy?'pick-saving':''}" ${orderBusy?'disabled':''} onclick="setPickOrder('${html(order.orderId)}',{orderStatus:'تحویل بسته‌بندی'})">${orderBusy?'در حال ثبت…':'تحویل بسته‌بندی'}</button></div>`;
+ else if(String(order.orderStatus||'')==='آماده بسته‌بندی')footer=`<div class="pick-footer"><button class="secondary ${orderBusy?'pick-saving':''}" ${orderBusy?'disabled':''} onclick="setPickOrder('${html(order.orderId)}',{orderStatus:'تحویل بسته‌بندی'})">${orderBusy?'در حال ثبت…':'تحویل بسته‌بندی'}</button><span class="pick-status ${statusClass}">${order._serverPending?'ثبت در حال پیگیری است.':'آمادهٔ تحویل بسته‌بندی'}</span></div>`;
+ else if(String(order.orderStatus||'')==='تحویل بسته‌بندی')footer=`<div class="pick-footer pick-footer-finish"><span class="pick-status ${statusClass}">${order._serverPending?'ثبت در حال پیگیری است.':'برای تحویل به مشتری آماده است.'}</span><span class="pick-status">تحویل بسته‌بندی ثبت شده</span><div class="pick-archive-note">پس از تحویل کامل به مشتری، «خروج از لیست» را بزنید. این کار فقط این سفارش را از فهرست جمع‌آوری‌شدهٔ همین دستگاه پنهان می‌کند و به موجودی، اکسل، سوابق یا لیست کسری دست نمی‌زند.</div><button class="danger pick-exit" ${orderBusy?'disabled':''} onclick="archivePickOrder('${html(order.orderId)}')">خروج از لیست · تحویل مشتری</button></div>`;
+ return `<article class="pick-order ${lastVoiceProductCode&&matchingPickItems(lastVoiceProductCode).some(h=>String(h.order.orderId)===String(order.orderId))?'pick-match':''}"><div class="pick-head"><div><div class="pick-meta"><span>سفارش ${pickOrderNo(order.orderId)}</span><span>${html(pickBatchFa(order.batch||''))}</span></div></div><div class="pick-head-actions"><span class="badge pick-progress">${fa(done)} از ${fa(total)}</span></div></div>${worker||passive}<div class="pick-items">${renderPickItems(order,interactive)}</div>${footer}</article>`;
+}
+function pickPrintGroupsForOrders(orders){
+ const wanted=new Set((orders||[]).map(o=>`${String(o.batch||'')}\u0001${pickCustomerKey(o)}`));
+ return (pickPrintCustomers||[]).filter(group=>wanted.has(`${String(group.batch||'')}\u0001${norm(group.customer||'بدون نام')||'بدون نام'}`));
+}
+function renderPickPrintGroup(group){
+ const busy=pickPrintBusy.has(String(group.groupKey));
+ const rows=(group.rows||[]).map(row=>`<label class="pick-reconcile-row"><input type="checkbox" ${row.checked?'checked':''} ${busy?'disabled':''} onchange="setPickPrintCheck('${html(group.groupKey)}','${html(row.rowKey)}',this.checked)"><span><b>${html(pickDisplayCode(row.code))}</b><small>درخواست ${fa(row.requestedQty)} · واقعی ${fa(row.actualQty)} · برای چاپ ${fa(row.shortageQty)}${row.notes?.length?` · ${html(row.notes.join(' | '))}`:''}</small></span><span class="pick-item-status bad">${html((row.issueTypes||[]).join(' / ')||'پیگیری')}</span></label>`).join('');
+ return `<div class="pick-reconcile"><div class="pick-reconcile-head"><b>تطبیق لیست کسری و ناموجود برای چاپ</b><span class="badge">${fa((group.rows||[]).length)} ردیف</span></div>${rows}<div class="pick-reconcile-foot"><span class="pick-status">${group.allChecked?'همهٔ ردیف‌ها تطبیق شد.':'ردیف‌های چاپی را با لیست جمع‌آوری تطبیق دهید.'}</span><button class="secondary ${busy?'pick-saving':''}" ${busy||!group.allChecked?'disabled':''} onclick="setPickPrintHandoff('${html(group.groupKey)}')">تحویل باربری</button></div></div>`;
+}
+function renderPickOrders(){
+ const host=document.querySelector('#pickOrders');
+ if(!host)return;
+ const query=norm(document.querySelector('#pickCustomerSearch')?.value||'').toLowerCase();
+ const ready=pickOrders.filter(o=>!pickOrderIsArchived(o)&&!pickOrderIsCollected(o)),collected=pickOrders.filter(o=>!pickOrderIsArchived(o)&&pickOrderIsCollected(o));
+ const readyCount=document.querySelector('#pickReadyCount'),collectedCount=document.querySelector('#pickCollectedCount');
+ if(readyCount)readyCount.textContent=fa(ready.length);if(collectedCount)collectedCount.textContent=fa(collected.length);
+ document.querySelectorAll('[data-pick-view]').forEach(b=>b.classList.toggle('active',b.dataset.pickView===pickView));
+ const source=pickView==='collected'?collected:ready;
+ const shown=source.filter(o=>!query||String(o.customer||'').toLowerCase().includes(query));
+ const counter=document.querySelector('#pickFilterCount');
+ if(counter)counter.textContent=query?`${fa(shown.length)} مشتری/سفارش مطابق جست‌وجو نمایش داده می‌شود.`:'';
+ if(!shown.length){host.innerHTML=`<div class="pick-empty">${source.length?(query?'مشتری مطابق جست‌وجو پیدا نشد.':'سفارشی در این بخش نیست.'):(pickView==='collected'?'هنوز سفارشی برای تطبیق جمع‌آوری نشده است.':'سفارش آمادهٔ جمع‌آوری وجود ندارد.')}</div>`;return}
+ const groups=new Map();shown.forEach(order=>{const key=pickCustomerKey(order);if(!groups.has(key))groups.set(key,{customer:order.customer||'بدون نام',orders:[]});groups.get(key).orders.push(order)});
+ host.innerHTML=[...groups.values()].map(group=>{const count=group.orders.length,printHtml=pickView==='collected'?pickPrintGroupsForOrders(group.orders).map(renderPickPrintGroup).join(''):'';return `<details class="pick-customer-group"><summary><span class="pick-customer-summary">${html(group.customer)}</span><span class="pick-customer-summary-meta"><span>${fa(count)} سفارش</span><i>⌄</i></span></summary><div class="pick-customer-content">${group.orders.map(order=>renderPickOrder(order,pickView==='ready')).join('')}${printHtml}</div></details>`}).join('');
+}
+async function refreshPickOrders(){
+ const btn=document.querySelector('#refreshPickOrders'),state=document.querySelector('#pickQueueState');
+ if(!db)return;
+ if(btn){btn.disabled=true;btn.textContent='در حال دریافت…'}
+ if(state)state.textContent='در حال دریافت سفارش‌های ارسالی از اکسل…';
+ try{
+  const r=await pickJsonp({action:'pickQueueList',includeDone:'1'});
+  if(!r?.ok)throw Error(r?.error||'صف سفارش پاسخ معتبر نداد.');
+  receivePickOrders(r.orders);
+  const visible=pickOrders.filter(o=>!pickOrderIsArchived(o)),ready=visible.filter(o=>!pickOrderIsCollected(o)).length,collected=visible.length-ready;
+  if(state)state.textContent=`${fa(ready)} سفارش آمادهٔ جمع‌آوری و ${fa(collected)} سفارش جمع‌آوری‌شده دریافت شد.`;
+  refreshPickPrintLists(true);
+ }catch(e){
+  if(state)state.textContent='دریافت صف سفارش انجام نشد؛ عملیات عادی انبار بدون تغییر فعال است.';
+  toast(e.message==='pick timeout'?'صف سفارش تا ۱۵ ثانیه پاسخ نداد.':(e.message||'خطا در دریافت سفارش‌ها'));
+ }finally{if(btn){btn.disabled=false;btn.textContent='↻ دریافت سفارش‌ها'}}
+}
+async function refreshPickPrintLists(silent=false){
+ try{const r=await pickJsonp({action:'pickQueuePrintList'},10000);if(!r?.ok)throw Error(r?.error||'فهرست تطبیق پاسخ معتبر نداد.');pickPrintCustomers=Array.isArray(r.customers)?r.customers:[];renderPickOrders()}catch(e){if(!silent)toast(e.message||'دریافت فهرست کسری و ناموجود انجام نشد.')}
+}
+function pickFindOrder(orderId){return pickOrders.find(o=>String(o.orderId)===String(orderId))}
+function pickFindItem(order,lineId){return (order?.items||[]).find(x=>String(x.lineId)===String(lineId))}
+function pickBusyKey(orderId,lineId){return String(orderId)+'|'+String(lineId||'ORDER')}
+function pickActionId(){return 'pick-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8)}
+async function confirmPickItem(orderId,lineId,expected){
+ const r=await pickJsonp({action:'pickQueueList',includeDone:'1'},12000);
+ if(!r?.ok)throw Error(r?.error||'پاسخ معتبر دریافت نشد.');
+ receivePickOrders(r.orders);
+ const item=pickFindItem(pickFindOrder(orderId),lineId);
+ return !!item && String(item.status||'')===String(expected.itemStatus||'') && (expected.actualQty===undefined || Number(item.actualQty||0)===Number(expected.actualQty));
+}
+async function confirmPickOrder(orderId,expected){
+ const r=await pickJsonp({action:'pickQueueList',includeDone:'1'},12000);
+ if(!r?.ok)throw Error(r?.error||'پاسخ معتبر دریافت نشد.');
+ receivePickOrders(r.orders);
+ const order=pickFindOrder(orderId);
+ return !!order && Object.keys(expected).every(k=>String(order[k]??'')===String(expected[k]??''));
+}
+function openPickIssue(orderId,lineId,itemStatus){
+ const item=pickFindItem(pickFindOrder(orderId),lineId);
+ if(!item)return toast('این ردیف سفارش پیدا نشد.');
+ pickIssueTarget={orderId,lineId,itemStatus,qty:Number(item.qty||0)};
+ document.querySelector('#pickIssueTitle').textContent=itemStatus==='ناقص'?'ثبت تعداد ناقص':'ثبت مغایرت';
+ document.querySelector('#pickIssueInfo').innerHTML=`کد <b>${html(pickDisplayCode(item.code))}</b> · تعداد درخواستی <b>${fa(item.qty)}</b>`;
+ const actual=document.querySelector('#pickActualQty'),note=document.querySelector('#pickIssueNote');
+ actual.max=String(item.qty);actual.value=itemStatus==='مغایرت'?'0':'';
+ note.value=itemStatus==='مغایرت'?'موجود نبود':'';
+ document.querySelector('#pickIssueModal').classList.add('show');setTimeout(()=>actual.focus(),50);
+}
+function closePickIssue(){document.querySelector('#pickIssueModal').classList.remove('show');pickIssueTarget=null}
+
+async function setPickItem(orderId,lineId,itemStatus,extra={}){
+ const key=pickBusyKey(orderId,lineId);
+ if(pickActionBusy.has(key))return;
+ if(pickItemShadows[pickItemShadowKey(orderId,lineId)])return toast('ثبت قبلی این ردیف هنوز در حال تأیید سرور است.');
+ const order=pickFindOrder(orderId),item=pickFindItem(order,lineId);
+ if(!order||!item)return toast('این ردیف سفارش پیدا نشد.');
+ const changes={status:itemStatus};
+ if(extra.actualQty!==undefined){changes.actualQty=Number(extra.actualQty);changes.hasActual=true}
+ if(extra.issueNote!==undefined)changes.issueNote=extra.issueNote;
+ Object.assign(item,changes);
+ pickActionBusy.add(key);
+ renderPickOrders();
+ const payload={action:'pickQueueSet',orderId,lineId,itemStatus,clientActionId:pickActionId(),...extra};
+ rememberPickItemShadow(orderId,lineId,changes,payload);
+ try{
+  const r=await pickJsonp(payload,6500);
+  if(!r?.ok)throw Error(r?.error||'ثبت وضعیت انجام نشد.');
+  clearPickItemShadow(orderId,lineId);delete item._serverPending;
+  toast(itemStatus==='برداشت شد'?'برداشت این ردیف ثبت شد.':itemStatus==='ناقص'?'این ردیف با مقدار واقعی ثبت شد.':'مغایرت این ردیف ثبت شد.');
+ }catch(e){
+  // Google may save the row before its JSONP response reaches the phone.
+  // Keep the card usable and verify/retry silently in the background.
+  item._serverPending=true;
+  schedulePickItemReconcile(orderId,lineId,payload,changes);
+  toast('درخواست ردیف ارسال شد؛ بدون قفل شدن صفحه در پس‌زمینه تأیید می‌شود.');
+ }finally{pickActionBusy.delete(key)}
+ renderPickOrders();
+}
+function rememberPickItemShadow(orderId,lineId,changes,payload){
+ const key=pickItemShadowKey(orderId,lineId);pickItemShadows[key]={changes:{...changes},payload,at:Date.now(),attempts:0};savePickItemShadows();
+}
+function clearPickItemShadow(orderId,lineId){const key=pickItemShadowKey(orderId,lineId);if(pickItemShadows[key]){delete pickItemShadows[key];savePickItemShadows()}}
+function schedulePickItemReconcile(orderId,lineId,payload,changes,attempt=0){
+ setTimeout(async()=>{
+  const key=pickItemShadowKey(orderId,lineId);if(!pickItemShadows[key])return;
+  try{
+   const listed=await pickJsonp({action:'pickQueueList',includeDone:'1'},7000);
+   if(!listed?.ok)throw Error('list');
+   const serverOrder=(listed.orders||[]).find(x=>String(x.orderId)===String(orderId));
+   const serverItem=pickFindItem(serverOrder,lineId);
+   if(pickItemMatchesChanges(serverItem,changes)){clearPickItemShadow(orderId,lineId);receivePickOrders(listed.orders);const current=pickFindItem(pickFindOrder(orderId),lineId);if(current)delete current._serverPending;renderPickOrders();return}
+   // Preserve the optimistic state while the server has not yet confirmed it.
+   receivePickOrders(listed.orders);
+   if(attempt<2){const retry=await pickJsonp(payload,7000);if(retry?.ok){clearPickItemShadow(orderId,lineId);const next=pickFindItem(pickFindOrder(orderId),lineId);if(next){Object.assign(next,changes);delete next._serverPending}toast('ثبت ردیف با تأخیر تأیید شد.');renderPickOrders();return}}
+  }catch{}
+  const pending=pickItemShadows[key];if(pending){pending.attempts=attempt+1;savePickItemShadows()}
+  if(attempt<2)schedulePickItemReconcile(orderId,lineId,payload,changes,attempt+1);
+ },attempt?4500:1300);
+}
+function rememberPickOrderShadow(orderId,changes,payload){
+ if(!changes.orderStatus)return;
+ pickOrderShadows[String(orderId)]={changes:{...changes},payload,at:Date.now(),attempts:0};
+ savePickOrderShadows();
+}
+function clearPickOrderShadow(orderId){if(pickOrderShadows[String(orderId)]){delete pickOrderShadows[String(orderId)];savePickOrderShadows()}}
+function schedulePickOrderReconcile(orderId,payload,changes,attempt=0){
+ setTimeout(async()=>{
+  const shadow=pickOrderShadows[String(orderId)];if(!shadow)return;
+  try{
+   const listed=await pickJsonp({action:'pickQueueList',includeDone:'1'},7000);
+   if(!listed?.ok)throw Error('list');
+   const serverOrder=(listed.orders||[]).find(x=>String(x.orderId)===String(orderId));
+   if(pickOrderMatchesChanges(serverOrder,changes)){clearPickOrderShadow(orderId);receivePickOrders(listed.orders);const current=pickFindOrder(orderId);if(current)delete current._serverPending;renderPickOrders();return}
+   // Do not confuse a locally held shadow with a confirmed server status.
+   receivePickOrders(listed.orders);
+   if(attempt<3){
+    const retry=await pickJsonp(payload,7000);
+    if(retry?.ok){clearPickOrderShadow(orderId);const local=pickFindOrder(orderId);if(local){Object.assign(local,changes);delete local._serverPending}renderPickOrders();toast('ثبت سفارش با تأخیر تأیید شد.');return}
+   }
+  }catch{}
+  const pending=pickOrderShadows[String(orderId)];if(pending){pending.attempts=attempt+1;savePickOrderShadows()}
+  if(attempt<3)schedulePickOrderReconcile(orderId,payload,changes,attempt+1);
+  else renderPickOrders();
+ },attempt?4500:1300);
+}
+async function setPickOrder(orderId,changes){
+ const key=pickBusyKey(orderId,'ORDER');
+ if(pickActionBusy.has(key))return;
+ if(pickOrderShadows[String(orderId)])return toast('ثبت قبلی این سفارش هنوز در حال تأیید سرور است.');
+ const order=pickFindOrder(orderId);
+ if(!order)return toast('این سفارش پیدا نشد.');
+ // Packaging is independent from row completion. Shortage/mismatch rows have
+ // their own print-follow-up path and never block the packaging workflow.
+ const payload={action:'pickQueueSet',orderId,clientActionId:pickActionId(),...changes};
+ Object.assign(order,changes);
+ if(changes.orderStatus){order._serverPending=true;rememberPickOrderShadow(orderId,changes,payload)}
+ pickActionBusy.add(key);
+ renderPickOrders();
+ try{
+  const r=await pickJsonp(payload,6500);
+  if(!r?.ok)throw Error(r?.error||'ثبت سفارش انجام نشد.');
+  clearPickOrderShadow(orderId);delete order._serverPending;
+  toast(changes.orderStatus==='آماده بسته‌بندی'?'سفارش آمادهٔ بسته‌بندی شد.':changes.orderStatus==='تحویل بسته‌بندی'?'سفارش تحویل بسته‌بندی شد.':'اطلاعات سفارش ثبت شد.');
+ }catch(e){
+  // Keep it in the collected view instead of throwing it back into the active
+  // list. The same idempotent request is verified and retried in background.
+  schedulePickOrderReconcile(orderId,payload,changes);
+  toast('درخواست سفارش ارسال شد؛ بدون قفل شدن صفحه در پس‌زمینه تأیید می‌شود.');
+ }finally{pickActionBusy.delete(key)}
+ renderPickOrders();
+}
+async function setPickPrintCheck(groupKey,rowKey,checked){
+ const key=String(groupKey);if(pickPrintBusy.has(key))return;
+ const group=(pickPrintCustomers||[]).find(x=>String(x.groupKey)===key),row=(group?.rows||[]).find(x=>String(x.rowKey)===String(rowKey));if(!group||!row)return toast('ردیف تطبیق پیدا نشد.');
+ const before=!!row.checked;row.checked=!!checked;group.allChecked=(group.rows||[]).length>0&&group.rows.every(x=>x.checked);pickPrintBusy.add(key);renderPickOrders();
+ try{const r=await pickJsonp({action:'pickQueuePrintCheck',groupKey,rowKey,checked:checked?'1':'0',clientActionId:pickActionId()},7000);if(!r?.ok)throw Error(r?.error||'ثبت تطبیق انجام نشد.');toast(checked?'ردیف تطبیق تأیید شد.':'علامت تطبیق برداشته شد.');refreshPickPrintLists(true)}catch(e){row.checked=before;group.allChecked=(group.rows||[]).length>0&&group.rows.every(x=>x.checked);toast(e.message||'ثبت تطبیق انجام نشد.')}finally{pickPrintBusy.delete(key);renderPickOrders()}
+}
+async function setPickPrintHandoff(groupKey){
+ const key=String(groupKey);if(pickPrintBusy.has(key))return;
+ const group=(pickPrintCustomers||[]).find(x=>String(x.groupKey)===key);if(!group)return toast('فهرست مشتری پیدا نشد.');if(!group.allChecked)return toast('ابتدا همهٔ ردیف‌های چاپ را تطبیق دهید.');pickPrintBusy.add(key);renderPickOrders();
+ try{const r=await pickJsonp({action:'pickQueuePrintHandoff',groupKey,clientActionId:pickActionId()},7000);if(!r?.ok)throw Error(r?.error||'تحویل باربری ثبت نشد.');toast('تحویل باربری ثبت شد.');await refreshPickPrintLists(true)}catch(e){toast(e.message||'تحویل باربری ثبت نشد.')}finally{pickPrintBusy.delete(key);renderPickOrders()}
+}
+window.setPickItem=setPickItem;window.setPickOrder=setPickOrder;window.setPickPrintCheck=setPickPrintCheck;window.setPickPrintHandoff=setPickPrintHandoff;window.archivePickOrder=archivePickOrder;
+document.querySelector('#refreshPickOrders').onclick=refreshPickOrders;
+window.openPickIssue=openPickIssue;
+document.querySelector('#pickCustomerSearch').oninput=renderPickOrders;
+document.querySelector('#clearPickSearch').onclick=()=>{document.querySelector('#pickCustomerSearch').value='';renderPickOrders();document.querySelector('#pickCustomerSearch').focus()};
+document.querySelectorAll('[data-pick-view]').forEach(b=>b.onclick=()=>{pickView=b.dataset.pickView==='collected'?'collected':'ready';renderPickOrders();if(pickView==='collected')refreshPickPrintLists(true)});
+document.querySelector('#closePickIssue').onclick=closePickIssue;
+document.querySelector('#pickIssueModal').onclick=e=>{if(e.target.id==='pickIssueModal')closePickIssue()};
+document.querySelector('#pickIssueSubmit').onclick=()=>{
+ if(!pickIssueTarget)return;
+ const actual=Number(document.querySelector('#pickActualQty').value),note=String(document.querySelector('#pickIssueNote').value||'').trim();
+ if(!Number.isFinite(actual)||actual<0||actual>pickIssueTarget.qty)return toast('تعداد واقعی باید بین صفر و تعداد درخواستی باشد.');
+ if(!note)return toast('برای پیگیری و چاپ، توضیح را وارد کنید.');
+ const target=pickIssueTarget;closePickIssue();
+ setPickItem(target.orderId,target.lineId,target.itemStatus,{actualQty:actual,issueNote:note});
+};
+
+document.querySelector('#resetDemo').onclick=()=>{if(confirm('همه تغییرات این دستگاه حذف و اطلاعات به وضعیت فایل اکسل برگردد؟')){db=structuredClone(initial);save();toast('اطلاعات به وضعیت فایل اکسل بازنشانی شد.')}};
+document.querySelector('#refreshExcel').onclick=refreshFromExcel;
+document.querySelector('#exportHistory').onclick=()=>{const blob=new Blob([JSON.stringify(db.history,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Nebras_Warehouse_Pilot_History.json';a.click();URL.revokeObjectURL(a.href)};
+document.querySelectorAll('[data-scan-target]').forEach(b=>b.onclick=()=>openScanner(b.dataset.scanTarget));
+async function openScanner(target){scanTarget=target;const productMode=target==='findProduct'||target==='inProduct',smartMode=target==='global';document.querySelector('#scannerTitle').textContent=smartMode?'اسکن محصول یا مکان':productMode?'اسکن بارکد محصول':'اسکن بارکد مکان';document.querySelector('#manualScan').value='';document.querySelector('#manualScan').placeholder=productMode?'10-5041':smartMode?'کد محصول یا مکان':'NBR-S01-R02-B01-02';document.querySelector('#scanner').classList.add('show');document.querySelector('#scanStatus').textContent='در حال آماده‌سازی دوربین…';try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}}});document.querySelector('#video').srcObject=stream;await document.querySelector('#video').play();if('BarcodeDetector'in window){const detector=new BarcodeDetector({formats:['qr_code','code_128','code_39','ean_13','ean_8']});const tick=async()=>{try{const codes=await detector.detect(document.querySelector('#video'));if(codes.length){applyScan(codes[0].rawValue);return}}catch{}scanTimer=requestAnimationFrame(tick)};tick();document.querySelector('#scanStatus').textContent=smartMode?'بارکد محصول یا QR مکان را مقابل دوربین بگیرید.':productMode?'دوربین را روی بارکد محصول نگه دارید.':'دوربین را روی بارکد مکان نگه دارید.'}else document.querySelector('#scanStatus').textContent='اسکن خودکار در این مرورگر فعال نیست؛ کد را پایین وارد کنید.'}catch{document.querySelector('#scanStatus').textContent='اجازه دوربین داده نشد؛ کد را پایین وارد کنید.'}}
+function closeScanner(){if(scanTimer)cancelAnimationFrame(scanTimer);if(stream)stream.getTracks().forEach(t=>t.stop());stream=null;document.querySelector('#scanner').classList.remove('show')}
+function applyScan(v){v=norm(v);if(!v){toast('کدی وارد نشده است.');return}if(scanTarget==='voiceAssignLoc'){if(!locationValid(v)){toast('این بارکد، کد معتبر مکان نبراس نیست.');return}const el=document.querySelector('#voiceAssignLocation');if(el)el.value=v;closeScanner();toast('لوکیشن برای ثبت انتخاب شد.');speakScanLocation(v);return}if(scanTarget.startsWith('allocation:')){if(!locationValid(v)){toast('این بارکد، کد معتبر مکان نبراس نیست.');return}const [,kind,index]=scanTarget.split(':');if(kind==='in'){smartInRows[Number(index)].loc=v;renderInRows()}else{splitRows[Number(index)].loc=v;renderSplitRows()}closeScanner();toast('مکان شناسایی شد.');speakScanLocation(v);return}if(scanTarget==='findProduct'||scanTarget==='inProduct'||(scanTarget==='global'&&!locationValid(v))){const target=scanTarget==='inProduct'?'inProduct':'findProduct';document.querySelector('#'+target).value=v;if(target==='inProduct'){switchTab('in');inProductInfo()}else{switchTab('find');document.querySelector('#searchResults').innerHTML=productResults(v)}closeScanner();toast(product(v)?'کد محصول شناسایی شد.':'کد جدید شناسایی شد.');speakScanProduct(v);return}if(!locationValid(v)){toast('این بارکد، کد معتبر مکان نبراس نیست.');return}if(scanTarget==='global'){document.querySelector('#findLocation').value=v;switchTab('find');document.querySelector('#showBoxBtn').click()}else{document.querySelector('#'+scanTarget).value=v;if(scanTarget==='outLoc')showAvailable()}closeScanner();toast('مکان شناسایی شد.');speakScanLocation(v)}
+document.querySelector('#closeScanner').onclick=closeScanner;document.querySelector('#useManual').onclick=()=>applyScan(document.querySelector('#manualScan').value);document.querySelector('#scanner').onclick=e=>{if(e.target.id==='scanner')closeScanner()};
+const voiceTextInput=document.querySelector('#voiceCommandText'),voiceTextSubmit=document.querySelector('#voiceCommandSubmit');if(voiceTextInput){voiceTextInput.addEventListener('compositionstart',()=>{voiceTextComposing=true;if(voiceTextProcessTimer){clearTimeout(voiceTextProcessTimer);voiceTextProcessTimer=null}});voiceTextInput.addEventListener('compositionend',()=>{voiceTextComposing=false;voiceTextLastProcessed='';queueVoiceCommandText()});voiceTextInput.addEventListener('input',()=>{voiceTextLastProcessed='';if(!voiceTextComposing)queueVoiceCommandText()});voiceTextInput.addEventListener('change',()=>processVoiceCommandText(true));voiceTextInput.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();processVoiceCommandText(true)}})}if(voiceTextSubmit)voiceTextSubmit.onclick=()=>processVoiceCommandText(true);document.querySelector('#closeVoiceConfirm').onclick=closeVoiceConfirm;document.querySelector('#cancelVoiceConfirm').onclick=closeVoiceConfirm;document.querySelector('#repeatVoiceConfirm').onclick=()=>speak(voiceConfirmSpeech,{force:true});document.querySelector('#acceptVoiceConfirm').onclick=acceptVoiceConfirm;document.querySelector('#voiceConfirmModal').onclick=e=>{if(e.target.id==='voiceConfirmModal')closeVoiceConfirm()};document.querySelector('#closeProductVoiceModal').onclick=()=>{stopVoice();document.querySelector('#productVoiceModal').classList.remove('show')};document.querySelector('#productVoiceModal').onclick=e=>{if(e.target.id==='productVoiceModal'){stopVoice();e.currentTarget.classList.remove('show')}};
+window.addEventListener('beforeunload',()=>{stopVoice();stopVoiceRecognition()});if(voiceSupported())speechSynthesis.onvoiceschanged=updateVoiceUi;updateVoiceUi();ensureInRow();renderInRows();
+function handleVoiceTranscript(transcript){const r=resolveSpokenProduct(transcript);if(r.product){const shown=showRecognizedVoiceCode(r.product.code),p={...r.product,code:shown};smartProductCard(p,{heard:shown,confidence:r.confidence,qty:r.qty,action:r.action});clearVoiceCommandAfterCard();return}if(r.ambiguous?.length){toast('چند کد نزدیک پیدا شد؛ لطفاً کد را دوباره واضح‌تر بخوانید.');return}if(r.inferredCode){const shown=showRecognizedVoiceCode(r.inferredCode),p={code:shown,name:'کد جدید',occasion:'',_voiceNew:true};smartProductCard(p,{heard:shown,confidence:'new',qty:r.qty,action:r.action});clearVoiceCommandAfterCard();toast('این کد در بانک نیست؛ در صورت درست بودن می‌توانید برایش لوکیشن ایجاد کنید.');return}const heard=document.querySelector('#voiceHeard');if(heard)heard.textContent='کد قابل تشخیص نبود: '+transcript;toast('کد قابل تشخیص نبود. دوباره بخوانید یا کد را تایپ کنید.')}
+function closeProductVoiceCard(){document.querySelector('#productVoiceModal').classList.remove('show')}
+document.querySelector('#closeProductVoiceModal').onclick=closeProductVoiceCard;
+</script>
+<script src="shared-box.js?v=20260916-2"></script>
+<script src="scanner-robust.js?v=20260919-1"></script>
+</body>
+</html>
