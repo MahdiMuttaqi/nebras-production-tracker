@@ -144,7 +144,7 @@ window.speakPickItem=speakPickItem;window.speakPickOrder=speakPickOrder;
 
 // Persian speech input and smart code resolver. This layer only searches/prefills UI; inventory writes remain in existing submit handlers.
 const SpeechRecognitionApi=window.SpeechRecognition||window.webkitSpeechRecognition;
-let voiceRecognizer=null,voiceListening=false,lastVoiceProductCode='',voiceSessionActive=false,voiceHadSpeech=false,voiceRestartTimer=null,voiceFinalizeTimer=null,voiceFinalText='',voiceInterimText='',voiceAlternatives=[],voiceFinalizing=false,voiceSegments=[],voiceStartBeepPlayed=false,lastVoiceQuantity=null,lastVoiceSuggestedAction='',voiceLastHeard='',voiceSessionToken=0,voiceNoSpeechRestarts=0;
+let voiceRecognizer=null,voiceListening=false,lastVoiceProductCode='',voiceSessionActive=false,voiceHadSpeech=false,voiceRestartTimer=null,voiceFinalizeTimer=null,voiceFinalText='',voiceInterimText='',voiceAlternatives=[],voiceFinalizing=false,voiceSegments=[],voiceStartBeepPlayed=false,lastVoiceQuantity=null,lastVoiceSuggestedAction='',voiceLastHeard='';
 const faDigitMap={'۰':'0','۱':'1','۲':'2','۳':'3','۴':'4','۵':'5','۶':'6','۷':'7','۸':'8','۹':'9','٠':'0','١':'1','٢':'2','٣':'3','٤':'4','٥':'5','٦':'6','٧':'7','٨':'8','٩':'9'};
 const faUnitWords={صفر:0,یک:1,يك:1,یه:1,يک:1,دو:2,سه:3,چهار:4,پنج:5,شش:6,شیش:6,هفت:7,هشت:8,نه:9};
 const faTeenWords={ده:10,یازده:11,يازده:11,دوازده:12,سیزده:13,سيزده:13,چهارده:14,پانزده:15,شانزده:16,هفده:17,هجده:18,نوزده:19};
@@ -313,170 +313,162 @@ function clearVoiceRecognitionTimers(){
 }
 function setVoiceRecognitionUi(active,message=''){
  const b=document.querySelector('#voiceCommandBtn'),heard=document.querySelector('#voiceHeard');
- if(b){b.classList.toggle('listening',active);b.textContent=active?'⏹ پایان شنیدن':'🎙️ گفتن کد محصول'}
+ if(b){
+  b.classList.toggle('listening',active);
+  b.textContent=active?'⏹ پایان شنیدن':'🎙️ گفتن کد محصول'
+ }
  if(heard&&message)heard.textContent=message
 }
-function currentVoiceRecognitionText(){
- return (voiceFinalText.trim()+' '+voiceInterimText.trim()).replace(/\s+/g,' ').trim()
-}
-function voiceRecognitionHasExactMatch(text){
- if(!text)return false;
- try{
-  const r=resolveSpokenProduct(text);
-  return !!(r&&r.product&&r.confidence==='exact')
- }catch{return false}
-}
-function scheduleVoiceRestart(delay=250){
- if(voiceRestartTimer){clearTimeout(voiceRestartTimer);voiceRestartTimer=null}
- if(!voiceSessionActive||voiceRecognizer)return;
- const token=voiceSessionToken;
- voiceRestartTimer=setTimeout(()=>{
-  voiceRestartTimer=null;
-  if(voiceSessionActive&&token===voiceSessionToken&&!voiceRecognizer)launchVoiceRecognizer()
- },delay)
-}
-function scheduleVoiceFinalize(delay=1400){
- if(voiceFinalizeTimer)clearTimeout(voiceFinalizeTimer);
- const token=voiceSessionToken;
- voiceFinalizeTimer=setTimeout(()=>{
-  voiceFinalizeTimer=null;
-  if(voiceSessionActive&&token===voiceSessionToken&&currentVoiceRecognitionText())finishVoiceRecognition(false)
- },delay)
-}
 function stopVoiceRecognition(){
- voiceSessionActive=false;voiceListening=false;voiceFinalizing=false;voiceSessionToken++;
+ voiceSessionActive=false;
+ voiceListening=false;
+ voiceFinalizing=false;
  clearVoiceRecognitionTimers();
- if(voiceRecognizer){const r=voiceRecognizer;voiceRecognizer=null;try{r.abort()}catch{}}
+ if(voiceRecognizer){
+  const r=voiceRecognizer;
+  voiceRecognizer=null;
+  try{r.abort()}catch{}
+ }
  setVoiceRecognitionUi(false)
 }
 function finishVoiceRecognition(manual=false){
  if(!voiceSessionActive||voiceFinalizing)return;
- const t=currentVoiceRecognitionText();
- if(!t&&!manual){
-  setVoiceRecognitionUi(true,'در حال شنیدن… کد را بخوانید.');
-  scheduleVoiceRestart(250);
-  return
- }
- voiceFinalizing=true;voiceSessionActive=false;voiceListening=false;
+ const t=(voiceFinalText.trim()||voiceInterimText.trim());
+ voiceFinalizing=true;
+ voiceSessionActive=false;
+ voiceListening=false;
  clearVoiceRecognitionTimers();
+
  const alts=[t,...voiceAlternatives].filter(Boolean);
- if(voiceRecognizer){const r=voiceRecognizer;voiceRecognizer=null;try{r.stop()}catch{}}
- setVoiceRecognitionUi(false,t?'شنیده شد: '+t:(manual?'شنیدن متوقف شد.':'صدایی تشخیص داده نشد.'));
+
+ if(voiceRecognizer){
+  const r=voiceRecognizer;
+  voiceRecognizer=null;
+  try{r.stop()}catch{}
+ }
+
+ setVoiceRecognitionUi(
+  false,
+  t ? 'شنیده شد: '+t :
+      (manual ? 'شنیدن متوقف شد.' : 'صدایی تشخیص داده نشد.')
+ );
+
  voiceFinalizing=false;
- if(t)setTimeout(()=>handleVoiceAlternatives(alts),0)
+
+ if(t){
+  // پردازش فوری بلافاصله بعد از پایان گفتار
+  handleVoiceAlternatives(alts)
+ }
 }
 function launchVoiceRecognizer(){
  if(!voiceSessionActive||voiceRecognizer)return;
- const token=voiceSessionToken,r=new SpeechRecognitionApi();
+
+ const r=new SpeechRecognitionApi();
  voiceRecognizer=r;
+
+ // فقط فارسی ایران
  r.lang='fa-IR';
+
+ // متن موقت را هم بگیر تا کاربر فوراً ببیند صدا دریافت شده
  r.interimResults=true;
+
+ // یک نشست واقعی؛ هیچ Restart خودکاری وجود ندارد
  r.continuous=true;
+
+ // چند برداشت برای افزایش دقت کد
  r.maxAlternatives=10;
 
  r.onstart=()=>{
-  if(!voiceSessionActive||token!==voiceSessionToken)return;
+  if(!voiceSessionActive)return;
   voiceListening=true;
-  setVoiceRecognitionUi(true,voiceHadSpeech?'در حال شنیدن ادامهٔ کد…':'در حال شنیدن… کد را بخوانید.')
+  setVoiceRecognitionUi(true,'در حال شنیدن… کد را بخوانید.')
  };
 
  r.onspeechstart=()=>{
-  if(!voiceSessionActive||token!==voiceSessionToken)return;
-  voiceHadSpeech=true;voiceNoSpeechRestarts=0;
-  if(voiceFinalizeTimer){clearTimeout(voiceFinalizeTimer);voiceFinalizeTimer=null}
+  if(!voiceSessionActive)return;
+  voiceHadSpeech=true;
   setVoiceRecognitionUi(true,'صدای شما دریافت شد…')
  };
 
  r.onresult=e=>{
-  if(!voiceSessionActive||token!==voiceSessionToken)return;
   let interim='';
+
   for(let i=e.resultIndex;i<e.results.length;i++){
-   const res=e.results[i],best=String(res[0]?.transcript||'').trim();
+   const res=e.results[i];
+   const best=String(res[0]?.transcript||'').trim();
    if(!best)continue;
-   voiceHadSpeech=true;voiceNoSpeechRestarts=0;
+
+   voiceHadSpeech=true;
+
    if(res.isFinal){
     voiceFinalText+=(voiceFinalText?' ':'')+best;
+
     for(let j=0;j<Math.min(res.length,10);j++){
      const a=String(res[j]?.transcript||'').trim();
      if(a)voiceAlternatives.push(a)
     }
-   }else{
-    interim+=(interim?' ':'')+best
+
+    // مرورگر گفتار را نهایی کرده؛ همان لحظه قطع و پردازش کن
+    finishVoiceRecognition(false);
+    return;
    }
+
+   interim+=(interim?' ':'')+best;
   }
+
   voiceInterimText=interim;
-  const heardNow=currentVoiceRecognitionText();
-  if(heardNow){
-   voiceLastHeard=heardNow;
-   const exact=voiceRecognitionHasExactMatch(heardNow);
-   setVoiceRecognitionUi(true,'شنیده شد: '+heardNow+(exact?' — کد پیدا شد؛ پایان گفتار…':' — ادامه دهید…'));
-   // A short pause between the two parts of a code must NOT end listening.
-   // Exact product matches finish quickly; incomplete speech gets a longer grace period.
-   scheduleVoiceFinalize(exact?650:1700)
-  }else{
-   setVoiceRecognitionUi(true,'در حال شنیدن… کد را بخوانید.')
+
+  if(interim){
+   setVoiceRecognitionUi(true,'شنیده شد: '+interim)
   }
  };
 
  r.onspeechend=()=>{
-  if(!voiceSessionActive||token!==voiceSessionToken)return;
-  const t=currentVoiceRecognitionText();
-  if(t)scheduleVoiceFinalize(voiceRecognitionHasExactMatch(t)?550:1500)
- };
+  if(!voiceSessionActive)return;
 
- r.onsoundend=()=>{
-  if(!voiceSessionActive||token!==voiceSessionToken)return;
-  const t=currentVoiceRecognitionText();
-  if(t)scheduleVoiceFinalize(voiceRecognitionHasExactMatch(t)?650:1600)
+  // اگر مرورگر هنوز نتیجه Final نداده، آخرین متن موقت را فوراً پردازش کن
+  if(voiceFinalText.trim()||voiceInterimText.trim()){
+   if(voiceFinalizeTimer)clearTimeout(voiceFinalizeTimer);
+   voiceFinalizeTimer=setTimeout(()=>{
+    voiceFinalizeTimer=null;
+    if(voiceSessionActive)finishVoiceRecognition(false)
+   },120)
+  }
  };
 
  r.onerror=e=>{
   if(voiceRecognizer===r)voiceRecognizer=null;
-  if(!voiceSessionActive||token!==voiceSessionToken)return;
-  voiceListening=false;
+  if(!voiceSessionActive)return;
+
   if(e.error==='not-allowed'||e.error==='service-not-allowed'){
    toast('اجازه میکروفن داده نشده است.');
    stopVoiceRecognition();
    return
   }
-  if(e.error==='network'){
-   setVoiceRecognitionUi(false,'ارتباط تشخیص صدا برقرار نشد؛ دوباره روی میکروفن بزنید.');
-   voiceSessionActive=false;
-   clearVoiceRecognitionTimers();
-   return
-  }
-  // no-speech/aborted are normal browser events. Do not beep/toast/toggle the UI.
-  // Keep the logical session alive and restart silently only when the browser itself ended it.
+
+  // عمداً Restart خودکار نداریم تا دکمه قطع و وصل نشود
+  voiceSessionActive=false;
+  voiceListening=false;
+  clearVoiceRecognitionTimers();
+  setVoiceRecognitionUi(false,
+   e.error==='no-speech'
+    ? 'صدایی شنیده نشد؛ دوباره دکمه را بزنید.'
+    : 'شنیدن صدا متوقف شد؛ دوباره دکمه را بزنید.'
+  )
  };
 
  r.onend=()=>{
   if(voiceRecognizer===r)voiceRecognizer=null;
-  if(!voiceSessionActive||token!==voiceSessionToken)return;
+  if(!voiceSessionActive)return;
+
   voiceListening=false;
 
-  // Some mobile browsers end Web Speech after a short idle period even before the
-  // user speaks. Keep the SAME one-tap session alive without changing the button/UI.
-  if(!voiceHadSpeech&&!currentVoiceRecognitionText()){
-   voiceNoSpeechRestarts++;
-   setVoiceRecognitionUi(true,'در حال شنیدن… کد را بخوانید.');
-   scheduleVoiceRestart(300);
-   return
-  }
-
-  // Preserve a last interim fragment if the browser ended the recognizer.
-  if(voiceInterimText.trim()){
-   voiceFinalText+=(voiceFinalText?' ':'')+voiceInterimText.trim();
-   voiceInterimText=''
-  }
-
-  const t=currentVoiceRecognitionText();
-  if(t){
-   const exact=voiceRecognitionHasExactMatch(t);
-   scheduleVoiceFinalize(exact?250:1200);
-   // If the browser ended between code parts, keep listening during the grace period.
-   if(!exact)scheduleVoiceRestart(220)
+  // اگر متن داریم، همان لحظه پردازش؛ اگر نداریم هیچ Restart و قطع‌و‌وصل خودکاری نکن
+  if(voiceFinalText.trim()||voiceInterimText.trim()){
+   finishVoiceRecognition(false)
   }else{
-   scheduleVoiceRestart(300)
+   voiceSessionActive=false;
+   setVoiceRecognitionUi(false,'صدایی شنیده نشد؛ دوباره دکمه را بزنید.')
   }
  };
 
@@ -484,7 +476,9 @@ function launchVoiceRecognizer(){
   r.start()
  }catch{
   if(voiceRecognizer===r)voiceRecognizer=null;
-  if(voiceSessionActive&&token===voiceSessionToken)scheduleVoiceRestart(500)
+  voiceSessionActive=false;
+  voiceListening=false;
+  setVoiceRecognitionUi(false,'میکروفن شروع نشد؛ دوباره دکمه را بزنید.')
  }
 }
 function startVoiceRecognition(){
@@ -492,16 +486,17 @@ function startVoiceRecognition(){
   toast('تشخیص گفتار در این مرورگر فعال نیست. برای بهترین نتیجه از Chrome استفاده کنید.');
   return
  }
+
  stopVoice();
+
  if(voiceSessionActive){
   finishVoiceRecognition(true);
   return
  }
- voiceSessionToken++;
+
  voiceSessionActive=true;
  voiceListening=false;
  voiceHadSpeech=false;
- voiceNoSpeechRestarts=0;
  voiceFinalText='';
  voiceInterimText='';
  voiceAlternatives=[];
@@ -509,6 +504,7 @@ function startVoiceRecognition(){
  voiceFinalizing=false;
  voiceLastHeard='';
  clearVoiceRecognitionTimers();
+
  setVoiceRecognitionUi(true,'در حال شنیدن… کد را بخوانید.');
  launchVoiceRecognizer()
 }
