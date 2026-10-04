@@ -313,200 +313,99 @@ function clearVoiceRecognitionTimers(){
 }
 function setVoiceRecognitionUi(active,message=''){
  const b=document.querySelector('#voiceCommandBtn'),heard=document.querySelector('#voiceHeard');
- if(b){
-  b.classList.toggle('listening',active);
-  b.textContent=active?'⏹ پایان شنیدن':'🎙️ گفتن کد محصول'
- }
+ if(b){b.classList.toggle('listening',active);b.textContent=active?'⏹ پایان شنیدن':'🎙️ گفتن کد محصول'}
  if(heard&&message)heard.textContent=message
 }
+let nebrasWhisperPipe=null,nebrasWhisperLoading=null;
+let nebrasVoiceStream=null,nebrasVoiceRecorder=null,nebrasVoiceChunks=[];
+let nebrasVoiceAudioCtx=null,nebrasVoiceAnalyser=null,nebrasVoiceSource=null;
+let nebrasVoiceVadRaf=0,nebrasVoiceState='idle',nebrasVoiceStartedAt=0;
+let nebrasVoiceLastSoundAt=0,nebrasVoiceSpeechStartedAt=0,nebrasVoiceNoiseFloor=0.008;
+let nebrasVoiceCalibrateUntil=0,nebrasVoiceSpeechFrames=0;
+function nebrasVoiceRms(){
+ if(!nebrasVoiceAnalyser)return 0;
+ const a=new Float32Array(nebrasVoiceAnalyser.fftSize);nebrasVoiceAnalyser.getFloatTimeDomainData(a);
+ let sum=0;for(let i=0;i<a.length;i++)sum+=a[i]*a[i];return Math.sqrt(sum/a.length)
+}
+function nebrasVoiceCleanup(){
+ cancelAnimationFrame(nebrasVoiceVadRaf);nebrasVoiceVadRaf=0;
+ try{nebrasVoiceSource?.disconnect()}catch{};try{nebrasVoiceAnalyser?.disconnect()}catch{};
+ if(nebrasVoiceAudioCtx){try{nebrasVoiceAudioCtx.close()}catch{}}
+ nebrasVoiceAudioCtx=null;nebrasVoiceAnalyser=null;nebrasVoiceSource=null;
+ if(nebrasVoiceStream){try{nebrasVoiceStream.getTracks().forEach(t=>t.stop())}catch{}}
+ nebrasVoiceStream=null;nebrasVoiceRecorder=null;voiceSessionActive=false;voiceListening=false;voiceFinalizing=false;nebrasVoiceState='idle'
+}
 function stopVoiceRecognition(){
- voiceSessionActive=false;
- voiceListening=false;
- voiceFinalizing=false;
- clearVoiceRecognitionTimers();
- if(voiceRecognizer){
-  const r=voiceRecognizer;
-  voiceRecognizer=null;
-  try{r.abort()}catch{}
- }
- setVoiceRecognitionUi(false)
+ if(nebrasVoiceRecorder&&nebrasVoiceRecorder.state!=='inactive'){try{nebrasVoiceRecorder.stop()}catch{nebrasVoiceCleanup()}}
+ else{nebrasVoiceCleanup();setVoiceRecognitionUi(false)}
 }
-function finishVoiceRecognition(manual=false){
- if(!voiceSessionActive||voiceFinalizing)return;
- const t=(voiceFinalText.trim()||voiceInterimText.trim());
- voiceFinalizing=true;
- voiceSessionActive=false;
- voiceListening=false;
- clearVoiceRecognitionTimers();
-
- const alts=[t,...voiceAlternatives].filter(Boolean);
-
- if(voiceRecognizer){
-  const r=voiceRecognizer;
-  voiceRecognizer=null;
-  try{r.stop()}catch{}
- }
-
- setVoiceRecognitionUi(
-  false,
-  t ? 'شنیده شد: '+t :
-      (manual ? 'شنیدن متوقف شد.' : 'صدایی تشخیص داده نشد.')
- );
-
- voiceFinalizing=false;
-
- if(t){
-  // پردازش فوری بلافاصله بعد از پایان گفتار
-  handleVoiceAlternatives(alts)
- }
+function finishVoiceRecognition(manual=false){stopVoiceRecognition()}
+function nebrasVoiceChooseMime(){
+ const c=['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/mp4'];
+ for(const x of c){try{if(MediaRecorder.isTypeSupported(x))return x}catch{}}return ''
 }
-function launchVoiceRecognizer(){
- if(!voiceSessionActive||voiceRecognizer)return;
-
- const r=new SpeechRecognitionApi();
- voiceRecognizer=r;
-
- // فقط فارسی ایران
- r.lang='fa-IR';
-
- // متن موقت را هم بگیر تا کاربر فوراً ببیند صدا دریافت شده
- r.interimResults=true;
-
- // یک نشست واقعی؛ هیچ Restart خودکاری وجود ندارد
- r.continuous=true;
-
- // چند برداشت برای افزایش دقت کد
- r.maxAlternatives=10;
-
- r.onstart=()=>{
-  if(!voiceSessionActive)return;
-  voiceListening=true;
-  setVoiceRecognitionUi(true,'در حال شنیدن… کد را بخوانید.')
- };
-
- r.onspeechstart=()=>{
-  if(!voiceSessionActive)return;
-  voiceHadSpeech=true;
-  setVoiceRecognitionUi(true,'صدای شما دریافت شد…')
- };
-
- r.onresult=e=>{
-  let interim='';
-
-  for(let i=e.resultIndex;i<e.results.length;i++){
-   const res=e.results[i];
-   const best=String(res[0]?.transcript||'').trim();
-   if(!best)continue;
-
-   voiceHadSpeech=true;
-
-   if(res.isFinal){
-    voiceFinalText+=(voiceFinalText?' ':'')+best;
-
-    for(let j=0;j<Math.min(res.length,10);j++){
-     const a=String(res[j]?.transcript||'').trim();
-     if(a)voiceAlternatives.push(a)
-    }
-
-    // مرورگر گفتار را نهایی کرده؛ همان لحظه قطع و پردازش کن
-    finishVoiceRecognition(false);
-    return;
-   }
-
-   interim+=(interim?' ':'')+best;
-  }
-
-  voiceInterimText=interim;
-
-  if(interim){
-   setVoiceRecognitionUi(true,'شنیده شد: '+interim)
-  }
- };
-
- r.onspeechend=()=>{
-  if(!voiceSessionActive)return;
-
-  // اگر مرورگر هنوز نتیجه Final نداده، آخرین متن موقت را فوراً پردازش کن
-  if(voiceFinalText.trim()||voiceInterimText.trim()){
-   if(voiceFinalizeTimer)clearTimeout(voiceFinalizeTimer);
-   voiceFinalizeTimer=setTimeout(()=>{
-    voiceFinalizeTimer=null;
-    if(voiceSessionActive)finishVoiceRecognition(false)
-   },120)
-  }
- };
-
- r.onerror=e=>{
-  if(voiceRecognizer===r)voiceRecognizer=null;
-  if(!voiceSessionActive)return;
-
-  if(e.error==='not-allowed'||e.error==='service-not-allowed'){
-   toast('اجازه میکروفن داده نشده است.');
-   stopVoiceRecognition();
-   return
-  }
-
-  // عمداً Restart خودکار نداریم تا دکمه قطع و وصل نشود
-  voiceSessionActive=false;
-  voiceListening=false;
-  clearVoiceRecognitionTimers();
-  setVoiceRecognitionUi(false,
-   e.error==='no-speech'
-    ? 'صدایی شنیده نشد؛ دوباره دکمه را بزنید.'
-    : 'شنیدن صدا متوقف شد؛ دوباره دکمه را بزنید.'
-  )
- };
-
- r.onend=()=>{
-  if(voiceRecognizer===r)voiceRecognizer=null;
-  if(!voiceSessionActive)return;
-
-  voiceListening=false;
-
-  // اگر متن داریم، همان لحظه پردازش؛ اگر نداریم هیچ Restart و قطع‌و‌وصل خودکاری نکن
-  if(voiceFinalText.trim()||voiceInterimText.trim()){
-   finishVoiceRecognition(false)
-  }else{
-   voiceSessionActive=false;
-   setVoiceRecognitionUi(false,'صدایی شنیده نشد؛ دوباره دکمه را بزنید.')
-  }
- };
-
+async function nebrasLoadWhisper(){
+ if(nebrasWhisperPipe)return nebrasWhisperPipe;if(nebrasWhisperLoading)return nebrasWhisperLoading;
+ nebrasWhisperLoading=(async()=>{
+   setVoiceRecognitionUi(true,'در حال آماده‌سازی موتور صوت محلی…');
+   const {pipeline,env}=await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1/+esm');
+   env.allowLocalModels=false;env.useBrowserCache=true;
+   const opts={dtype:'q4'};if('gpu' in navigator)opts.device='webgpu';
+   try{nebrasWhisperPipe=await pipeline('automatic-speech-recognition','onnx-community/whisper-tiny',opts)}
+   catch(e){nebrasWhisperPipe=await pipeline('automatic-speech-recognition','onnx-community/whisper-tiny',{dtype:'q4'})}
+   return nebrasWhisperPipe
+ })();
+ try{return await nebrasWhisperLoading}finally{nebrasWhisperLoading=null}
+}
+async function nebrasBlobTo16kMono(blob){
+ const buf=await blob.arrayBuffer();const Ctx=window.AudioContext||window.webkitAudioContext;const ctx=new Ctx();let decoded;
+ try{decoded=await ctx.decodeAudioData(buf.slice(0))}finally{try{await ctx.close()}catch{}}
+ const rate=16000,length=Math.max(1,Math.ceil(decoded.duration*rate));const off=new OfflineAudioContext(1,length,rate);
+ const src=off.createBufferSource();src.buffer=decoded;src.connect(off.destination);src.start();const rendered=await off.startRendering();return rendered.getChannelData(0).slice()
+}
+async function nebrasLocalTranscribe(blob){
+ const transcriber=await nebrasLoadWhisper();const audio=await nebrasBlobTo16kMono(blob);
+ const result=await transcriber(audio,{language:'fa',task:'transcribe',return_timestamps:false});
+ return String(result?.text||'').trim()
+}
+async function nebrasProcessRecordedVoice(blob){
  try{
-  r.start()
- }catch{
-  if(voiceRecognizer===r)voiceRecognizer=null;
-  voiceSessionActive=false;
-  voiceListening=false;
-  setVoiceRecognitionUi(false,'میکروفن شروع نشد؛ دوباره دکمه را بزنید.')
- }
+   if(!blob||blob.size<500){setVoiceRecognitionUi(false,'صدای کافی ثبت نشد؛ دوباره بزنید.');return}
+   setVoiceRecognitionUi(true,'در حال تشخیص کد روی همین دستگاه…');
+   const text=await nebrasLocalTranscribe(blob);
+   if(!text){setVoiceRecognitionUi(false,'متنی از صدا تشخیص داده نشد؛ دوباره بزنید.');return}
+   setVoiceRecognitionUi(false,'شنیده شد: '+text);handleVoiceTranscript(text)
+ }catch(e){console.error('Nebras local Whisper error',e);setVoiceRecognitionUi(false,'موتور صوت محلی آماده نشد.');toast('برای بار اول اینترنت را بررسی کنید؛ مدل صوتی باید یک‌بار دانلود شود.')}
 }
-function startVoiceRecognition(){
- if(!SpeechRecognitionApi){
-  toast('تشخیص گفتار در این مرورگر فعال نیست. برای بهترین نتیجه از Chrome استفاده کنید.');
-  return
+function nebrasVoiceVadLoop(){
+ if(nebrasVoiceState==='idle'||!nebrasVoiceAnalyser)return;const now=performance.now(),rms=nebrasVoiceRms();
+ if(now<nebrasVoiceCalibrateUntil){nebrasVoiceNoiseFloor=Math.max(0.004,nebrasVoiceNoiseFloor*0.82+rms*0.18);nebrasVoiceVadRaf=requestAnimationFrame(nebrasVoiceVadLoop);return}
+ const startThreshold=Math.max(0.018,nebrasVoiceNoiseFloor*2.8),keepThreshold=Math.max(0.012,nebrasVoiceNoiseFloor*1.9);
+ if(nebrasVoiceState==='waiting'){
+   if(rms>=startThreshold){nebrasVoiceSpeechFrames++;if(nebrasVoiceSpeechFrames>=2){nebrasVoiceState='speaking';nebrasVoiceSpeechStartedAt=now;nebrasVoiceLastSoundAt=now;setVoiceRecognitionUi(true,'صدای شما دریافت شد…')}}
+   else{nebrasVoiceSpeechFrames=0;nebrasVoiceNoiseFloor=Math.max(0.004,nebrasVoiceNoiseFloor*0.97+rms*0.03)}
+   if(now-nebrasVoiceStartedAt>8000){setVoiceRecognitionUi(false,'صدایی شنیده نشد؛ دوباره دکمه را بزنید.');stopVoiceRecognition();return}
+ }else if(nebrasVoiceState==='speaking'){
+   if(rms>=keepThreshold)nebrasVoiceLastSoundAt=now;const spokenFor=now-nebrasVoiceSpeechStartedAt,silentFor=now-nebrasVoiceLastSoundAt;
+   if(spokenFor>300&&silentFor>900){setVoiceRecognitionUi(true,'گفتار تمام شد؛ در حال پردازش…');stopVoiceRecognition();return}
+   if(spokenFor>12000){setVoiceRecognitionUi(true,'در حال پردازش…');stopVoiceRecognition();return}
  }
-
- stopVoice();
-
- if(voiceSessionActive){
-  finishVoiceRecognition(true);
-  return
- }
-
- voiceSessionActive=true;
- voiceListening=false;
- voiceHadSpeech=false;
- voiceFinalText='';
- voiceInterimText='';
- voiceAlternatives=[];
- voiceSegments=[];
- voiceFinalizing=false;
- voiceLastHeard='';
- clearVoiceRecognitionTimers();
-
- setVoiceRecognitionUi(true,'در حال شنیدن… کد را بخوانید.');
- launchVoiceRecognizer()
+ nebrasVoiceVadRaf=requestAnimationFrame(nebrasVoiceVadLoop)
+}
+async function startVoiceRecognition(){
+ stopVoice();if(voiceSessionActive){stopVoiceRecognition();return}
+ if(!navigator.mediaDevices?.getUserMedia||!window.MediaRecorder){toast('ضبط میکروفن در این دستگاه پشتیبانی نمی‌شود.');return}
+ try{
+   nebrasLoadWhisper().catch(()=>{});setVoiceRecognitionUi(true,'در حال آماده‌سازی میکروفن…');
+   nebrasVoiceStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,channelCount:1}});
+   voiceSessionActive=true;voiceListening=true;voiceHadSpeech=false;voiceFinalText='';voiceInterimText='';voiceAlternatives=[];voiceFinalizing=false;
+   nebrasVoiceAudioCtx=new (window.AudioContext||window.webkitAudioContext)();nebrasVoiceSource=nebrasVoiceAudioCtx.createMediaStreamSource(nebrasVoiceStream);nebrasVoiceAnalyser=nebrasVoiceAudioCtx.createAnalyser();nebrasVoiceAnalyser.fftSize=1024;nebrasVoiceAnalyser.smoothingTimeConstant=0.12;nebrasVoiceSource.connect(nebrasVoiceAnalyser);
+   const mime=nebrasVoiceChooseMime();nebrasVoiceChunks=[];nebrasVoiceRecorder=mime?new MediaRecorder(nebrasVoiceStream,{mimeType:mime}):new MediaRecorder(nebrasVoiceStream);
+   nebrasVoiceRecorder.ondataavailable=e=>{if(e.data&&e.data.size)nebrasVoiceChunks.push(e.data)};
+   nebrasVoiceRecorder.onerror=()=>{setVoiceRecognitionUi(false,'ضبط صدا متوقف شد؛ دوباره دکمه را بزنید.');nebrasVoiceCleanup()};
+   nebrasVoiceRecorder.onstop=async()=>{const type=nebrasVoiceRecorder?.mimeType||mime||'audio/webm';const blob=new Blob(nebrasVoiceChunks,{type});nebrasVoiceCleanup();await nebrasProcessRecordedVoice(blob)};
+   nebrasVoiceRecorder.start(100);const now=performance.now();nebrasVoiceStartedAt=now;nebrasVoiceCalibrateUntil=now+450;nebrasVoiceNoiseFloor=0.008;nebrasVoiceSpeechFrames=0;nebrasVoiceState='waiting';setVoiceRecognitionUi(true,'در حال شنیدن… کد را بخوانید.');nebrasVoiceVadRaf=requestAnimationFrame(nebrasVoiceVadLoop)
+ }catch(e){console.error(e);nebrasVoiceCleanup();setVoiceRecognitionUi(false,'دسترسی میکروفن داده نشد.');toast('برای خواندن کد، اجازه میکروفن را فعال کنید.')}
 }
 
 function b64bytes(s){return Uint8Array.from(atob(s),c=>c.charCodeAt(0))}
