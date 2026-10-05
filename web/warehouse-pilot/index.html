@@ -76,7 +76,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-let initial=null,db=null,cryptoKey=null,securePayload=null,scanTarget='global',stream=null,scanTimer=null,syncTimer=null,syncBusy=false,statusBusy=false,smartInRows=[],splitRows=[],splitSource=null,pickOrders=[],pickPrintCustomers=[],pickView='ready';
+let initial=null,db=null,cryptoKey=null,securePayload=null,scanTarget='global',stream=null,scanTimer=null,syncTimer=null,syncBusy=false,statusBusy=false,smartInRows=[],splitRows=[],splitSource=null,pickOrders=[],pickPrintCustomers=[],pickView='ready',pickExpandedCustomers=new Set();
 const SECURE_KEY='nebrasWarehousePilotSecureV1';
 const SESSION_PASSWORD_KEY='nebrasWarehousePilotSessionPasswordV1';
 const DATA_VERSION='inventory-2026-09-09-2';
@@ -688,6 +688,16 @@ function applyPickItemShadows(orders){
 function receivePickOrders(orders){pickOrders=applyPickOrderShadows(applyPickItemShadows(orders));renderPickOrders()}
 function pickOrderIsCollected(order){const s=String(order?.orderStatus||'');return s==='آماده بسته‌بندی'||s==='تحویل بسته‌بندی'}
 function pickCustomerKey(order){return norm(order?.customer||'بدون نام')||'بدون نام'}
+function pickExpandedCustomerKey(view,customerKey){return String(view||pickView)+'\u0001'+String(customerKey||'')}
+// Rendering is intentionally frequent for optimistic server status updates.
+// Remember which customer's <details> is open so a single item update never
+// makes the picker reopen the customer manually.
+function rememberPickExpandedCustomers(){
+ document.querySelectorAll('details.pick-customer-group[data-pick-customer-key]').forEach(el=>{
+  const key=pickExpandedCustomerKey(el.dataset.pickView||pickView,el.dataset.pickCustomerKey);
+  pickExpandedCustomers.delete(key);if(el.open)pickExpandedCustomers.add(key);
+ });
+}
 function pickOrdersForView(){const collected=pickView==='collected';return pickOrders.filter(order=>!pickOrderIsArchived(order)&&pickOrderIsCollected(order)===collected)}
 function pickOrderStatusText(order){const base=String(order?.orderStatus||'در انتظار برداشت');return order?._serverPending?`${base} · در انتظار تأیید سرور`:base}
 function pickOrderStatusClass(order){return order?._serverPending?'pending':''}
@@ -728,6 +738,7 @@ function renderPickPrintGroup(group){
 function renderPickOrders(){
  const host=document.querySelector('#pickOrders');
  if(!host)return;
+ rememberPickExpandedCustomers();
  const query=norm(document.querySelector('#pickCustomerSearch')?.value||'').toLowerCase();
  const ready=pickOrders.filter(o=>!pickOrderIsArchived(o)&&!pickOrderIsCollected(o)),collected=pickOrders.filter(o=>!pickOrderIsArchived(o)&&pickOrderIsCollected(o));
  const readyCount=document.querySelector('#pickReadyCount'),collectedCount=document.querySelector('#pickCollectedCount');
@@ -739,7 +750,7 @@ function renderPickOrders(){
  if(counter)counter.textContent=query?`${fa(shown.length)} مشتری/سفارش مطابق جست‌وجو نمایش داده می‌شود.`:'';
  if(!shown.length){host.innerHTML=`<div class="pick-empty">${source.length?(query?'مشتری مطابق جست‌وجو پیدا نشد.':'سفارشی در این بخش نیست.'):(pickView==='collected'?'هنوز سفارشی برای تطبیق جمع‌آوری نشده است.':'سفارش آمادهٔ جمع‌آوری وجود ندارد.')}</div>`;return}
  const groups=new Map();shown.forEach(order=>{const key=pickCustomerKey(order);if(!groups.has(key))groups.set(key,{customer:order.customer||'بدون نام',orders:[]});groups.get(key).orders.push(order)});
- host.innerHTML=[...groups.values()].map(group=>{const count=group.orders.length,printHtml=pickView==='collected'?pickPrintGroupsForOrders(group.orders).map(renderPickPrintGroup).join(''):'';return `<details class="pick-customer-group"><summary><span class="pick-customer-summary">${html(group.customer)}</span><span class="pick-customer-summary-meta"><span>${fa(count)} سفارش</span><i>⌄</i></span></summary><div class="pick-customer-content">${group.orders.map(order=>renderPickOrder(order,pickView==='ready')).join('')}${printHtml}</div></details>`}).join('');
+ host.innerHTML=[...groups.values()].map(group=>{const customerKey=pickCustomerKey(group.orders[0]),expandedKey=pickExpandedCustomerKey(pickView,customerKey),count=group.orders.length,printHtml=pickView==='collected'?pickPrintGroupsForOrders(group.orders).map(renderPickPrintGroup).join(''):'';return `<details class="pick-customer-group" data-pick-view="${html(pickView)}" data-pick-customer-key="${html(customerKey)}" ${pickExpandedCustomers.has(expandedKey)?'open':''}><summary><span class="pick-customer-summary">${html(group.customer)}</span><span class="pick-customer-summary-meta"><span>${fa(count)} سفارش</span><i>⌄</i></span></summary><div class="pick-customer-content">${group.orders.map(order=>renderPickOrder(order,pickView==='ready')).join('')}${printHtml}</div></details>`}).join('');
 }
 async function refreshPickOrders(){
  const btn=document.querySelector('#refreshPickOrders'),state=document.querySelector('#pickQueueState');
@@ -909,7 +920,7 @@ document.querySelector('#refreshPickOrders').onclick=refreshPickOrders;
 window.openPickIssue=openPickIssue;
 document.querySelector('#pickCustomerSearch').oninput=renderPickOrders;
 document.querySelector('#clearPickSearch').onclick=()=>{document.querySelector('#pickCustomerSearch').value='';renderPickOrders();document.querySelector('#pickCustomerSearch').focus()};
-document.querySelectorAll('[data-pick-view]').forEach(b=>b.onclick=()=>{pickView=b.dataset.pickView==='collected'?'collected':'ready';renderPickOrders();if(pickView==='collected')refreshPickPrintLists(true)});
+document.querySelectorAll('[data-pick-view]').forEach(b=>b.onclick=()=>{rememberPickExpandedCustomers();pickView=b.dataset.pickView==='collected'?'collected':'ready';renderPickOrders();if(pickView==='collected')refreshPickPrintLists(true)});
 document.querySelector('#closePickIssue').onclick=closePickIssue;
 document.querySelector('#pickIssueModal').onclick=e=>{if(e.target.id==='pickIssueModal')closePickIssue()};
 document.querySelector('#pickIssueSubmit').onclick=()=>{
