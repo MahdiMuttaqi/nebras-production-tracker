@@ -76,7 +76,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-let initial=null,db=null,cryptoKey=null,securePayload=null,scanTarget='global',stream=null,scanTimer=null,syncTimer=null,syncBusy=false,statusBusy=false,smartInRows=[],splitRows=[],splitSource=null,pickOrders=[],pickPrintCustomers=[],pickView='ready',pickExpandedCustomers=new Set();
+let initial=null,db=null,cryptoKey=null,securePayload=null,scanTarget='global',stream=null,scanTimer=null,syncTimer=null,syncBusy=false,statusBusy=false,smartInRows=[],splitRows=[],splitSource=null,pickOrders=[],pickPrintCustomers=[],pickView='ready',pickExpandedCustomers=new Set(),pickRefreshBusy=false;
 const SECURE_KEY='nebrasWarehousePilotSecureV1';
 const SESSION_PASSWORD_KEY='nebrasWarehousePilotSessionPasswordV1';
 const DATA_VERSION='inventory-2026-09-09-2';
@@ -415,7 +415,7 @@ function save(){cleanupConfirmedHistory();render();encryptJson(db,cryptoKey).the
 // Two test requests explicitly cancelled by the owner on 2026-09-16.
 const cancelledTestIds=new Set(['9eaff053-f66b-47ae-83ca-1a1c7a68ef6a','b6221d85-769b-4bb0-9925-b88849f4a8d6']);
 function removeCancelledTests(data){if(!Array.isArray(data?.history))return false;const count=data.history.length;data.history=data.history.filter(h=>!cancelledTestIds.has(String(h.id)));return data.history.length!==count}
-async function unlock(){const btn=document.querySelector('#unlockBtn'),error=document.querySelector('#lockError'),password=document.querySelector('#managerPassword').value;error.textContent='';if(!password){error.textContent='رمز را وارد کنید.';return}btn.disabled=true;btn.textContent='در حال بررسی…';try{securePayload=securePayload||await fetch('inventory.secure.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error();return r.json()});cryptoKey=await deriveKey(password,b64bytes(securePayload.salt),securePayload.iterations);initial=await decryptJson(securePayload,cryptoKey);initial.sourceVersion=DATA_VERSION;const savedText=localStorage.getItem(SECURE_KEY);let saved=null;if(savedText){try{saved=await decryptJson(JSON.parse(savedText),cryptoKey)}catch{saved=null}}const savedVersion=String(saved?.sourceVersion||'');db=saved&&(savedVersion===DATA_VERSION||savedVersion.startsWith('excel-'))?saved:structuredClone(initial);const removedTests=removeCancelledTests(db);removeCancelledTests(initial);db.bridgeKey=initial.bridgeKey;if(!db.syncSchema){db.history.forEach(h=>{if(!h.sync)h.sync='pending'});db.syncSchema=1}document.querySelector('#lock').style.display='none';document.querySelector('#app').classList.remove('locked');localStorage.setItem(SESSION_PASSWORD_KEY,password);sessionStorage.removeItem(SESSION_PASSWORD_KEY);document.querySelector('#managerPassword').value='';save();document.querySelector('#searchResults').innerHTML=productResults('10-5041');if(removedTests)await refreshFromExcel();else scheduleSync(100)}catch{cryptoKey=null;error.textContent='رمز اشتباه است یا اطلاعات امن بارگذاری نشد.'}finally{btn.disabled=false;btn.textContent='ورود به سامانه'}}
+async function unlock(){const btn=document.querySelector('#unlockBtn'),error=document.querySelector('#lockError'),password=document.querySelector('#managerPassword').value;error.textContent='';if(!password){error.textContent='رمز را وارد کنید.';return}btn.disabled=true;btn.textContent='در حال بررسی…';try{securePayload=securePayload||await fetch('inventory.secure.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error();return r.json()});cryptoKey=await deriveKey(password,b64bytes(securePayload.salt),securePayload.iterations);initial=await decryptJson(securePayload,cryptoKey);initial.sourceVersion=DATA_VERSION;const savedText=localStorage.getItem(SECURE_KEY);let saved=null;if(savedText){try{saved=await decryptJson(JSON.parse(savedText),cryptoKey)}catch{saved=null}}const savedVersion=String(saved?.sourceVersion||'');db=saved&&(savedVersion===DATA_VERSION||savedVersion.startsWith('excel-'))?saved:structuredClone(initial);const removedTests=removeCancelledTests(db);removeCancelledTests(initial);db.bridgeKey=initial.bridgeKey;if(!db.syncSchema){db.history.forEach(h=>{if(!h.sync)h.sync='pending'});db.syncSchema=1}document.querySelector('#lock').style.display='none';document.querySelector('#app').classList.remove('locked');localStorage.setItem(SESSION_PASSWORD_KEY,password);sessionStorage.removeItem(SESSION_PASSWORD_KEY);document.querySelector('#managerPassword').value='';save();document.querySelector('#searchResults').innerHTML=productResults('10-5041');const savedPickOrders=loadPickOrdersFromDevice();if(savedPickOrders.length){receivePickOrders(savedPickOrders,{merge:false});const state=document.querySelector('#pickQueueState');if(state)state.textContent=`${fa(savedPickOrders.length)} سفارش قبلی از همین دستگاه نمایش داده شد.`}setTimeout(()=>refreshPickOrders(true),0);if(removedTests)await refreshFromExcel();else scheduleSync(100)}catch{cryptoKey=null;error.textContent='رمز اشتباه است یا اطلاعات امن بارگذاری نشد.'}finally{btn.disabled=false;btn.textContent='ورود به سامانه'}}
 document.querySelector('#unlockBtn').onclick=unlock;document.querySelector('#managerPassword').onkeydown=e=>{if(e.key==='Enter')unlock()};
 function logoutWarehouse(){
  const unsent=db&&Array.isArray(db.history)?db.history.filter(h=>h.sync!=='synced').length:0;
@@ -557,7 +557,7 @@ async function syncPending(){
 }
 window.addEventListener('online',()=>scheduleSync(100));window.addEventListener('offline',()=>syncState('بدون اینترنت',false));
 function render(){const active=db.stock.filter(x=>x.q>0);document.querySelector('#totalStock').textContent=fa(active.reduce((a,x)=>a+x.q,0));document.querySelector('#activeLocs').textContent=fa(new Set(active.filter(x=>!x.unassigned).map(x=>x.l)).size);document.querySelector('#productCount').textContent=fa(new Set(active.map(x=>x.p)).size);document.querySelector('#todayOps').textContent=fa(db.history.length);document.querySelector('#products').innerHTML=db.products.map(p=>`<option value="${p.code}">${p.name}</option>`).join('');renderHistory()}
-function switchTab(id){document.querySelectorAll('.panel').forEach(x=>x.classList.toggle('active',x.id===id));document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x.dataset.tab===id));window.scrollTo({top:0,behavior:'smooth'});if(id==='pick'&&!pickOrders.length)refreshPickOrders()}
+function switchTab(id){document.querySelectorAll('.panel').forEach(x=>x.classList.toggle('active',x.id===id));document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x.dataset.tab===id));window.scrollTo({top:0,behavior:'smooth'});if(id==='pick')refreshPickOrders(!!pickOrders.length)}
 document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
 function productResults(query){query=norm(query);const ps=db.products.filter(p=>!query||norm(p.code).includes(query)||norm(p.name).includes(query)||norm(p.occasion).includes(query));if(!ps.length)return'<div class="empty">محصولی پیدا نشد.</div>';return ps.map(p=>{const rows=db.stock.filter(x=>x.p===p.code&&x.l).sort((a,b)=>Number(b.q)-Number(a.q));const total=rows.reduce((a,x)=>a+Math.max(0,Number(x.q)||0),0);return`<div class="result"><div class="result-head"><b>${p.code} — ${p.name}</b><span class="badge">مجموع ${fa(total)}</span></div>${rows.length?rows.map((x,i)=>`<div class="result-row"><span class="location-code">${i+1}. ${x.display||x.l}${x.shared?' (موجودی مشترک)':''}</span><span class="qty"><small>موجودی</small>${fa(x.q)}</span>${Number(x.q)>0?(x.shared||x.unassigned?`<button class="primary" onclick="openSplit('${p.code}','${x.l}')">تفکیک</button>`:`<button class="secondary" onclick="quickOut('${p.code}','${x.l}')">برداشت</button>`):'<span class="badge">موجودی صفر</span>'}</div>`).join(''):'<div class="empty">لوکیشنی برای این کد ثبت نشده است.</div>'}</div>`}).join('')}
 document.querySelector('#searchProductBtn').onclick=()=>document.querySelector('#searchResults').innerHTML=productResults(document.querySelector('#findProduct').value);
@@ -643,6 +643,7 @@ function pickOrderNo(v){
 const PICK_ORDER_SHADOW_KEY='nebrasWarehousePickOrderShadowsV4';
 const PICK_ITEM_SHADOW_KEY='nebrasWarehousePickItemShadowsV4';
 const PICK_ORDER_ARCHIVE_KEY='nebrasWarehousePickCompletedArchiveV1';
+const PICK_ORDER_CACHE_KEY='nebrasWarehousePickOrdersCacheV1';
 const PICK_ORDER_SHADOW_MAX_AGE=24*60*60*1000;
 const PICK_ORDER_ARCHIVE_MAX_AGE=180*24*60*60*1000;
 let pickOrderShadows=loadPickOrderShadows(),pickItemShadows=loadPickItemShadows(),pickArchivedOrders=loadPickArchivedOrders();
@@ -656,6 +657,9 @@ function savePickItemShadows(){try{localStorage.setItem(PICK_ITEM_SHADOW_KEY,JSO
 function pickArchiveKey(order){return String(order?.orderId||'')+'\u0001'+String(order?.batch||'')}
 function loadPickArchivedOrders(){try{const raw=JSON.parse(localStorage.getItem(PICK_ORDER_ARCHIVE_KEY)||'{}'),nowMs=Date.now();if(!raw||typeof raw!=='object')return{};let changed=false;for(const key of Object.keys(raw)){if(!raw[key]||nowMs-Number(raw[key].at||0)>PICK_ORDER_ARCHIVE_MAX_AGE){delete raw[key];changed=true}}if(changed)localStorage.setItem(PICK_ORDER_ARCHIVE_KEY,JSON.stringify(raw));return raw}catch{return{}}}
 function savePickArchivedOrders(){try{localStorage.setItem(PICK_ORDER_ARCHIVE_KEY,JSON.stringify(pickArchivedOrders))}catch{}}
+function loadPickOrdersFromDevice(){try{const raw=JSON.parse(localStorage.getItem(PICK_ORDER_CACHE_KEY)||'null');return Array.isArray(raw?.orders)?raw.orders:[]}catch{return[]}}
+function savePickOrdersToDevice(){try{localStorage.setItem(PICK_ORDER_CACHE_KEY,JSON.stringify({at:Date.now(),orders:pickOrders}))}catch{}}
+function mergePickOrdersWithDevice(serverOrders){const merged=new Map((pickOrders||[]).map(order=>[String(order?.orderId||'')+'\u0001'+String(order?.batch||''),order]));for(const order of Array.isArray(serverOrders)?serverOrders:[]){merged.set(String(order?.orderId||'')+'\u0001'+String(order?.batch||''),order)}return [...merged.values()]}
 function pickOrderIsArchived(order){return !!pickArchivedOrders[pickArchiveKey(order)]}
 function archivePickOrder(orderId){const order=pickFindOrder(orderId);if(!order)return toast('این سفارش پیدا نشد.');if(!pickOrderIsCollected(order))return toast('این سفارش هنوز در مرحلهٔ جمع‌آوری است.');if(order._serverPending||pickActionBusy.has(pickBusyKey(orderId,'ORDER')))return toast('ابتدا ثبت قبلی این سفارش تأیید شود.');if(!confirm(`سفارش «${order.customer||'بدون نام'}» پس از تحویل به مشتری از فهرست جمع‌آوری‌شدهٔ همین دستگاه پنهان شود؟\n\nموجودی، فایل اکسل، سوابق و گزارش کسری هیچ تغییری نمی‌کند.`))return;pickArchivedOrders[pickArchiveKey(order)]={at:Date.now(),customer:String(order.customer||''),orderStatus:String(order.orderStatus||'')};savePickArchivedOrders();renderPickOrders();toast('سفارش از فهرست جمع‌آوری‌شده خارج شد.');}
 function pickOrderMatchesChanges(order,changes){return Object.keys(changes||{}).every(k=>String(order?.[k]??'')===String(changes[k]??''))}
@@ -685,7 +689,7 @@ function applyPickItemShadows(orders){
  if(changed)savePickItemShadows();
  return out;
 }
-function receivePickOrders(orders){pickOrders=applyPickOrderShadows(applyPickItemShadows(orders));renderPickOrders()}
+function receivePickOrders(orders,{merge=true}={}){const source=merge?mergePickOrdersWithDevice(orders):(Array.isArray(orders)?orders:[]);pickOrders=applyPickOrderShadows(applyPickItemShadows(source));savePickOrdersToDevice();renderPickOrders()}
 function pickOrderIsCollected(order){const s=String(order?.orderStatus||'');return s==='آماده بسته‌بندی'||s==='تحویل بسته‌بندی'}
 function pickCustomerKey(order){return norm(order?.customer||'بدون نام')||'بدون نام'}
 function pickExpandedCustomerKey(view,customerKey){return String(view||pickView)+'\u0001'+String(customerKey||'')}
@@ -752,22 +756,23 @@ function renderPickOrders(){
  const groups=new Map();shown.forEach(order=>{const key=pickCustomerKey(order);if(!groups.has(key))groups.set(key,{customer:order.customer||'بدون نام',orders:[]});groups.get(key).orders.push(order)});
  host.innerHTML=[...groups.values()].map(group=>{const customerKey=pickCustomerKey(group.orders[0]),expandedKey=pickExpandedCustomerKey(pickView,customerKey),count=group.orders.length,printHtml=pickView==='collected'?pickPrintGroupsForOrders(group.orders).map(renderPickPrintGroup).join(''):'';return `<details class="pick-customer-group" data-pick-view="${html(pickView)}" data-pick-customer-key="${html(customerKey)}" ${pickExpandedCustomers.has(expandedKey)?'open':''}><summary><span class="pick-customer-summary">${html(group.customer)}</span><span class="pick-customer-summary-meta"><span>${fa(count)} سفارش</span><i>⌄</i></span></summary><div class="pick-customer-content">${group.orders.map(order=>renderPickOrder(order,pickView==='ready')).join('')}${printHtml}</div></details>`}).join('');
 }
-async function refreshPickOrders(){
+async function refreshPickOrders(silent=false){
  const btn=document.querySelector('#refreshPickOrders'),state=document.querySelector('#pickQueueState');
- if(!db)return;
- if(btn){btn.disabled=true;btn.textContent='در حال دریافت…'}
- if(state)state.textContent='در حال دریافت سفارش‌های ارسالی از اکسل…';
+ if(!db||pickRefreshBusy)return;
+ pickRefreshBusy=true;
+ if(!silent&&btn){btn.disabled=true;btn.textContent='در حال دریافت…'}
+ if(!silent&&state)state.textContent='در حال دریافت سفارش‌های ارسالی از اکسل…';
  try{
   const r=await pickJsonp({action:'pickQueueList',includeDone:'1'});
   if(!r?.ok)throw Error(r?.error||'صف سفارش پاسخ معتبر نداد.');
   receivePickOrders(r.orders);
   const visible=pickOrders.filter(o=>!pickOrderIsArchived(o)),ready=visible.filter(o=>!pickOrderIsCollected(o)).length,collected=visible.length-ready;
   if(state)state.textContent=`${fa(ready)} سفارش آمادهٔ جمع‌آوری و ${fa(collected)} سفارش جمع‌آوری‌شده دریافت شد.`;
-  refreshPickPrintLists(true);
+ refreshPickPrintLists(true);
  }catch(e){
-  if(state)state.textContent='دریافت صف سفارش انجام نشد؛ عملیات عادی انبار بدون تغییر فعال است.';
-  toast(e.message==='pick timeout'?'صف سفارش تا ۱۵ ثانیه پاسخ نداد.':(e.message||'خطا در دریافت سفارش‌ها'));
- }finally{if(btn){btn.disabled=false;btn.textContent='↻ دریافت سفارش‌ها'}}
+  if(!silent&&state)state.textContent='دریافت صف سفارش انجام نشد؛ عملیات عادی انبار بدون تغییر فعال است.';
+  if(!silent)toast(e.message==='pick timeout'?'صف سفارش تا ۱۵ ثانیه پاسخ نداد.':(e.message||'خطا در دریافت سفارش‌ها'));
+ }finally{pickRefreshBusy=false;if(!silent&&btn){btn.disabled=false;btn.textContent='↻ دریافت سفارش‌ها'}}
 }
 async function refreshPickPrintLists(silent=false){
  try{const r=await pickJsonp({action:'pickQueuePrintList'},10000);if(!r?.ok)throw Error(r?.error||'فهرست تطبیق پاسخ معتبر نداد.');pickPrintCustomers=Array.isArray(r.customers)?r.customers:[];renderPickOrders()}catch(e){if(!silent)toast(e.message||'دریافت فهرست کسری و ناموجود انجام نشد.')}
