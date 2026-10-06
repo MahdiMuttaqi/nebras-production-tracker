@@ -757,6 +757,7 @@ function renderPickOrders(){
  host.innerHTML=[...groups.values()].map(group=>{const customerKey=pickCustomerKey(group.orders[0]),expandedKey=pickExpandedCustomerKey(pickView,customerKey),count=group.orders.length,printHtml=pickView==='collected'?pickPrintGroupsForOrders(group.orders).map(renderPickPrintGroup).join(''):'';return `<details class="pick-customer-group" data-pick-view="${html(pickView)}" data-pick-customer-key="${html(customerKey)}" ${pickExpandedCustomers.has(expandedKey)?'open':''}><summary><span class="pick-customer-summary">${html(group.customer)}</span><span class="pick-customer-summary-meta"><span>${fa(count)} سفارش</span><i>⌄</i></span></summary><div class="pick-customer-content">${group.orders.map(order=>renderPickOrder(order,pickView==='ready')).join('')}${printHtml}</div></details>`}).join('');
 }
 async function refreshPickOrders(silent=false){
+ silent=silent===true;
  const btn=document.querySelector('#refreshPickOrders'),state=document.querySelector('#pickQueueState');
  if(!db)return;
  if(silent&&pickRefreshBusy)return;
