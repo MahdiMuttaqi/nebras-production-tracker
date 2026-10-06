@@ -758,8 +758,9 @@ function renderPickOrders(){
 }
 async function refreshPickOrders(silent=false){
  const btn=document.querySelector('#refreshPickOrders'),state=document.querySelector('#pickQueueState');
- if(!db||pickRefreshBusy)return;
- pickRefreshBusy=true;
+ if(!db)return;
+ if(silent&&pickRefreshBusy)return;
+ if(silent)pickRefreshBusy=true;
  if(!silent&&btn){btn.disabled=true;btn.textContent='در حال دریافت…'}
  if(!silent&&state)state.textContent='در حال دریافت سفارش‌های ارسالی از اکسل…';
  try{
@@ -772,7 +773,7 @@ async function refreshPickOrders(silent=false){
  }catch(e){
   if(!silent&&state)state.textContent='دریافت صف سفارش انجام نشد؛ عملیات عادی انبار بدون تغییر فعال است.';
   if(!silent)toast(e.message==='pick timeout'?'صف سفارش تا ۱۵ ثانیه پاسخ نداد.':(e.message||'خطا در دریافت سفارش‌ها'));
- }finally{pickRefreshBusy=false;if(!silent&&btn){btn.disabled=false;btn.textContent='↻ دریافت سفارش‌ها'}}
+ }finally{if(silent)pickRefreshBusy=false;if(!silent&&btn){btn.disabled=false;btn.textContent='↻ دریافت سفارش‌ها'}}
 }
 async function refreshPickPrintLists(silent=false){
  try{const r=await pickJsonp({action:'pickQueuePrintList'},10000);if(!r?.ok)throw Error(r?.error||'فهرست تطبیق پاسخ معتبر نداد.');pickPrintCustomers=Array.isArray(r.customers)?r.customers:[];renderPickOrders()}catch(e){if(!silent)toast(e.message||'دریافت فهرست کسری و ناموجود انجام نشد.')}
