@@ -152,10 +152,12 @@ body {
 .transfer-history div{margin-top:8px;display:grid;gap:6px}
 .transfer-history p{margin:0;background:#f6f9fa;border-radius:8px;padding:7px 9px;display:flex;justify-content:space-between;gap:10px;font-size:12px}
 .transfer-history p span{color:#71808a}
+.customer-folders{max-width:1160px;margin:0 auto;padding:0 18px 50px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.customer-folder{appearance:none;width:100%;border:1px solid var(--line);border-radius:14px;background:#fff;padding:16px;text-align:right;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px;color:var(--ink);cursor:pointer;box-shadow:0 2px 8px #16324c0d;transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease}.customer-folder:hover{transform:translateY(-2px);border-color:#83b8b1;box-shadow:0 8px 20px #16324c18}.customer-folder:focus-visible{outline:3px solid #70cfc1;outline-offset:2px}.folder-icon{display:grid;place-items:center;width:42px;height:42px;border-radius:11px;background:#dff5ef;color:#067365}.folder-icon svg{width:25px;height:25px}.folder-body{min-width:0;display:grid;gap:4px}.folder-body b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:16px}.folder-body small{color:#71808a;font-size:12px}.folder-count{min-width:30px;height:30px;display:grid;place-items:center;border-radius:999px;background:#e7f1f4;color:#17324d;font-weight:800;font-size:13px}.back-to-folders{appearance:none;display:inline-flex;align-items:center;gap:5px;border:0;background:none;color:#0b7c72;padding:0;margin:0 0 8px;cursor:pointer;font:inherit;font-size:13px;font-weight:700}.back-to-folders svg{width:16px;height:16px}.back-to-folders:focus-visible{outline:2px solid #0b7c72;outline-offset:3px;border-radius:4px}.folders-hidden{display:none}
 
 @media(max-width:760px){
   .meta{grid-template-columns:1fr}
   .meta span:last-child{grid-column:auto}
   .tailor-select{width:100%}
   .transfer-history p{align-items:flex-start;flex-direction:column}
+  .customer-folders{grid-template-columns:1fr;padding:0 10px 35px}
 }
