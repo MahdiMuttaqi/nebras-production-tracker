@@ -11,6 +11,8 @@ function nebrasIsTypedColumnFormatError(err){
   return m.includes("typed column")&&m.includes("number format");
 }
 function nebrasDelay(ms){return new Promise(ok=>setTimeout(ok,ms))}
+function nebrasIsConcurrencyError(err){return typeof isConcurrencyError==="function"?isConcurrencyError(err):["CARD_CHANGED","MUTATION_BUSY"].includes(String(err?.code||""))}
+function nebrasShowSyncNotice(message){if(typeof showSyncNotice==="function")showSyncNotice(message,"warning")}
 
 // Reject only list responses that started before a transfer and returned afterwards.
 call=async function(action,data={}){
@@ -42,13 +44,15 @@ advance=async function(id,route="",tailor=""){
   localMove(j,to,event);
 
   try{
-    await nebrasOriginalCall("advance",{id,route,tailor});
-    // Server already confirmed the transfer, so refresh immediately instead of
-    // waiting for the old 1.2s reconciliation timer.
-    load(true);
+    await nebrasOriginalCall("advance",{id,route,tailor,expectedRevision:j.revision||""});
+    // Reconcile after this card is released. The page remains usable meanwhile.
+    syncSoon();
   }catch(e){
     if(e?.code==="NO_RESPONSE"||nebrasIsTypedColumnFormatError(e)){
       // Keep the already-applied optimistic move and reconcile in background.
+      syncSoon();
+    }else if(nebrasIsConcurrencyError(e)){
+      nebrasShowSyncNotice(e?.message||"این کارت هم‌زمان به‌روز شد؛ فهرست تازه می‌شود.");
       syncSoon();
     }else{
       alert(e?.message||"انتقال سفارش انجام نشد");
